@@ -10,6 +10,16 @@ Se a pessoa pedir “atualiza aí”, “atualize o projeto” ou a versão mais
 
 Na instalação pelo prompt do README que autoriza a tarefa, siga [a checagem a cada três dias](ATUALIZAR.md#confira-releases-a-cada-três-dias-pelo-assistente): crie ou atualize, sem duplicar, uma tarefa no agendador nativo. A tarefa consulta a release estável original e compara a instalação em modo de leitura; avisa novidades ou falhas que exigem ação e fica quieta sem mudança ou diante da mesma pendência. Não executa atualização, rodada ou candidatura e não muda opt-in. A autorização dessa checagem independe da autonomia de candidaturas. Fora desse prompt, peça autorização apenas para o agendamento. Comprove identificador e próxima execução pela ferramenta; se não houver agendador disponível, informe que a criação ficou pendente, sem improvisar cron.
 
+## Atalhos de operação
+
+| Pedido ou skill | Entrada dona |
+|---|---|
+| `/onboarding`, `$onboarding` ou configurar a instalação | [Skills/onboarding/SKILL.md](Skills/onboarding/SKILL.md) |
+| `/coletar`, `$coletar` ou buscar vagas | [Skills/coletar/SKILL.md](Skills/coletar/SKILL.md) |
+| `/aplicar`, `$aplicar` ou retomar candidaturas | [Skills/aplicar/SKILL.md](Skills/aplicar/SKILL.md) |
+
+As entradas locais do Claude Code ficam em `.claude/skills/`; as do Codex, em `.agents/skills/`. Os adaptadores leem a fonte em `Skills/`. Seleção pelo menu depende do ambiente; um atalho não substitui autorização, onboarding ou conexão disponível. Coletar não preenche candidaturas, e aplicar não inicia uma nova coleta.
+
 ## Primeiro uso: onboarding antes da operação
 
 ```bash

@@ -4,6 +4,12 @@ Para o pedido curto “atualiza aí”, comece pela entrada [ATUALIZAR.md](../AT
 
 As versões publicadas ficam em Releases, com acesso pelo [README](../README.md#receba-e-instale-atualizações). Cada release identifica uma tag, mudanças, limites e o código disponível para download. A versão 1.2.0 separa coleta e aplicação, organiza as fontes de respostas e incorpora revisão editorial independente. A validação desta distribuição usa testes locais e dados fictícios; não comprova candidaturas reais nem aumento de contratações.
 
+## Lançamento público v1.3.0
+
+A v1.3.0 reúne o README simplificado, a instalação guiada, as entradas de onboarding, coleta e aplicação e a checagem periódica de releases. As publicações de release anteriores foram substituídas por este lançamento; as tags e o histórico Git foram preservados. A numeração continua para distinguir instalações antigas. A migração de versões anteriores à v1.2.0 continua exigindo os cuidados abaixo.
+
+O download em Releases corresponde à tag publicada, incluindo as skills e o guia da raiz. No Claude Code, as entradas são `/onboarding`, `/coletar` e `/aplicar`; no Codex, escolha a skill no menu ou use `$onboarding`, `$coletar` e `$aplicar` onde houver suporte à menção. Os adaptadores são arquivos comuns para funcionar também em ZIP, sem depender de links simbólicos.
+
 ## Ao atualizar para a v1.2.0
 
 Esta versão altera modelos de perfil e fontes de respostas. Por isso, o atualizador automático recusa a transição de uma instalação anterior, preservando seus arquivos. Peça ao assistente para fazer a migração com a instalação parada, uma cópia dos dados dentro do projeto e a comparação das suas alterações locais. Preserve também `aplicacao/`, além dos dados e materiais listados neste guia.
@@ -53,6 +59,6 @@ Depois da atualização, confira a configuração e os registros com os comandos
 
 ## Publicar uma versão deste projeto
 
-O mantenedor escolhe um commit revisado, confere os checks, define a tag e escreve notas com mudanças, validação, instruções de atualização e limites. RCs são marcados como pré-release e não como `latest`. Uma release pode apontar para um commit de uma PR sem fundi-la em `main`; nesse caso, as notas precisam informar isso. O pacote é o código público daquela tag: dados de uma instalação nunca são anexados.
+O mantenedor escolhe um commit revisado, confere os checks, define a tag e escreve notas com mudanças, validação, instruções de atualização e limites. RCs são marcados como pré-release e não como `latest`. Uma release pode apontar para um commit de uma PR sem fundi-la em `main`; nesse caso, as notas precisam informar isso. O pacote é o código público daquela tag: dados de uma instalação nunca são anexados. Gere `jobrelay.zip` com `git archive` a partir do commit exato da tag e anexe-o antes de publicar a release; o botão de download do README usa esse nome fixo em `releases/latest/download/jobrelay.zip`. Confira o conteúdo e o hash do ZIP publicado.
 
 Referência: [GitHub Docs: releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
