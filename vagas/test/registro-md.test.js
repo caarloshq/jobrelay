@@ -139,6 +139,7 @@ test('perguntas de diversidade e endereço mantêm só referência privada', (t)
     'Endereço *',
     'CEP *',
     'Street address *',
+    'Você se identifica como parte da comunidade LGBTQIA+?',
   ].entries()) {
     const pacote = entrada(`diversidade-${i}`);
     pacote.campos = [{ pergunta, texto: 'Seleção sensível fictícia', preenchida: true }];
