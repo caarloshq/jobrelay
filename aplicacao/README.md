@@ -379,3 +379,6 @@ o verificador atual e conferir a adaptação à vaga.
 Antes de apresentar uma sugestão, responder em campo aberto ou preencher o formulário, aplicar [review-escrita](../Skills/review-escrita/SKILL.md) ao texto autoral. Conferir voz, clareza e cada afirmação com as fontes. O verificador mecânico lê um arquivo de texto local; perguntas, alternativas literais, metadados e respostas históricas não são rascunhos para reescrita. A revisão não aprova opinião, declaração pessoal nem consentimento.
 
 Se uma resposta enviada revelar atribuição indevida, promessa sem prova ou texto genérico, preservar o histórico efetivo e a confirmação. Corrigir a versão reutilizável em Respostas ou Perfil dentro do alcance aprovado, com fonte e nova revisão. A correção não altera o que foi enviado nem amplia autorização.
+
+
+A revisão editorial das respostas usa o agente independente e o parecer descritos em [Revisor de respostas](../docs/revisor-respostas.md).

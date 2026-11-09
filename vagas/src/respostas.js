@@ -1,16 +1,16 @@
+import { contemMetatexto } from './texto-respostas.js';
+export { contemMetatexto } from './texto-respostas.js';
+import { validarRevisaoRespostas } from './revisao-respostas.js';
+
 // Guarda local de estrutura e erros conhecidos. Não prova veracidade, adequação
 // à vaga ou aprovação real; a conferência humana continua necessária.
 const normalizar = (valor) => String(valor ?? '').normalize('NFD')
   .replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
 const texto = (valor) => typeof valor === 'string' && valor.trim().length > 0;
 const USOS = new Set(['direta', 'contextual', 'pessoal', 'documento']);
-const METATEXTO = /(?:traducao para (?:o )?ingles|resposta enviada em|texto sobre|\[todo\]|\btodo\s*:|ver data\/|depende da vaga|nao declarar fluencia|\b(?:tbd|lorem ipsum)\b|\[(?:preencher|inserir)[^\]]*\])/;
 const PESSOAL = /\b(?:cpf|rg|rne|passaporte|passport|raca|etnia|ethnicity|race|genero|gender|pronome|pronomes|pronouns?|deficiencia|disabilit\w*|orientacao sexual|sexual orientation|data de nascimento|date of birth|nome (?:completo )?da (?:sua )?mae)\b/;
 const NUMERO_DOCUMENTO = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b/;
 
-export function contemMetatexto(valor) {
-  return typeof valor === 'string' && METATEXTO.test(normalizar(valor));
-}
 
 function fonteConcreta(valor) {
   if (!texto(valor) || /^(?:fonte|perfil|curriculo|confirmado|legado|teste|exemplo|a confirmar)$/i.test(valor.trim())) return false;
@@ -88,6 +88,19 @@ function escopoCompativel(escopo, candidatura) {
     || ['pais', 'regime', 'moeda'].some((campo) => texto(candidatura[campo]) && valor === normalizar(candidatura[campo]));
 }
 
+/** Projeção do texto efetivo: alterações de pergunta, contexto ou fonte invalidam o parecer. */
+export function pacoteEditorialCandidatura(c) {
+  return {
+    contexto: { empresa: c.empresa, vaga: c.vaga || c.idExterno, id: c.idExterno, idioma: c.idioma },
+    campos: (c.respostas || []).filter(r => r && typeof r === 'object').map(r => ({
+      pergunta: r.pergunta, texto: r.resposta, fonte: r.fonte, escopo: r.escopo,
+      ...(r.limite !== undefined ? { limite: r.limite } : {}),
+      ...(r.tipo ? { tipo: r.tipo } : {}), ...(r.alternativas ? { alternativas: r.alternativas } : {}),
+    })),
+    fontes: c.fontesEscrita || [], vetos: c.vetosEscrita || [],
+  };
+}
+
 export function validarCandidatura(candidatura) {
   const erros = [];
   const pendencias = [];
@@ -116,6 +129,11 @@ export function validarCandidatura(candidatura) {
       erros.push(`${local}: documento ou dado pessoal sensível não pertence ao registro; conferir separadamente com voce.`);
     }
   });
+  // Histórico enviado permanece literal; a exigência vale para o próximo uso.
+  if (candidatura.estado !== 'enviada' && Array.isArray(candidatura.respostas) && candidatura.respostas.length) {
+    const editorial = validarRevisaoRespostas(pacoteEditorialCandidatura(candidatura), candidatura.revisaoEscrita, { autor: candidatura.autorRespostas });
+    erros.push(...editorial.erros.map(e => `Revisão de escrita: ${e}`));
+  }
   const a = candidatura.autorizacaoEnvio;
   if (!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(a?.em ?? '') || !fonteConcreta(a?.referencia)) {
     pendencias.push('Candidatura: falta autorização de envio de voce com data e referência concreta.');

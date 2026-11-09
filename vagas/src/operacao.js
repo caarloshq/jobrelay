@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { validarRevisaoRespostas } from './revisao-respostas.js';
 import { lerJsonSeguro, gravarJsonAtomico } from './persistencia.js';
 
 const CONTRATO = 1;
@@ -329,6 +330,19 @@ function chaveExistente(estado, entrada) {
   return null;
 }
 
+// O parecer editorial é um atestado independente, nunca autorização de UI.
+function conferirRevisaoEscrita(entrega, parecer = entrega.revisaoEscrita) {
+  if (!entrega.pacoteRespostas && !['candidatura', 'respostas'].includes(entrega.tipo)) return;
+  const pacote = entrega.pacoteRespostas;
+  if (!pacote || !Array.isArray(pacote.campos)) falha('REVISAO_ESCRITA_OBRIGATORIA');
+  // As orientações declaradas precisam pertencer às fontes congeladas da entrega.
+  for (const fonte of pacote.fontes || []) {
+    if (!entrega.fontesLocais.some(f => f.papel === fonte.papel && f.caminho === fonte.caminho && f.hash === fonte.hash)) falha('FONTE_EDITORIAL_NAO_FIXADA');
+  }
+  const resultado = validarRevisaoRespostas(pacote, parecer, { autor: entrega.autor });
+  if (!resultado.ok) falha('REVISAO_ESCRITA_INVALIDA', resultado.erros.join('; '));
+}
+
 function validarPacote(estado, chave, versoes, dados) {
   const pronta = estado.prontas[chave];
   if (!pronta) falha('NAO_PRONTA', chave);
@@ -338,6 +352,7 @@ function validarPacote(estado, chave, versoes, dados) {
   if (pronta.hashVersoes !== hash(entrega.versoes)) falha('FONTES_MUDARAM');
   conferirHashesFontes(entrega, dados, estado);
   conferirHashesArtefatos(entrega, dados);
+  conferirRevisaoEscrita(entrega);
   return pronta;
 }
 
@@ -446,7 +461,8 @@ function planoLocal(p, estado, registroValido = true) {
     papeis: {
       busca: emFila.filter(r => r.etapa === 'busca').map(r => ({ chave: r.chave, taskId: r.taskId })),
       preparacao: ativa && registroValido && estoqueValido < estado.estoqueAlvo ? emFila.filter(r => r.etapa === 'preparar' && estado.tarefas[r.chave]?.estado === 'reservada').map(r => ({ chave: r.chave, taskId: r.taskId })) : [],
-      revisao: ativa && registroValido ? Object.entries(estado.tarefas).filter(([, t]) => t.estado === 'em_revisao').map(([chave, t]) => ({ chave, entregaId: t.entregaId })) : [],
+      revisao: ativa && registroValido ? Object.entries(estado.tarefas).filter(([, t]) => t.estado === 'em_revisao' && !estado.entregas[t.entregaId]?.pacoteRespostas && !['candidatura', 'respostas'].includes(estado.entregas[t.entregaId]?.tipo)).map(([chave, t]) => ({ chave, entregaId: t.entregaId })) : [],
+      revisaoEscrita: ativa && registroValido ? Object.entries(estado.tarefas).filter(([, t]) => t.estado === 'em_revisao' && (estado.entregas[t.entregaId]?.pacoteRespostas || ['candidatura', 'respostas'].includes(estado.entregas[t.entregaId]?.tipo))).map(([chave, t]) => ({ chave, entregaId: t.entregaId, contrato: 'REVISOR-RESPOSTAS.md', independente: true })) : [],
       aplicador: ativa && registroValido ? prontas.filter(pacote => !pacote.invalida) : [],
     },
     pacotesInvalidos: prontas.filter(pacote => pacote.invalida),
@@ -674,9 +690,10 @@ export function operar(dirDados, acao, args = {}) {
         return { caminho, hash: digest };
       });
       let entrega = { entregaId, runId: estado.runId, taskId, chave, aliases: estado.identidades[chave]?.aliases || [], tipo: string(args.tipo, 'tipo'),
+        ...(args.pacoteRespostas ? { pacoteRespostas: args.pacoteRespostas } : {}),
         revisaoNumero: revisao, substituiId: args.substituiId || null, autor: string(args.autor, 'autor'), versoes: args.versoes || {},
         evidencias: args.evidencias || [], fontesLocais, fontesEsperadasHash: hash(fontesEsperadas), artefatos,
-        hash: hash({ chave, tipo: args.tipo, versoes: args.versoes || {}, evidencias: args.evidencias || [], fontesLocais, fontesEsperadasHash: hash(fontesEsperadas), artefatos }),
+        hash: hash({ chave, tipo: args.tipo, ...(args.pacoteRespostas ? { pacoteRespostas: args.pacoteRespostas } : {}), versoes: args.versoes || {}, evidencias: args.evidencias || [], fontesLocais, fontesEsperadasHash: hash(fontesEsperadas), artefatos }),
         estado: 'em_revisao', criadaEm: agora() };
       if (estado.entregas[entregaId]) {
         const existente = estado.entregas[entregaId];
@@ -706,11 +723,16 @@ export function operar(dirDados, acao, args = {}) {
       const revisor = string(args.revisor, 'revisor');
       if (entrega.autor === revisor) falha('REVISAO_NAO_INDEPENDENTE');
       if (string(args.hash, 'hash') !== entrega.hash) falha('HASH_DIVERGENTE');
+      if (args.parecer === 'aprovado') {
+        conferirRevisaoEscrita(entrega, args.revisaoEscrita);
+        if (entrega.pacoteRespostas?.campos?.length && args.revisaoEscrita?.revisor !== revisor) falha('REVISOR_EDITORIAL_DIVERGENTE');
+      }
       if (entrega.revisao) {
         if (entrega.revisao.revisor === revisor && entrega.revisao.parecer === args.parecer) return { entrega, repetida: true };
         falha('REVISAO_IMUTAVEL');
       }
       if (!['aprovado', 'reprovado'].includes(args.parecer)) falha('PARECER_INVALIDO');
+      if (args.revisaoEscrita) entrega.revisaoEscrita = args.revisaoEscrita;
       entrega.revisao = { revisor, parecer: args.parecer, em: agora(), hash: entrega.hash };
       entrega.estado = args.parecer === 'aprovado' ? 'revisada' : 'reprovada';
       estado.tarefas[entrega.chave].estado = entrega.estado;
@@ -721,6 +743,7 @@ export function operar(dirDados, acao, args = {}) {
     if (acao === 'pronta') {
       const entrega = estado.entregas[string(args.entregaId, 'entregaId')];
       if (!entrega || entrega.estado !== 'revisada') falha('REVISAO_INVALIDA');
+      conferirRevisaoEscrita(entrega);
       if (['terminal', 'enviada', 'envio_incerto', 'aguardando_pessoa', 'bloqueada_tecnica'].includes(estado.tarefas[entrega.chave]?.estado)) falha('VAGA_BLOQUEADA');
       conferirHashesFontes(entrega, p.dados, estado);
       conferirHashesArtefatos(entrega, p.dados);
