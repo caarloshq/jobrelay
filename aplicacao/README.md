@@ -141,13 +141,15 @@ tinha saído do ar.
 - Nunca inventar fato, resposta negativa, experiência ou motivo pessoal. Não
   citar o conteúdo proibido na base de currículo, conforme a skill de adaptação.
 - Documentos ficam com você, conforme o perfil. Não os guardar em logs.
-- LinkedIn e Candidatura Simplificada estão liberados desde 08/09/2026. Selecionar
-  currículo pelo idioma e adequação atual à vaga, não apenas pelo nome do arquivo.
+- Antes de usar LinkedIn ou Candidatura Simplificada, conferir a política local, o
+  opt-in e a autorização da pessoa para a candidatura. Selecionar o currículo pelo
+  idioma e adequação atual à vaga, não apenas pelo nome do arquivo.
 - Autodeclaração e consentimento seguem os respectivos blocos do perfil, que
   guardam o alcance autorizado. Consultar somente o atributo perguntado; não
   inferir pronomes ou necessidade de acessibilidade de outro atributo.
-- Pesquisa para “por que esta empresa?” está autorizada desde 14/09/2026 como
-  rascunho para conferência seu. Aprovação é por candidatura.
+- Para “por que esta empresa?”, consultar a permissão de rascunho no perfil e a
+  fonte oficial. A pesquisa não comprova motivação pessoal nem autoriza preencher,
+  consentir ou enviar; a pessoa confere o texto para cada candidatura.
 
 ### Mecânica que já custou erro, e não é opcional
 
@@ -157,7 +159,7 @@ tinha saído do ar.
 | **`navigate` sempre com `tabId` explícito** | Sem ele, pega a primeira aba do grupo e destrói o formulário que estava lá |
 | **Radio e checkbox por referência, nunca por coordenada** | Coordenada de screenshot envelhece quando a página rola. Foi assim que uma candidatura foi enviada como CLT quando você tinha escolhido PJ |
 | **Campo de moeda recebe só os dígitos** | Digitar `12.000,00` na máscara da InHire produz **R$ 1.200.000,00**. Digitar `12000` produz o valor certo |
-| **Máscara que embaralha o que foi digitado: pressione `End` entre um dígito e outro** | Descoberto em 2026-09-08 no recrut.ai (Insi). Digitar `48936186883` de uma vez produziu **(89) 18688-3634**, e o CEP `88058291` virou `88058-912`: a máscara devolve o cursor para o começo a cada tecla, então os dígitos entram fora de ordem. Um dígito, `End`, próximo dígito. Sai certo |
+| **Máscara que embaralha o que foi digitado: pressione `End` entre um dígito e outro** | Em um formulário, a máscara devolvia o cursor ao começo a cada tecla e deslocava os dígitos de telefone e CEP. Digite um dígito, pressione `End` e siga até conferir o valor visível. |
 | **Campo com máscara não limpa com Ctrl+A** | O valor antigo fica e o novo concatena. Limpar com `focus()` mais `setSelectionRange` e um Backspace |
 | **Recusar o banner de cookies antes de clicar em Continuar** | Cada domínio da Gupy tem o seu, e ele intercepta o clique **sem dar erro**: a página só não avança |
 | **Trocar o país do telefone ANTES de digitar o número** | O padrão é `Estados Unidos +1`, e digitar `+55` junto duplica o prefixo |
