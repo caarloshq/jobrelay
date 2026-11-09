@@ -12,9 +12,63 @@ Markdown editado é a fonte editorial. O JSON em `../vagas/data/perguntas.json` 
 
 ## Candidatar
 
-**Meta e saldo:** consultar `../vagas/data/candidaturas.json`. Priorizar vagas elegíveis e
-compatíveis; volume não libera resposta sem fonte ou aprovação. O que depender do
-Você vira pendência específica, sem bloquear o trabalho independente nas demais.
+### Objetivo e encerramento da fila
+
+Ao iniciar uma rodada de candidaturas autorizada, consulte a política local, o quadro
+da instalação e `../vagas/data/candidaturas.json`. A meta diária vem de
+`quotaDiaria` nesse arquivo; quando ele ainda não existe, o contador usa o padrão
+da instalação definido em `../vagas/src/candidaturas.js`. Consulte o saldo, mas
+não use a meta como corte de busca ou de aplicação. Somente recibo ou confirmação
+visível do canal de destino conta como candidatura enviada; cadastro, rascunho,
+formulário preenchido e etapa adicional da mesma requisição não somam outra.
+
+Se o host oferece objetivo nativo e a pessoa pediu a execução da rodada, crie
+**um** objetivo para percorrer a fila acionável e registrar o desfecho de cada
+requisição. Reutilize o objetivo já ativo da mesma rodada, em vez de duplicá-lo.
+Atualize o progresso à medida que houver prova. Atingir `quotaDiaria` não conclui
+o objetivo: ele só termina quando toda vaga acionável da fila tiver destino
+comprovado e não houver ação necessária pendente. Respeite as
+regras de status da ferramenta; não marque como concluído um objetivo ainda
+pendente. Se o host não oferecer objetivo nativo, declare essa limitação e anote
+o objetivo e o progresso num relatório datado dentro de `../vagas/data/`, sem
+afirmar que uma ferramenta de objetivos foi acionada.
+
+Percorra **todas** as vagas em `Avaliar` por prioridade do quadro atual, além das
+que já estejam em fase de aplicação, sem encerrar a leitura quando a meta diária
+for alcançada. Releia o estado antes de cada candidatura e antes do envio. Para
+cada `ID externo`, confronte anúncio e formulário oficiais,
+identidade da requisição, vigência, modalidade e requisitos com as fontes locais.
+O índice ordena o trabalho; falta de experiência comprovada, país não informado
+ou nota baixa não são, por si, prova de impedimento. Um campo que exigiria
+afirmação falsa impede **aquele preenchimento**, não a análise das próximas
+vagas. Registre para cada ID o destino verificável: candidatura confirmada;
+preparo ou formulário em andamento; pendência específica de resposta, login,
+Chrome ou canal; encerramento comprovado; ou indeterminação com próximo passo.
+Use as fases existentes do quadro e seus campos de histórico; uma retirada por
+decisão da pessoa também exige registro da decisão. Não invente uma
+fase nem apague uma requisição. A vaga aberta que ainda precisa de decisão da
+pessoa continua pendente, com a pergunta e a fonte exatas.
+
+Se Chrome, login ou uma resposta pessoal bloquear uma vaga, preserve o rascunho
+e a aba identificada por vaga e etapa quando houver navegador ativo, registre o
+ponto atingido e siga para o próximo ID.
+Continue pesquisa, preparo de CV e respostas factuais dentro das autorizações
+vigentes. Antes de perguntar, busque dados e decisões anteriores com escopo,
+finalidade e destinatário compatíveis conforme [Dados já existentes e perguntas
+pendentes](#dados-já-existentes-e-perguntas-pendentes). Ao final do trabalho
+independente, apresente apenas as decisões ainda necessárias, **uma decisão por
+cartão interativo**, com alternativas literais quando houver e opções clicáveis
+quando couber; o bloco final pode agrupar cartões por candidatura. Não peça uma
+lista de respostas dentro de um cartão.
+
+O modo padrão continua só mapear. Preencher e enviar exige opt-in local,
+autorização de envio e conferência da requisição; a existência de uma meta ou
+objetivo não concede permissão nova. O quadro local é o padrão e o Notion só é
+usado quando configurado e conectado pela instalação. Não iniciar coleta paga,
+contato externo ou login apenas para cumprir a meta. O relatório final
+informa total confirmado, saldo, IDs cobertos, destino de cada vaga ainda
+acionável e pendências que realmente exigem a pessoa; o objetivo permanece
+ativo se ainda houver trabalho autorizado ou decisão necessária pendente.
 
 ### Antes de abrir o navegador
 

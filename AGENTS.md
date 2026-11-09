@@ -30,6 +30,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | Como a rodada funciona, o que o código faz sozinho e o que é seu | [`vagas/AGENTS.md`](vagas/AGENTS.md) |
 | Buscar, avaliar e preparar vagas | [`coleta/README.md`](coleta/README.md) |
 | Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](aplicacao/README.md) |
+| Porta curta para percorrer a fila de candidaturas | [`Skills/apply-jobs/SKILL.md`](Skills/apply-jobs/SKILL.md); o procedimento dono continua em `aplicacao/README.md` |
 | O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](vagas/RODADA-DIARIA.md) |
 | O quadro: estado e histórico de cada vaga | `vagas/data/quadro.json`, escrito só por `vagas/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
 | Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md) |
