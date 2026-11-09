@@ -302,6 +302,8 @@ O perfil continua sendo a fonte dos fatos e autorizações. O banco e os histór
 
 O registrador Markdown não captura o navegador nem descobre campo omitido pelo aplicador. Cabe ao revisor comparar as perguntas e textos com os campos visíveis. Bancos, perfis e quadro de exemplo são versionados na distribuição; revise arquivos personalizados antes de publicar sua cópia. O histórico literal de aplicação é local.
 
+Depois de concluir o trabalho independente nas candidaturas autorizadas, reúna as perguntas pendentes para confirmação. Cada cartão interativo trata de um único assunto ou decisão, com opções clicáveis quando couber; não peça várias respostas no mesmo cartão. O bloco final pode organizar os cartões por candidatura. Mostre a pergunta e as alternativas literais, apresente uma sugestão apoiada nas fontes e mantenha a pendência até a pessoa confirmar. A sugestão não substitui as permissões da instalação para preencher ou enviar.
+
 ## O que se reutiliza
 
 | `uso` no banco | Procedimento |
