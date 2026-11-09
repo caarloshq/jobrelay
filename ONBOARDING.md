@@ -6,7 +6,7 @@ Tenha seu currículo em PDF e acesso a um desses assistentes. A conexão com o L
 
 ## Abra o formulário
 
-Se ainda não instalou o projeto, siga o [README](README.md#para-instalar-pelo-terminal). Para retomar a configuração, abra o terminal na pasta `vagas` e execute:
+Se ainda não instalou o projeto, siga o [guia de instalação](docs/instalar-com-agente.md#pelo-terminal). Para retomar a configuração, abra o terminal na pasta `vagas` e execute:
 
 ```bash
 npm start
@@ -67,6 +67,7 @@ O assistente vai:
 - Ajustar a busca à sua profissão e verificar se a configuração está completa.
 - Configurar a fonte de estado, a fonte de respostas e o modo de candidatura escolhidos, sem inferir consentimento.
 - Se você ativou a autonomia, criar e confirmar no chat a tarefa recorrente de 4 horas no agendador nativo do assistente.
+- Se você usou o prompt de instalação do README, configurar também a [checagem de releases](ATUALIZAR.md#confira-releases-a-cada-três-dias-pelo-assistente), independente da autonomia de candidaturas, e conferir sua criação na ferramenta.
 
 Ao terminar o formulário, tudo está salvo neste computador. A configuração fica concluída depois que o assistente prepara o currículo e ajusta a busca. Aguarde essa confirmação antes de iniciar a primeira busca.
 

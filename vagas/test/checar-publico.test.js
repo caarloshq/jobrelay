@@ -28,6 +28,8 @@ test('URLs públicas exatas são permitidas sem dispensar dado pessoal na mesma 
     'https://github.com/caarloshq/jobrelay.git',
     'https://github.com/caarloshq/job-scrapper.git',
     'https://api.github.com/repos/caarloshq/jobrelay',
+    'https://github.com/caarloshq/jobrelay/releases/latest',
+    'https://api.github.com/repos/caarloshq/jobrelay/releases/latest',
   ]) {
     assert.equal(checar(t, url).status, 0, url);
     assert.equal(checar(t, `${url} ${telefone}`).status, 1, url);
@@ -46,5 +48,9 @@ test('nome protegido e URLs com host ou sufixo alterados continuam bloqueados', 
     `http://github.com/${nome}/jobrelay.git`,
     `https://github.com/${nome}/job-scrapper.git/extra`,
     `https://github.com/${nome}/job-scrapper.git.evil`,
+    `https://github.com/${nome}/jobrelay/releases/latest/extra`,
+    `https://github.com/${nome}/jobrelay/releases/latest?token=teste`,
+    `https://api.github.com/repos/${nome}/jobrelay/releases/latest/extra`,
+    `https://api.github.com.evil.example/repos/${nome}/jobrelay/releases/latest`,
   ]) assert.equal(checar(t, conteudo).status, 1, conteudo);
 });
