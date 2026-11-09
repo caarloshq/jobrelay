@@ -129,12 +129,16 @@ test('campo sensível só aceita referência e padrões conhecidos de segredo s�
   assert.throws(() => registrarRespostas(pacote, { raizProjeto: raiz }), /DADO_SENSIVEL/);
 });
 
-test('perguntas de grupos de diversidade e inscrição como PcD mantêm só referência privada', (t) => {
+test('perguntas de diversidade e endereço mantêm só referência privada', (t) => {
   const raiz = fixture(t);
   for (const [i, pergunta] of [
     'Do you belong to one of the groups below?',
     'Would you like to apply as a disabled person?',
     'Você pertence a algum dos grupos de diversidade?',
+    'Bairro *',
+    'Endereço *',
+    'CEP *',
+    'Street address *',
   ].entries()) {
     const pacote = entrada(`diversidade-${i}`);
     pacote.campos = [{ pergunta, texto: 'Seleção sensível fictícia', preenchida: true }];
