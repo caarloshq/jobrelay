@@ -35,6 +35,7 @@
     "sincronizar:fontes": "node scripts/sincronizar-fontes.mjs",
     "registrar:respostas": "node scripts/registrar-respostas.mjs",
     "atualizar": "node scripts/atualizar.mjs",
-    "estado": "node scripts/estado.mjs"
+    "estado": "node scripts/estado.mjs",
+    "revisar:escrita": "node scripts/revisar-escrita.mjs"
   }
 }

@@ -180,7 +180,7 @@ export function renderizarFontes({ banco, perfil }) {
     perfilMd.push('', `### ${no.caminho.length ? no.caminho.join(' / ') : 'Estrutura do perfil'}`, '',
       cerca(no.conteudo, 'jobrelay-campo', { caminho: no.caminho, tipo: no.tipo }));
   }
-  return { respostas: respostas.join('\n') + '\n', perfil: perfilMd.join('\n') + '\n' };
+  return { respostas: respostas.join('\n').trimEnd() + '\n', perfil: perfilMd.join('\n').trimEnd() + '\n' };
 }
 
 function reconstruirPerfil(lista) {

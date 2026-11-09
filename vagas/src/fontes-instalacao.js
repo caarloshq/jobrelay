@@ -8,7 +8,7 @@ import { comEscritaCentral } from './operacao.js';
 
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const MODELOS = Object.freeze({
-  respostas: '5f1db62462398ffc07a3b8e0b360ea1532701f158dbc9abb27e8fd7dc7e0bf4a',
+  respostas: 'af0c0336d51f53a9759f6f58d1c6f83c3e6d3b08f0c72a56d027e3ba09d8a573',
   perfil: 'd45db3d7cf7bc146ec3022790ff1ae46e95f30fa93cb7763c4057957e7e44a99',
 });
 const DADOS_NEUTROS = Object.freeze({
