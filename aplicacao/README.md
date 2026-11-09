@@ -140,13 +140,14 @@ tinha saído do ar.
 
 - Nunca inventar fato, resposta negativa, experiência ou motivo pessoal. Não
   citar o conteúdo proibido na base de currículo, conforme a skill de adaptação.
-- Documentos ficam com você, conforme o perfil. Não os guardar em logs.
+- Documentos seguem as fontes privadas e autorizações do perfil, conforme [Dados já existentes e perguntas pendentes](#dados-já-existentes-e-perguntas-pendentes). Não registrar valores em logs, Markdown ou histórico público.
 - Antes de usar LinkedIn ou Candidatura Simplificada, conferir a política local, o
   opt-in e a autorização da pessoa para a candidatura. Selecionar o currículo pelo
   idioma e adequação atual à vaga, não apenas pelo nome do arquivo.
 - Autodeclaração e consentimento seguem os respectivos blocos do perfil, que
   guardam o alcance autorizado. Consultar somente o atributo perguntado; não
-  inferir pronomes ou necessidade de acessibilidade de outro atributo.
+  inferir pronomes ou necessidade de acessibilidade de outro atributo. A
+  reutilização de decisões anteriores segue [Dados já existentes e perguntas pendentes](#dados-já-existentes-e-perguntas-pendentes).
 - Para “por que esta empresa?”, consultar a permissão de rascunho no perfil e a
   fonte oficial. A pesquisa não comprova motivação pessoal nem autoriza preencher,
   consentir ou enviar; a pessoa confere o texto para cada candidatura.
@@ -300,6 +301,8 @@ Cargo anterior não é empresa atual; último salário não é remuneração atu
 
 O perfil continua sendo a fonte dos fatos e autorizações. O banco e os históricos estruturados já usados pela instalação podem ser preservados e consultados; eles não são um novo requisito para salvar o que foi preenchido. O maestro mantém os bloqueios de perguntas sem resposta e distingue pendente, respondida e aplicada. Omissão numa lista nova não resolve uma pendência. A confirmação de envio exige prova externa; não é inferida de um Markdown ou JSON.
 
+Antes de perguntar por um dado pessoal, documento ou consentimento, consultar as fontes privadas e as decisões já registradas nesta instalação ou na conversa ativa. Verificar o dado ou texto aprovado, sua origem, validade, escopo, finalidade e destinatário. Se a decisão anterior ainda cobre o uso presente, reutilizá-la sem pedir confirmação idêntica; o valor sensível continua fora dos registros públicos. Se faltar o dado ou a autorização, ou se o formulário pedir outro uso, destinatário ou alcance, deixar a pendência específica para a pessoa. Uma preferência reutilizável não substitui a confirmação que a ferramenta exige no momento da ação: ler novos termos legais, aceitar uma nova versão, autenticar-se ou resolver CAPTCHA continuam no fluxo próprio. Não contornar essas etapas nem inferir aceite de uma autorização parecida. O opt-in local e a autorização de envio permanecem necessários.
+
 O registrador Markdown não captura o navegador nem descobre campo omitido pelo aplicador. Cabe ao revisor comparar as perguntas e textos com os campos visíveis. Bancos, perfis e quadro de exemplo são versionados na distribuição; revise arquivos personalizados antes de publicar sua cópia. O histórico literal de aplicação é local.
 
 Depois de concluir o trabalho independente nas candidaturas autorizadas, reúna as perguntas pendentes para confirmação. Cada cartão interativo trata de um único assunto ou decisão, com opções clicáveis quando couber; não peça várias respostas no mesmo cartão. O bloco final pode organizar os cartões por candidatura. Mostre a pergunta e as alternativas literais, apresente uma sugestão apoiada nas fontes e mantenha a pendência até a pessoa confirmar. A sugestão não substitui as permissões da instalação para preencher ou enviar.
@@ -311,7 +314,7 @@ Depois de concluir o trabalho independente nas candidaturas autorizadas, reúna 
 | `direta` | Usar o texto final somente com `aprovada: true`, fonte e escopo compatíveis. |
 | `contextual` | Ler anúncio, pergunta e opções. Compor resposta para essa candidatura; conferir antes de enviar. |
 | `pessoal` | Usar apenas declaração ou autorização explícita sua, nunca dedução de outro atributo. |
-| `documento` | Deixar para você, conforme os limites do perfil. |
+| `documento` | Consultar a fonte privada e a autorização compatível conforme [Dados já existentes e perguntas pendentes](#dados-já-existentes-e-perguntas-pendentes); sem elas, deixar para você. |
 
 `resposta` contém apenas o que alguém poderia ler no formulário. Orientações
 ficam em `instrucao`; relatos antigos, em `registro_anterior`. Texto alterado que
