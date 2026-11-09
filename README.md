@@ -41,7 +41,7 @@ Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador.
 
 ## Receba e instale atualizações
 
-Na instalação pelo prompt, o assistente configura uma checagem **a cada três dias** e avisa quando houver uma nova versão. A tarefa depende do agendador e do computador disponíveis. Para instalar a atualização, peça **“atualiza aí”**.
+Na instalação pelo prompt, o assistente configura uma checagem **a cada três dias** e avisa quando houver uma nova versão. A tarefa depende do agendador e do computador disponíveis. Para instalar a atualização, peça **“atualize para a versão mais recente”**.
 
 O [guia de atualização na raiz](ATUALIZAR.md) identifica o repositório original, a [última release estável](https://github.com/caarloshq/jobrelay/releases/latest) e o caminho para preservar seus dados, inclusive em versões antigas.
 
