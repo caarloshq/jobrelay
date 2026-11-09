@@ -63,6 +63,12 @@ ausente, perguntar. Não interromper por informação já confirmada no mesmo co
 5. Conferir idioma, limite de caracteres e alternativas reais. Não traduzir nem
    reescrever rótulos de alternativas. Campo livre usa português com acentos ou o
    idioma solicitado pela vaga.
+6. Antes de apresentar uma sugestão, responder em campo aberto ou preencher o
+   formulário, aplicar [`review-escrita`](../Skills/review-escrita/SKILL.md) ao
+   **texto autoral da resposta**. Conferir voz, clareza e cada afirmação com as
+   fontes. O verificador mecânico lê apenas um arquivo de texto local; perguntas,
+   alternativas literais, metadados e respostas históricas não são rascunho para
+   reescrita. A revisão não aprova opinião, declaração pessoal nem consentimento.
 
 Apresentação livre não tem parágrafo obrigatório sobre a sua empresa atual. A
 experiência vem da pergunta, e não de uma sequência universal. Se trocar o nome
@@ -101,3 +107,8 @@ O comando com `--modelo` imprime o formato do registro sem criar candidatura.
 Relatos históricos resumidos permanecem históricos; não reconstruir uma frase e
 afirmar que foi exatamente a enviada. Antes de reutilizar PDF do acervo, executar
 o verificador atual e conferir a adaptação à vaga.
+
+Se uma resposta já enviada revelar atribuição indevida, promessa sem prova ou
+texto genérico, preserve o histórico efetivo e sua confirmação. Corrija o padrão
+reutilizável em `data/perguntas.json` dentro do escopo aprovado, com fonte e nova
+revisão; uma correção não altera o que foi enviado nem amplia uma autorização.

@@ -88,6 +88,8 @@ Passar `descricao` grava a impressão digital do texto. Se o anúncio for reedit
 
 O `resumo` **descreve a vaga primeiro e fecha com o encaixe**. Todo fato de encaixe citado tem que existir no `base_content`.
 
+Antes de registrar `resumo` e `gaps`, aplique [`review-escrita`](../Skills/review-escrita/SKILL.md) ao texto que o agente redigiu. A varredura mecânica ajuda a encontrar frases vazias; a leitura humana confere cada afirmação contra anúncio e currículo. Não varra a descrição copiada do empregador como se fosse texto autoral. Requisito sem prova permanece em `gaps`.
+
 ### Julgamento semântico com evidência
 
 Distribuir os 40 pontos em quatro eixos de 0 a 10: trabalho exigido, experiência
@@ -156,8 +158,12 @@ Você vira pendência específica, sem bloquear o trabalho independente nas dema
    vaga e as regras atuais. Nome e idioma de um PDF antigo não comprovam sua
    adequação. Não usar versão que falhe na revisão atual.
 4. Preparar as respostas com fontes e registrar o texto exato localmente conforme
-   `RESPOSTAS.md`. Pergunta sobre a empresa pode ser pesquisada e rascunhada para
-   você conferir; não inventar opinião pessoal. Reunir dúvidas necessárias.
+   `RESPOSTAS.md`. Antes de apresentar sugestão, preencher ou responder em campo
+   aberto, aplicar [`review-escrita`](../Skills/review-escrita/SKILL.md) ao texto
+   autoral. Não reescrever pergunta nem alternativa literal; revisão de escrita
+   não aprova opinião, declaração pessoal ou consentimento. Pergunta sobre a
+   empresa pode ser pesquisada e rascunhada para você conferir; não inventar
+   opinião pessoal. Reunir dúvidas necessárias.
 
 ### 🔴 O que a rodada de 2026-08-26 pagou caro para descobrir
 
