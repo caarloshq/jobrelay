@@ -17,3 +17,7 @@
 ## Limites
 
 Notion é sincronizado pelo agente pela conexão da instalação. Estado, hashes e pendências não provam uma edição remota por si. A aplicação visual da instalação é independente dos testes locais; não há nova release ou agendamento implícito nesta mudança.
+
+## Integração concorrente conferida
+
+A revisão de escrita publicada durante a execução foi integrada sem descartar a skill, scripts, testes ou regras recebidos. Suíte final integrada: 468/468; checker público e diff-check passaram.
