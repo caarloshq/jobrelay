@@ -2,7 +2,15 @@
 
 Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. As duas entradas operacionais estão em [coleta](coleta/README.md) e [aplicação](aplicacao/README.md).
 
-## Primeiro uso: onboarding antes de qualquer coisa
+## Pedido de atualização: antes do onboarding
+
+Se a pessoa pedir “atualiza aí”, “atualize o projeto” ou a versão mais recente, leia [ATUALIZAR.md](ATUALIZAR.md) na raiz. Ali estão o repositório original, a consulta da release estável, os créditos e os caminhos para Git, fork e ZIP. O pedido é para atualizar a instalação preservando seus dados; não reinicie onboarding, coleta ou candidaturas por associação.
+
+## Checagem de releases: tarefa separada da operação
+
+Na instalação pelo prompt do README que autoriza a tarefa, siga [a checagem a cada três dias](ATUALIZAR.md#confira-releases-a-cada-três-dias-pelo-assistente): crie ou atualize, sem duplicar, uma tarefa no agendador nativo. A tarefa consulta a release estável original e compara a instalação em modo de leitura; avisa novidades ou falhas que exigem ação e fica quieta sem mudança ou diante da mesma pendência. Não executa atualização, rodada ou candidatura e não muda opt-in. A autorização dessa checagem independe da autonomia de candidaturas. Fora desse prompt, peça autorização apenas para o agendamento. Comprove identificador e próxima execução pela ferramenta; se não houver agendador disponível, informe que a criação ficou pendente, sem improvisar cron.
+
+## Primeiro uso: onboarding antes da operação
 
 ```bash
 cd vagas && npm run onboarding
@@ -49,6 +57,6 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 
 ## Opções da instalação e operação recorrente
 
-O onboarding escolhe quadro local ou Notion para vagas e, separadamente, Markdown local ou Markdown local + Notion para respostas; também escolhe só mapeamento ou Chrome assistido e tarefa opcional de quatro em quatro horas. Configuração da instalação e conexões pertencem à própria pessoa; nenhum token deve ser colado no chat. O agente usa `vagas/RODADA-DIARIA.md` como entrada do ciclo e segue os runbooks de coleta e aplicação e cria/atualiza a tarefa no agendador nativo somente quando a pessoa escolher autonomia. Se não houver agendador, entrega o prompt no chat e informa que não criou a tarefa. O processo Node não instala um serviço de agentes nem executa o agendador.
+O onboarding escolhe quadro local ou Notion para vagas e, separadamente, Markdown local ou Markdown local + Notion para respostas; também escolhe só mapeamento ou Chrome assistido e tarefa opcional de quatro em quatro horas. Configuração da instalação e conexões pertencem à própria pessoa; nenhum token deve ser colado no chat. O agente usa `vagas/RODADA-DIARIA.md` como entrada do ciclo e segue os runbooks de coleta e aplicação e cria/atualiza a tarefa de operação no agendador nativo somente quando a pessoa escolher autonomia. Essa tarefa é distinta da checagem de releases, cuja autorização e frequência estão em `ATUALIZAR.md`. Se não houver agendador, entrega o prompt no chat e informa que não criou a tarefa. O processo Node não instala um serviço de agentes nem executa o agendador.
 
 O registro obrigatório do preenchimento é `aplicacao/RESPOSTAS-PREENCHIDAS.md`, escrito pelo maestro/aplicador através de `npm run registrar:respostas` dentro de vagas. Não exigir banco novo por resposta. Nas entradas npm de coleta, atualização estável ocorre antes da importação do código quando as condições seguras permitem; recusa mantém dados e informa o motivo. Notion opcional usa snapshot completo e a conexão do agente; não usa credenciais do mantenedor.

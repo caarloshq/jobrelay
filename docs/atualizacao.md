@@ -1,5 +1,7 @@
 # Receba avisos de versões e preserve seus dados ao atualizar
 
+Para o pedido curto “atualiza aí”, comece pela entrada [ATUALIZAR.md](../ATUALIZAR.md), na raiz. Ela identifica a origem do produto e encaminha o assistente para os procedimentos deste guia.
+
 As versões publicadas ficam em Releases, com acesso pelo [README](../README.md#receba-e-instale-atualizações). Cada release identifica uma tag, mudanças, limites e o código disponível para download. A versão 1.2.0 separa coleta e aplicação, organiza as fontes de respostas e incorpora revisão editorial independente. A validação desta distribuição usa testes locais e dados fictícios; não comprova candidaturas reais nem aumento de contratações.
 
 ## Ao atualizar para a v1.2.0
@@ -26,14 +28,9 @@ Peça ao assistente:
 
 > Atualize minha instalação para JobRelay. Confira a origem e a versão, preserve meus dados e configurações e compare minhas alterações locais. Use https://github.com/caarloshq/jobrelay.git como origem. Aplique a release estável compatível sem apagar arquivos ou substituir meus dados pelos exemplos. Se houver conflito ou histórico divergente, pare e me mostre o que precisa ser resolvido.
 
-Em um checkout sem alterações locais de código e com histórico compatível, os comandos de migração são:
+Consulte a última release estável do original e confirme sua tag e commit antes de trocar arquivos. Prepare uma cópia dessa tag dentro do projeto, compare as alterações e porte o código compatível com a migração assistida. Preserve os dados e configurações da instalação. Não use `git pull origin main` como substituto da release escolhida.
 
-```bash
-git remote set-url origin https://github.com/caarloshq/jobrelay.git
-git pull --ff-only origin main
-```
-
-Não execute a troca de arquivos antes de preservar e conferir suas alterações. Depois desta migração, o atualizador usa o endereço novo. Ele aceita também a URL Git antiga exata por compatibilidade; não aceita outros repositórios.
+Se a instalação for um clone reconhecido do original antigo, o assistente pode atualizar a URL do remote para a origem canônica depois dessa conferência. Em um fork, preserve os remotes da pessoa. O atualizador novo aceita também a URL Git antiga exata por compatibilidade; não aceita outros repositórios.
 
 ## Se você clonou com Git
 
@@ -46,7 +43,7 @@ git fetch origin --tags
 git tag --list 'v*'
 ```
 
-Uma atualização estável pelo branch principal pode usar `git pull --ff-only` depois de resolver e preservar suas alterações; isso acompanha `main`, não instala automaticamente uma pré-release publicada em outra branch. Para avaliar um RC, o assistente deve preparar uma cópia isolada da tag escolhida, comparar as diferenças e portar o código compatível sem substituir os dados da instalação. Nunca iniciar duas operações apontando para os mesmos dados.
+Para instalar a release estável, confirme a tag e o commit no original e siga o atualizador ou a migração compatível a partir dessa tag. Atualizar pelo branch `main` é uma operação diferente: pode trazer código posterior à release e não comprova instalação da versão estável. Para avaliar um RC, o assistente deve preparar uma cópia isolada da tag escolhida, comparar as diferenças e portar o código compatível sem substituir os dados da instalação. Nunca iniciar duas operações apontando para os mesmos dados.
 
 ## Se você baixou um ZIP
 

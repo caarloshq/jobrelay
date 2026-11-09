@@ -42,8 +42,10 @@ const PADROES = [
 const URLS_PUBLICAS = new Set([
   'https://github.com/caarloshq/jobrelay',
   'https://github.com/caarloshq/jobrelay.git',
+  'https://github.com/caarloshq/jobrelay/releases/latest',
   'https://github.com/caarloshq/job-scrapper.git',
   'https://api.github.com/repos/caarloshq/jobrelay',
+  'https://api.github.com/repos/caarloshq/jobrelay/releases/latest',
 ]);
 const URL_HTTPS = /(^|[\s('"`])https:\/\/[^\s'"`<>),\]}]+/g;
 function omitirUrlPublica(linha) {
