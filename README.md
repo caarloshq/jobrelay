@@ -6,6 +6,16 @@ O projeto roda no seu computador e usa suas próprias contas. Você pode acompan
 
 Criado por [Carlos Henrique](https://www.linkedin.com/in/caarloshq), Product Designer, a partir da própria busca de trabalho. O repositório traz dados fictícios para você substituir pelos seus.
 
+## Novidades da v1.2.0
+
+- Coleta e aplicação com fluxos separados para retomar candidaturas sem repetir a busca.
+- Perfil, respostas e histórico separados, com Markdown local obrigatório e Notion opcional.
+- Revisor independente para conferir cada resposta antes do preenchimento; mudanças no texto ou nas fontes exigem nova revisão.
+- Reutilização de autorizações compatíveis e proteção de dados sensíveis no histórico.
+- Migração das fontes com preservação das configurações e das edições locais.
+
+Para atualizar uma instalação anterior, siga a [migração assistida para a v1.2.0](docs/atualizacao.md#ao-atualizar-para-a-v120). O atualizador automático bloqueia esta transição porque ela altera modelos de perfil e fontes protegidas. Veja as [notas da release](https://github.com/caarloshq/jobrelay/releases/tag/v1.2.0).
+
 ## Instale com uma instrução ao assistente
 
 Você precisa de **Node.js 20 ou mais recente, Python 3, Git e Claude Code ou Codex** com acesso ao terminal. Tenha seu currículo em PDF; o PDF do LinkedIn é opcional. A conta Apify também é opcional: ela acrescenta vagas do LinkedIn e pode gerar custo.
