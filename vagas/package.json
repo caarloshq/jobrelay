@@ -20,6 +20,7 @@
     "pendentes": "node scripts/pendentes.mjs",
     "descobrir": "node scripts/descobrir-empresas.mjs",
     "validar:respostas": "node scripts/validar-respostas.mjs",
+    "revisar:escrita": "node scripts/revisar-escrita.mjs",
     "test:curriculo": "python3 -m unittest discover -s ../Skills/adapt-resume/tests -p \"test_*.py\"",
     "apify": "node scripts/executar.mjs apify",
     "checar:publico": "node scripts/checar-publico.mjs",
