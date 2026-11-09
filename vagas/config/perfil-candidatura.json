@@ -10,7 +10,7 @@
     "regra": ""
   },
   "identidade": {
-    "_nota": "Só o que um formulário de vaga pede. Documento (CPF, RG, passaporte) NUNCA entra aqui nem em arquivo nenhum do projeto.",
+    "_nota": "Só o que um formulário de vaga pede. Documento (CPF, RG, passaporte) não entra nestes modelos nem em fonte versionável. Se estiver em fonte privada da instalação, usar somente o atributo perguntado com autorização válida para aquela finalidade e destinatário.",
     "nome_completo": "",
     "nome_primeiro": "",
     "nome_do_meio": "",
@@ -66,7 +66,7 @@
     "_ver": "data/dados-pessoais.json (fora do git)"
   },
   "consentimento": {
-    "_nota": "Aceite de privacidade e de diversidade só quando necessário para uma candidatura cujo envio você autorizou.",
+    "_nota": "Antes de marcar, conferir a fonte da autorização, finalidade, destinatário e escopo. Reutilizar decisão anterior ainda válida dentro desse alcance, sem perguntar de novo. Ausência de autorização, novo alcance ou novos termos exigem decisão própria; a candidatura continua sujeita ao opt-in e à autorização de envio.",
     "marcar_lgpd_automaticamente": false,
     "somente_candidatura_com_envio_autorizado": true,
     "opcionais_exigem_decisao": true,
@@ -81,7 +81,7 @@
     "como_conheceu_a_vaga": null
   },
   "nunca_responder_sozinho": [
-    "documento (CPF, RG, passaporte)",
+    "documento sem fonte privada confirmada e autorização compatível",
     "autodeclaração (gênero, raça, deficiência)",
     "pretensão salarial fora dos valores deste arquivo",
     "vínculo ou parentesco com alguém da empresa",

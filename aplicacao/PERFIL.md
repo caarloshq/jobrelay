@@ -109,7 +109,7 @@ false
 ### identidade / _nota
 
 ```jobrelay-campo {"caminho":["identidade","_nota"],"tipo":"string"}
-Só o que um formulário de vaga pede. Documento (CPF, RG, passaporte) NUNCA entra aqui nem em arquivo nenhum do projeto.
+Só o que um formulário de vaga pede. Documento (CPF, RG, passaporte) não entra nestes modelos nem em fonte versionável. Se estiver em fonte privada da instalação, usar somente o atributo perguntado com autorização válida para aquela finalidade e destinatário.
 ```
 
 ### identidade / nome_completo
@@ -403,7 +403,7 @@ data/dados-pessoais.json (fora do git)
 ### consentimento / _nota
 
 ```jobrelay-campo {"caminho":["consentimento","_nota"],"tipo":"string"}
-Aceite de privacidade e de diversidade só quando necessário para uma candidatura cujo envio você autorizou.
+Antes de marcar, conferir a fonte da autorização, finalidade, destinatário e escopo. Reutilizar decisão anterior ainda válida dentro desse alcance, sem perguntar de novo. Ausência de autorização, novo alcance ou novos termos exigem decisão própria; a candidatura continua sujeita ao opt-in e à autorização de envio.
 ```
 
 ### consentimento / marcar_lgpd_automaticamente
@@ -481,7 +481,7 @@ Perguntas que dependem da candidatura ficam null: 'já trabalhou nesta empresa' 
 ### nunca_responder_sozinho / 0
 
 ```jobrelay-campo {"caminho":["nunca_responder_sozinho",0],"tipo":"string"}
-documento (CPF, RG, passaporte)
+documento sem fonte privada confirmada e autorização compatível
 ```
 
 ### nunca_responder_sozinho / 1

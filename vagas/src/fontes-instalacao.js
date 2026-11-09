@@ -9,11 +9,11 @@ import { comEscritaCentral } from './operacao.js';
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const MODELOS = Object.freeze({
   respostas: 'af0c0336d51f53a9759f6f58d1c6f83c3e6d3b08f0c72a56d027e3ba09d8a573',
-  perfil: 'd45db3d7cf7bc146ec3022790ff1ae46e95f30fa93cb7763c4057957e7e44a99',
+  perfil: ['d45db3d7cf7bc146ec3022790ff1ae46e95f30fa93cb7763c4057957e7e44a99', 'af2ba3c0f4b02ad219b8f2377daab2c005ddd0d9c99d0405151cf7be49d110f2'],
 });
 const DADOS_NEUTROS = Object.freeze({
   banco: '7f2382cce998355f062cdb182d9b9579d9c7eb0d1f482c7775e027b298db10d7',
-  perfil: 'f786aefe3897258c5d20e7f530b30bed50f90be0b044f01d0795fa43494e61aa',
+  perfil: ['f786aefe3897258c5d20e7f530b30bed50f90be0b044f01d0795fa43494e61aa', 'af344190f4b63fe7ded12128c8a256aa9a0f309315dc4445a867908b09737545'],
 });
 const hash = (texto) => crypto.createHash('sha256').update(texto).digest('hex');
 const existe = (arquivo) => fs.existsSync(arquivo);
@@ -75,11 +75,11 @@ export function lerFontesInstalacao({ raizProjeto = PROJETO } = {}) {
   }
   const textos = { respostas: lerArquivo(c.respostas), perfil: lerArquivo(c.perfil) };
   const fontes = lerFontes(textos);
-  if (hash(JSON.stringify(fontes.banco)) === DADOS_NEUTROS.banco ||
-      hash(JSON.stringify(fontes.perfil)) === DADOS_NEUTROS.perfil) {
+  if ([DADOS_NEUTROS.banco].flat().includes(hash(JSON.stringify(fontes.banco))) ||
+      [DADOS_NEUTROS.perfil].flat().includes(hash(JSON.stringify(fontes.perfil)))) {
     const dadosAntigos = legado(c);
-    if ((hash(JSON.stringify(fontes.banco)) === DADOS_NEUTROS.banco && !isDeepStrictEqual(fontes.banco, dadosAntigos.banco)) ||
-        (hash(JSON.stringify(fontes.perfil)) === DADOS_NEUTROS.perfil && !isDeepStrictEqual(fontes.perfil, dadosAntigos.perfil))) {
+    if (([DADOS_NEUTROS.banco].flat().includes(hash(JSON.stringify(fontes.banco))) && !isDeepStrictEqual(fontes.banco, dadosAntigos.banco)) ||
+        ([DADOS_NEUTROS.perfil].flat().includes(hash(JSON.stringify(fontes.perfil))) && !isDeepStrictEqual(fontes.perfil, dadosAntigos.perfil))) {
       throw new Error('MIGRACAO_PENDENTE: modelos Markdown vazios e JSON local diferente; rode npm run respostas -- --importar-legado');
     }
   }
@@ -97,7 +97,7 @@ export function importarLegado({ raizProjeto = PROJETO } = {}) {
     const gerados = renderizarFontes(dados);
     lerFontes(gerados);
     for (const nome of ['respostas', 'perfil']) {
-      if (anteriores[nome] !== null && hash(anteriores[nome]) !== MODELOS[nome] &&
+      if (anteriores[nome] !== null && ![MODELOS[nome]].flat().includes(hash(anteriores[nome])) &&
           anteriores[nome] !== gerados[nome]) {
         throw new Error('FONTE_EDITADA: importação recusada; confira Markdown e JSON sem sobrescrever edição local');
       }
