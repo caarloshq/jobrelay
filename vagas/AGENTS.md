@@ -4,6 +4,8 @@
 >
 > **A rodada recorrente é opcional e depende da escolha de autonomia no onboarding.** Quando a pessoa a ativa, o assistente cria uma tarefa nativa a cada quatro horas apontando para [`RODADA-DIARIA.md`](RODADA-DIARIA.md). O formulário só entrega o prompt; não cria a tarefa. O runbook define a execução e as candidaturas dependem das autorizações da própria instalação.
 
+Na etapa de candidatura, use a porta [`apply-jobs`](../Skills/apply-jobs/SKILL.md) e siga a seção **Objetivo e encerramento da fila** de [`aplicacao/README.md`](../aplicacao/README.md#objetivo-e-encerramento-da-fila). Ela define o percurso completo dos IDs em `Avaliar`, sem alterar o opt-in ou o quadro escolhido pela instalação.
+
 ## Estado real, em 2026-07-30
 
 Leia isto antes de confiar em qualquer promessa deste arquivo. O `critic` pegou três documentos afirmando funcionalidade que não existe, então aqui vale a régua: **o que está escrito é o que roda.**
