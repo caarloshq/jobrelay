@@ -1,6 +1,6 @@
 # JobRelay: instruções para o agente
 
-Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. Não existe outro roteiro.
+Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. As duas entradas operacionais estão em [coleta](coleta/README.md) e [aplicação](aplicacao/README.md).
 
 ## Primeiro uso: onboarding antes de qualquer coisa
 
@@ -12,7 +12,7 @@ Se a saída disser **"Perfil ainda NÃO configurado"**, o projeto está com valo
 
 Olhe os blocos marcados `ok`: eles vieram do **formulário** (`npm start`, que o `npm run setup` já abre no primeiro uso), que a pessoa preenche no navegador e que grava perfil, mercado, salário, busca do LinkedIn, token e os arquivos de currículo. **Não repergunte o que está `ok`.** Se os blocos 1, 2 e 5 estiverem em `falta`, peça pra pessoa rodar `npm start` e preencher o formulário primeiro: é mais rápido que entrevistar. **Nunca rode `npm start` você mesmo:** ele sobe um servidor e fica esperando.
 
-O que sobra pra você, sempre: o bloco 3 (montar o currículo base a partir dos arquivos em `materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
+O que sobra pra você, sempre: perguntar se as respostas ficam só nos Markdown locais ou também numa página Notion da pessoa; o bloco 3 (montar o currículo base a partir dos arquivos em `materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
 
 A sua parte é **entrevista**, não formulário: o formulário já pegou os fatos; você pergunta de volta antes de escrever qualquer frase de currículo. Regras que valem nela:
 
@@ -20,7 +20,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 2. **Mercado antes do currículo.** A resposta de nacional, internacional ou ambos (e qual prioriza) decide o idioma do currículo base, as fontes e a moeda. Sem ela, não monte o `base_content`.
 3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `Skills/adapt-resume/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
 4. **Nunca peça o token da Apify.** Diga onde pegar e onde colar (`vagas/.env.example`). Token não passa pelo chat.
-5. **Candidatura automática fica desligada** até a pessoa preencher `vagas/config/perfil-candidatura.json` e marcar `autorizado: true`. Enquanto for `false`, você não abre navegador pra preencher nem enviar formulário. Sem exceção.
+5. **Candidatura automática fica desligada** até a pessoa preencher `aplicacao/PERFIL.md` e marcar `autorizado: true`. Enquanto for `false`, você não abre navegador pra preencher nem enviar formulário. Sem exceção.
 6. **Feche com `npm run onboarding -- --concluir`.** Ele recusa se faltar bloco.
 
 ## Depois do onboarding
@@ -28,10 +28,13 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | Preciso de | Está em |
 |---|---|
 | Como a rodada funciona, o que o código faz sozinho e o que é seu | [`vagas/AGENTS.md`](vagas/AGENTS.md) |
-| O passo a passo da rodada | [`vagas/RODADA-DIARIA.md`](vagas/RODADA-DIARIA.md) |
+| Buscar, avaliar e preparar vagas | [`coleta/README.md`](coleta/README.md) |
+| Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](aplicacao/README.md) |
+| O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](vagas/RODADA-DIARIA.md) |
 | O quadro: estado e histórico de cada vaga | `vagas/data/quadro.json`, escrito só por `vagas/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
 | Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md) |
-| Respostas de formulário, quando a candidatura automática estiver ligada | [`vagas/RESPOSTAS.md`](vagas/RESPOSTAS.md) |
+| Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](aplicacao/RESPOSTAS.md) |
+| Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](aplicacao/PERFIL.md) |
 
 ## Duas regras que valem sempre
 
@@ -40,10 +43,10 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 
 ## O que nunca vai pro git
 
-`vagas/.env`, `vagas/data/dados-pessoais.json`, os materiais em `materiais-fonte/`, os currículos gerados em `Curriculo/` e os rascunhos em `builds/`. Já estão no `.gitignore`. Se for publicar um fork, rode `npm run checar:publico` antes: ele acusa dado pessoal em arquivo versionável.
+`vagas/.env`, `vagas/data/dados-pessoais.json`, os materiais em `materiais-fonte/`, os currículos gerados em `Curriculo/` e os rascunhos em `builds/`. Já estão no `.gitignore`. Se for publicar um fork, rode `npm run checar:publico` antes: ele acusa dado pessoal em arquivo versionável e recusa fontes ou histórico preenchido no repositório público.
 
 ## Opções da instalação e operação recorrente
 
-O onboarding escolhe quadro local ou Notion, só mapeamento ou Chrome assistido e tarefa opcional de quatro em quatro horas. Configuração da instalação e conexões pertencem à própria pessoa; nenhum token deve ser colado no chat. O agente usa `vagas/RODADA-DIARIA.md` como única fonte da execução e cria/atualiza a tarefa no agendador nativo somente quando a pessoa escolher autonomia. Se não houver agendador, entrega o prompt no chat e informa que não criou a tarefa. O processo Node não instala um serviço de agentes nem executa o agendador.
+O onboarding escolhe quadro local ou Notion para vagas e, separadamente, Markdown local ou Markdown local + Notion para respostas; também escolhe só mapeamento ou Chrome assistido e tarefa opcional de quatro em quatro horas. Configuração da instalação e conexões pertencem à própria pessoa; nenhum token deve ser colado no chat. O agente usa `vagas/RODADA-DIARIA.md` como entrada do ciclo e segue os runbooks de coleta e aplicação e cria/atualiza a tarefa no agendador nativo somente quando a pessoa escolher autonomia. Se não houver agendador, entrega o prompt no chat e informa que não criou a tarefa. O processo Node não instala um serviço de agentes nem executa o agendador.
 
-O registro obrigatório do preenchimento é `revisoes/respostas.md`, escrito pelo maestro/aplicador através de `npm run registrar:respostas` dentro de vagas. Não exigir banco novo por resposta. Nas entradas npm de coleta, atualização estável ocorre antes da importação do código quando as condições seguras permitem; recusa mantém dados e informa o motivo. Notion opcional usa snapshot completo e a conexão do agente; não usa credenciais do mantenedor.
+O registro obrigatório do preenchimento é `aplicacao/RESPOSTAS-PREENCHIDAS.md`, escrito pelo maestro/aplicador através de `npm run registrar:respostas` dentro de vagas. Não exigir banco novo por resposta. Nas entradas npm de coleta, atualização estável ocorre antes da importação do código quando as condições seguras permitem; recusa mantém dados e informa o motivo. Notion opcional usa snapshot completo e a conexão do agente; não usa credenciais do mantenedor.

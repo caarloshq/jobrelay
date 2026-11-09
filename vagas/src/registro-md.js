@@ -8,6 +8,7 @@ const ESPERA = new Int32Array(new SharedArrayBuffer(4));
 const CHAVES_PERIGOSAS = new Set(['__proto__', 'prototype', 'constructor']);
 const PERGUNTA_SENSIVEL = /\b(?:cpf|rg|passaporte|passport|social security|national id|documento de identidade|identity document|data de nascimento|date of birth|birth date|raça|raca|race|etnia|ethnicity|gênero|genero|gender|orientação sexual|orientacao sexual|sexual orientation|deficiência|deficiencia|disability|pcd|religião|religiao|religion|antecedentes criminais|criminal record|autodeclaração|autodeclaracao|self.identification)\b/i;
 const VALOR_SENSIVEL = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16})\b|\bBearer\s+[A-Za-z0-9._~+/-]{16,}/i;
+export const PONTEIRO_HISTORICO = '# Histórico migrado\n\nConsulte [Respostas preenchidas](../aplicacao/RESPOSTAS-PREENCHIDAS.md).\n';
 
 function objeto(valor, chaves, rotulo) {
   if (!valor || typeof valor !== 'object' || Array.isArray(valor) || ![Object.prototype, null].includes(Object.getPrototypeOf(valor))) {
@@ -38,7 +39,7 @@ function cerca(valor) {
 
 function pacoteValidado(entrada) {
   objeto(entrada, ['contexto', 'campos'], 'pacote');
-  const contexto = objeto(entrada.contexto, ['empresa', 'vaga', 'id', 'data'], 'contexto');
+  const contexto = objeto(entrada.contexto, ['empresa', 'vaga', 'id', 'data', 'estado', 'evidenciaEnvio'], 'contexto');
   const dados = {
     empresa: texto(contexto.empresa, 'empresa', { linha: true }),
     vaga: texto(contexto.vaga, 'vaga', { linha: true }),
@@ -47,6 +48,13 @@ function pacoteValidado(entrada) {
   };
   const data = new Date(`${dados.data}T00:00:00Z`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dados.data) || Number.isNaN(data.getTime()) || data.toISOString().slice(0, 10) !== dados.data) throw new Error('PACOTE_INVALIDO: data deve ser YYYY-MM-DD');
+  dados.estado = contexto.estado === undefined ? 'rascunho' : contexto.estado;
+  if (!['rascunho', 'enviada'].includes(dados.estado)) throw new Error('PACOTE_INVALIDO: estado deve ser rascunho ou enviada');
+  if (dados.estado === 'enviada') {
+    dados.evidenciaEnvio = texto(contexto.evidenciaEnvio, 'evidenciaEnvio', { linha: true });
+    if (VALOR_SENSIVEL.test(dados.evidenciaEnvio)) throw new Error('DADO_SENSIVEL: evidência contém dado pessoal ou segredo');
+  }
+  else if (contexto.evidenciaEnvio !== undefined) throw new Error('PACOTE_INVALIDO: evidenciaEnvio exige estado enviada');
   if (!Array.isArray(entrada.campos) || entrada.campos.length === 0) throw new Error('PACOTE_INVALIDO: campos não pode ser vazio');
   const campos = [];
   for (const [indice, bruto] of entrada.campos.entries()) {
@@ -72,8 +80,9 @@ function pacoteValidado(entrada) {
 }
 
 function bloco(pacote) {
-  const { empresa, vaga, id, data } = pacote.contexto;
-  const linhas = [`## ${[empresa, vaga, id, data].map(mdLinha).join(' | ')}`, ''];
+  const { empresa, vaga, id, data, estado, evidenciaEnvio } = pacote.contexto;
+  const linhas = [`## ${[empresa, vaga, id, data].map(mdLinha).join(' | ')}`, '', `Estado: ${estado}`, ''];
+  if (evidenciaEnvio) linhas.push(`Evidência de envio: ${mdLinha(evidenciaEnvio)}`, '');
   for (const campo of pacote.campos) {
     linhas.push(`### ${mdLinha(campo.pergunta)}`, '');
     if (campo.referenciaPrivada) {
@@ -97,24 +106,27 @@ function validarDiretorioReal(diretorio) {
   if (fs.realpathSync(diretorio) !== diretorio) throw new Error('CAMINHO_INSEGURO: diretório contém link');
 }
 
-function destinoSeguro(raizProjeto) {
+function caminhosSeguros(raizProjeto) {
   if (typeof raizProjeto !== 'string' || !path.isAbsolute(raizProjeto)) throw new Error('CAMINHO_INVALIDO: raizProjeto deve ser absoluta');
   const raiz = path.resolve(raizProjeto);
   const relativo = path.relative(PROJETO, raiz);
   if (relativo === '..' || relativo.startsWith(`..${path.sep}`) || path.isAbsolute(relativo)) throw new Error('CAMINHO_INVALIDO: raizProjeto fora do projeto');
   validarDiretorioReal(raiz);
-  const pasta = path.join(raiz, 'revisoes');
+  const pasta = path.join(raiz, 'aplicacao');
   try { fs.mkdirSync(pasta, { mode: 0o700 }); }
   catch (erro) { if (erro.code !== 'EEXIST') throw erro; }
   validarDiretorioReal(pasta);
-  return path.join(pasta, 'respostas.md');
+  const pastaLegada = path.join(raiz, 'revisoes');
+  try { validarDiretorioReal(pastaLegada); }
+  catch (erro) { if (erro.code !== 'ENOENT') throw erro; }
+  return { arquivo: path.join(pasta, 'RESPOSTAS-PREENCHIDAS.md'), legado: path.join(pastaLegada, 'respostas.md') };
 }
 
 function lerSeguro(arquivo) {
   let anterior;
   try { anterior = fs.lstatSync(arquivo); }
   catch (erro) { if (erro.code === 'ENOENT') return { conteudo: Buffer.alloc(0), hash: null }; throw erro; }
-  if (!anterior.isFile() || anterior.isSymbolicLink() || anterior.nlink !== 1 || fs.realpathSync(arquivo) !== arquivo) throw new Error('CAMINHO_INSEGURO: respostas.md não é arquivo regular exclusivo');
+  if (!anterior.isFile() || anterior.isSymbolicLink() || anterior.nlink !== 1 || fs.realpathSync(arquivo) !== arquivo) throw new Error('CAMINHO_INSEGURO: histórico não é arquivo regular exclusivo');
   const fd = fs.openSync(arquivo, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
   try {
     const aberto = fs.fstatSync(fd);
@@ -127,7 +139,7 @@ function lerSeguro(arquivo) {
 }
 
 function comLock(arquivo, operacao) {
-  const trava = path.join(path.dirname(arquivo), '.respostas.md.lock');
+  const trava = path.join(path.dirname(arquivo), '.RESPOSTAS-PREENCHIDAS.md.lock');
   const limite = Date.now() + 8000;
   let fd;
   while (fd === undefined) {
@@ -153,16 +165,16 @@ function comLock(arquivo, operacao) {
 }
 
 function gravarAtomico(arquivo, conteudo, hashEsperado) {
-  if (lerSeguro(arquivo).hash !== hashEsperado) throw new Error('CONFLITO_ESCRITA: respostas.md mudou durante a gravação');
+  if (lerSeguro(arquivo).hash !== hashEsperado) throw new Error('CONFLITO_ESCRITA: histórico mudou durante a gravação');
   const pasta = path.dirname(arquivo);
-  const temporario = path.join(pasta, `.respostas.md.${process.pid}.${crypto.randomUUID()}.tmp`);
+  const temporario = path.join(pasta, `.RESPOSTAS-PREENCHIDAS.md.${process.pid}.${crypto.randomUUID()}.tmp`);
   let fd;
   try {
     fd = fs.openSync(temporario, 'wx', 0o600);
     fs.writeFileSync(fd, conteudo);
     fs.fsyncSync(fd);
     fs.closeSync(fd); fd = undefined;
-    if (lerSeguro(arquivo).hash !== hashEsperado) throw new Error('CONFLITO_ESCRITA: respostas.md mudou durante a gravação');
+    if (lerSeguro(arquivo).hash !== hashEsperado) throw new Error('CONFLITO_ESCRITA: histórico mudou durante a gravação');
     fs.renameSync(temporario, arquivo);
     const dfd = fs.openSync(pasta, 'r');
     try { fs.fsyncSync(dfd); } finally { fs.closeSync(dfd); }
@@ -176,8 +188,13 @@ function gravarAtomico(arquivo, conteudo, hashEsperado) {
 export function registrarRespostas(entrada, { raizProjeto = PROJETO } = {}) {
   const pacote = pacoteValidado(entrada);
   if (!pacote) return { registrado: false, motivo: 'nenhum campo preenchido' };
-  const arquivo = destinoSeguro(raizProjeto);
+  const { arquivo, legado } = caminhosSeguros(raizProjeto);
   return comLock(arquivo, () => {
+    const historicoLegado = lerSeguro(legado);
+    if (historicoLegado.hash !== null && !historicoLegado.conteudo.equals(Buffer.from(PONTEIRO_HISTORICO))) {
+      throw new Error('HISTORICO_LEGADO_PENDENTE: migre revisoes/respostas.md antes de registrar');
+    }
+    if (historicoLegado.hash !== null && lerSeguro(arquivo).hash === null) throw new Error('CONFLITO_HISTORICOS: ponteiro sem destino');
     const anterior = lerSeguro(arquivo);
     const novoBloco = Buffer.from(bloco(pacote), 'utf8');
     if (anterior.conteudo.includes(novoBloco)) return { registrado: false, motivo: 'pacote já registrado', arquivo };
@@ -185,6 +202,39 @@ export function registrarRespostas(entrada, { raizProjeto = PROJETO } = {}) {
     const separador = anterior.conteudo.length === 0 || fim === '\n\n' ? '' : fim.endsWith('\n') ? '\n' : '\n\n';
     gravarAtomico(arquivo, Buffer.concat([anterior.conteudo, Buffer.from(separador), novoBloco]), anterior.hash);
     return { registrado: true, campos: pacote.campos.length, arquivo };
+  });
+}
+
+// Migração explícita: link exclusivo evita sobrescrever um destino criado em paralelo.
+// O unlink do legado só ocorre depois de confirmar que o novo nome aponta aos mesmos bytes.
+export function migrarHistorico({ raizProjeto = PROJETO } = {}) {
+  const { arquivo, legado } = caminhosSeguros(raizProjeto);
+  return comLock(arquivo, () => {
+    const origem = lerSeguro(legado);
+    const destino = lerSeguro(arquivo);
+    if (origem.hash === null) return { migrado: false, motivo: 'histórico legado ausente', arquivo };
+    if (origem.conteudo.equals(Buffer.from(PONTEIRO_HISTORICO))) {
+      if (destino.hash === null) throw new Error('CONFLITO_HISTORICOS: ponteiro sem destino');
+      return { migrado: false, motivo: 'histórico já migrado', arquivo };
+    }
+    if (destino.hash !== null && destino.conteudo.length !== 0) throw new Error('CONFLITO_HISTORICOS: destino e legado existem; resolva antes de migrar');
+    // Instalações atualizadas podem trazer o arquivo novo vazio como placeholder.
+    // Só esse caso pode ser substituído; qualquer byte preexistente é conflito.
+    if (destino.hash !== null) {
+      if (lerSeguro(arquivo).conteudo.length !== 0) throw new Error('CONFLITO_HISTORICOS: destino deixou de estar vazio');
+      fs.unlinkSync(arquivo);
+    }
+    fs.linkSync(legado, arquivo);
+    const a = fs.lstatSync(legado);
+    const b = fs.lstatSync(arquivo);
+    if (a.dev !== b.dev || a.ino !== b.ino || a.nlink !== 2 || b.nlink !== 2) throw new Error('ARQUIVO_ALTERADO_DURANTE_MIGRACAO');
+    fs.unlinkSync(legado);
+    gravarAtomico(legado, Buffer.from(PONTEIRO_HISTORICO), null);
+    for (const pasta of [path.dirname(legado), path.dirname(arquivo)]) {
+      const fd = fs.openSync(pasta, 'r');
+      try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+    }
+    return { migrado: true, bytes: origem.conteudo.length, arquivo };
   });
 }
 

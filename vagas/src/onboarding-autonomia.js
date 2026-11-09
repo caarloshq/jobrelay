@@ -48,12 +48,13 @@ export function instrucaoOnboarding({ fonteEstado, databaseId, politica }) {
     ? 'Quero configurar candidaturas assistidas no Chrome depois de revisar o perfil, as respostas e cada autorização necessária. Esta escolha não autoriza preenchimento ou envio irrestrito.'
     : 'Quero apenas mapear e avaliar vagas; não preencha nem envie candidaturas.';
   const autonomia = politica.ativa
-    ? 'Depois de concluir o onboarding, crie no agendador nativo do assistente uma tarefa recorrente a cada 4 horas. Use vagas/RODADA-DIARIA.md como única fonte do processo. Respeite no máximo uma execução da Apify por dia, mesmo com quatro ou mais rodadas. Mostre no chat a tarefa criada e seu próximo horário. Se o agendador não estiver disponível, entregue o prompt pronto no chat e informe que a tarefa ainda não foi criada. Ela depende de o computador e as conexões estarem disponíveis; não prometa execução com o computador desligado.'
+    ? 'Depois de concluir o onboarding, crie no agendador nativo do assistente uma tarefa recorrente a cada 4 horas. Use vagas/RODADA-DIARIA.md como entrada do ciclo e siga coleta/README.md e aplicacao/README.md. Respeite no máximo uma execução da Apify por dia, mesmo com quatro ou mais rodadas. Mostre no chat a tarefa criada e seu próximo horário. Se o agendador não estiver disponível, entregue o prompt pronto no chat e informe que a tarefa ainda não foi criada. Ela depende de o computador e as conexões estarem disponíveis; não prometa execução com o computador desligado.'
     : 'Não crie tarefa recorrente; farei as rodadas manualmente.';
   return [
     'Quero concluir o onboarding do JobRelay. Leia AGENTS.md, ONBOARDING.md e rode `cd vagas && npm run onboarding`; não repergunte blocos marcados ok.',
     'Use Skills/adapt-resume/materiais-fonte/ para montar meu currículo base. Entreviste antes de escrever fatos e deixe o currículo para minha conferência. Ajuste vagas/config/palavras-chave.json à minha profissão. Depois rode `npm run onboarding -- --concluir`.',
     fonte,
+    'Pergunte separadamente se quero respostas só nos Markdown locais (padrão) ou Markdown local + minha página Notion. Se eu escolher Notion, mantenha ambos em paralelo, confira as alterações e deixe divergências pendentes no campo afetado. Configure a preferência com npm run fonte:respostas; não peça token.',
     candidatura,
     autonomia,
     'Configure as conexões necessárias na sua própria conta ou ferramenta. Nunca peça credenciais em chat. Não inicie candidatura antes de concluir as confirmações do perfil.',

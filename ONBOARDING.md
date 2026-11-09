@@ -44,7 +44,9 @@ Escolha se aceita trabalho remoto, híbrido ou presencial. Para as duas últimas
 
 Escolha o **quadro local** ou uma **database do Notion** como fonte do estado das vagas. O quadro local é o padrão. Para Notion, informe somente o ID da database no formulário e configure a conexão Notion na ferramenta do assistente. Não envie credenciais no chat.
 
-Em candidaturas, o padrão é **só mapear e avaliar**. Se escolher configurar candidatura assistida no Chrome, o assistente ainda precisará revisar seu perfil, suas respostas e as autorizações necessárias. Essa escolha não libera preenchimento ou envio. O campo `autorizado` do perfil de candidatura permanece `false` depois do formulário.
+Em candidaturas, o padrão é **só mapear e avaliar**. Se escolher configurar candidatura assistida no Chrome, o assistente ainda precisará revisar seu perfil, suas respostas e as autorizações necessárias. Essa escolha não libera preenchimento ou envio. Em instalação nova, o campo `autorizado` começa em `false`. Reabrir o formulário não muda uma autorização já configurada; a revisão do perfil continua necessária.
+
+As **fontes de respostas** têm uma escolha separada do quadro de vagas. O assistente perguntará se você quer guardar as respostas somente nos Markdown locais (padrão) ou também numa página sua do Notion. Na segunda opção, os Markdown continuam obrigatórios e o assistente atualiza e confere os dois lugares. A conexão Notion é configurada na ferramenta do assistente, sem token no chat. Divergência pendente bloqueia apenas a resposta ou campo afetado até a conferência. Para conferir a preferência local: `cd vagas && npm run fonte:respostas -- --estado`.
 
 A rodada recorrente começa **desligada**. Se você a escolher, o resumo pedirá ao assistente que crie uma tarefa no agendador nativo a cada 4 horas. A Apify deve executar no máximo uma vez por dia, mesmo que haja mais rodadas. O formulário grava a política local em `vagas/data/politica-autonomia.json`, mas não cria a tarefa. Ela depende de o computador e as conexões estarem disponíveis.
 
@@ -63,7 +65,7 @@ O assistente vai:
 - Ler seu material e esclarecer informações que faltarem.
 - Preparar o currículo no idioma escolhido para você conferir.
 - Ajustar a busca à sua profissão e verificar se a configuração está completa.
-- Configurar a fonte de estado e o modo de candidatura escolhidos, sem inferir consentimento.
+- Configurar a fonte de estado, a fonte de respostas e o modo de candidatura escolhidos, sem inferir consentimento.
 - Se você ativou a autonomia, criar e confirmar no chat a tarefa recorrente de 4 horas no agendador nativo do assistente.
 
 Ao terminar o formulário, tudo está salvo neste computador. A configuração fica concluída depois que o assistente prepara o currículo e ajusta a busca. Aguarde essa confirmação antes de iniciar a primeira busca.

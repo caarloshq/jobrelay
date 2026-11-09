@@ -147,9 +147,13 @@ Os valores que estão lá são exemplo. O agente pergunta os seus e marca `salar
 
 ## Bloco 6: candidatura automática, desligada
 
-O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e continua desligado até você preencher `vagas/config/perfil-candidatura.json` e marcar `autorizado: true`. Enquanto isso, o agente prepara currículo e rascunho, e a candidatura é sua.
+O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e continua desligado até você preencher `aplicacao/PERFIL.md` e marcar `autorizado: true`. Enquanto isso, o agente prepara currículo e rascunho, e a candidatura é sua.
 
 O agente explica o que é, e pergunta se você quer ligar agora. "Não" é a resposta padrão, e não tem prova: o bloco fecha sozinho.
+
+## Fonte das respostas: local ou local + Notion
+
+Pergunte separadamente da escolha do quadro: a pessoa quer respostas só nos Markdown locais (padrão) ou também numa página Notion própria? Configure com `cd vagas && npm run fonte:respostas -- --fonte local` ou `--fonte local_notion --pagina <URL-ou-ID>`. Se a página ainda não estiver definida, registre local_notion sem página e mantenha a sincronização pendente. O Node não acessa Notion: o agente usa sua conexão. Antes de editar, marca `--pendente <ID>` e `--pendente configuracao`; atualiza o Markdown, espelha o campo alterado no Notion e compara o conteúdo e o escopo de **ambos** os Markdown com as páginas correspondentes. Só então marca `--conferida configuracao` e `--conferida <ID>`. Falha em Notion ou diferença entre os textos mantém as pendências; não reutilize aquela resposta até resolver. A preferência e os hashes ficam em `vagas/data/fonte-respostas.json` e não dependem da fonte do quadro.
 
 ## Bloco 7: a Apify, por último
 

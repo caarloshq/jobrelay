@@ -3,7 +3,7 @@
 Todo dia de manhã, isto procura vaga de Product Designer remota, lê cada anúncio novo contra o seu currículo, dá uma nota de 0 a 100 e publica no Notion. Nas que passam de 75%, já deixa o currículo adaptado pronto.
 
 Você acompanha o board, confere os rascunhos e resolve o que é pessoal. O agente prepara materiais e conduz apenas candidaturas autorizadas.
-Respostas e seus limites estão em [`RESPOSTAS.md`](RESPOSTAS.md).
+[Coleta](../coleta/README.md) e [aplicação](../aplicacao/README.md) têm entradas próprias. Respostas e seus limites estão no [protocolo de aplicação](../aplicacao/README.md#protocolo-de-respostas).
 
 ---
 
@@ -106,7 +106,7 @@ Apertar uma regra aqui vale na próxima vez que você olhar — as vistas reapli
 
 ## Rodada diária
 
-A rodada segue [`RODADA-DIARIA.md`](RODADA-DIARIA.md). Conferir no agendador a
+A rodada completa segue [`RODADA-DIARIA.md`](RODADA-DIARIA.md); [coleta](../coleta/README.md) e [aplicação](../aplicacao/README.md) também podem ser executadas separadamente. Conferir no agendador a
 cadência e o horário efetivos; este README não mantém outra configuração.
 
 Aprovações e disponibilidade do runtime são verificadas ao operar a tarefa.

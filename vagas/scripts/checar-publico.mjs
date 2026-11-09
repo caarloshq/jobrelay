@@ -17,6 +17,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, relative, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
 import { RAIZ } from '../src/config.js';
 
 const REPO = resolve(RAIZ, '..');
@@ -86,6 +87,29 @@ for (const arq of listarVersionaveis()) {
   });
 }
 if (!problemas) console.log('  nenhum. ok');
+
+// Fontes de candidatura versionáveis precisam permanecer modelos neutros no
+// repositório público. O histórico literal começa vazio e não pode ser publicado.
+const MODELOS_NEUTROS = {
+  'aplicacao/RESPOSTAS.md': '5f1db62462398ffc07a3b8e0b360ea1532701f158dbc9abb27e8fd7dc7e0bf4a',
+  'aplicacao/PERFIL.md': 'd45db3d7cf7bc146ec3022790ff1ae46e95f30fa93cb7763c4057957e7e44a99',
+  'vagas/data/perguntas.json': '3b35f5b85d841fc195b01e9bb2ee0d1605a5dd2df9d154e7423ea67b02abe874',
+  'vagas/config/perfil-candidatura.json': '29c9066fd809dc02630ff7cf68003385dc1df784711a5b9cd90600bbd0abc9fc',
+};
+for (const [nome, esperado] of Object.entries(MODELOS_NEUTROS)) {
+  const alvo = join(REPO, nome);
+  if (!existsSync(alvo)) continue; // fixtures do teste não trazem a instalação completa
+  const atual = createHash('sha256').update(readFileSync(alvo)).digest('hex');
+  if (atual !== esperado) {
+    problemas++;
+    console.log('  ' + nome + ' contém edição local; publique somente o modelo neutro');
+  }
+}
+const historico = join(REPO, 'aplicacao/RESPOSTAS-PREENCHIDAS.md');
+if (existsSync(historico) && readFileSync(historico).length !== 0) {
+  problemas++;
+  console.log('  aplicacao/RESPOSTAS-PREENCHIDAS.md contém histórico; não publique respostas preenchidas');
+}
 
 console.log('\n2. Scripts do package.json apontando para arquivo que existe');
 const pkg = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8'));
