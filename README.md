@@ -2,7 +2,7 @@
 
 Busque vagas em vários sites, organize as oportunidades em um quadro e use seu assistente de IA para preparar as candidaturas.
 
-**[Instalar com um prompt](#instale-com-um-prompt)** · **[Baixar a última versão](https://github.com/caarloshq/jobrelay/releases/latest)** · [Ver todas as releases](https://github.com/caarloshq/jobrelay/releases)
+**[Instalar com um prompt](#instale-com-um-prompt)** · **[Baixar a última versão](https://github.com/caarloshq/jobrelay/releases/latest/download/jobrelay.zip)** · [Ver todas as releases](https://github.com/caarloshq/jobrelay/releases)
 
 ## O que ele faz por você
 
@@ -19,19 +19,25 @@ Abra o **Claude Code ou o Codex** e cole:
 Instale https://github.com/caarloshq/jobrelay em uma pasta própria, sem sobrescrever meus projetos. Leia AGENTS.md e me acompanhe na configuração: meu currículo, as vagas que procuro e onde quero acompanhar as oportunidades. Pergunte se quero só buscar vagas ou também autorizar candidaturas. Crie uma tarefa para checar atualizações a cada três dias, seguindo ATUALIZAR.md, e confirme a próxima execução. Se não houver agendador disponível, me avise. Use meus dados sem inventar informações, não peça senhas ou chaves de acesso no chat e me avise antes de usar serviços pagos.
 ```
 
-O assistente prepara a instalação e orienta você no que faltar. Tenha seu currículo em PDF. Você escolhe as conexões e confere os materiais antes de usá-los.
+O assistente guia o onboarding, que é a configuração inicial da sua busca. Tenha seu currículo em PDF. Você escolhe as conexões e confere os materiais antes de usá-los.
 
-Prefere baixar a pasta? [Abra a última release](https://github.com/caarloshq/jobrelay/releases/latest) e escolha **Source code (zip)**. O download corresponde à versão publicada nessa página. Depois, abra a pasta no assistente e peça para seguir o `AGENTS.md`.
+Prefere baixar a pasta? [Baixe o ZIP](https://github.com/caarloshq/jobrelay/releases/latest/download/jobrelay.zip), extraia e abra a pasta no assistente. Peça para seguir o `AGENTS.md`. O download corresponde à [última release publicada](https://github.com/caarloshq/jobrelay/releases/latest).
 
-## Depois, é só pedir
+## Três comandos para começar
 
-> Busque vagas para o meu perfil e organize no quadro.
+No Claude Code, use os atalhos abaixo. No Codex, selecione a skill de mesmo nome no menu de skills ou faça o pedido por escrito.
 
-> Adapte meu currículo para esta vaga.
+| Comando | O que faz |
+|---|---|
+| `/onboarding` | Guia a configuração com você, prepara o currículo base e ajusta a busca. |
+| `/coletar` | Busca, avalia e organiza vagas no seu quadro. |
+| `/aplicar` | Retoma as vagas da fila e conduz as candidaturas que você autorizar. |
 
-> Quero configurar as candidaturas para as vagas que me interessam.
+## Quer que ele se candidate por você?
 
-As candidaturas dependem das suas autorizações e das conexões disponíveis. Serviços externos podem ter custos; o assistente deve avisar antes de usá-los.
+Para candidaturas no navegador, instale e conecte a extensão do seu assistente: [Claude no Chrome](https://code.claude.com/docs/en/chrome) ou [conexão de navegador para o Codex](https://learn.chatgpt.com/docs/chrome-extension). Essa conexão é opcional para quem só quer buscar vagas, organizar o quadro e adaptar currículos.
+
+Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador. Faça o login diretamente no site. O assistente guia a conexão e pede as autorizações necessárias para candidatar. Serviços externos podem ter custos; ele deve avisar antes de usá-los.
 
 ## Receba e instale atualizações
 

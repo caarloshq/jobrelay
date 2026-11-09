@@ -15,7 +15,32 @@ __pycache__/
 /Skills/adapt-resume/builds/*
 !/Skills/adapt-resume/builds/.gitkeep
 /Skills/adapt-resume/base_resume_*.pdf
-.claude/
+# Só os adaptadores públicos de skills entram; configurações locais continuam fora.
+/.claude/*
+!/.claude/skills/
+/.claude/skills/*
+!/.claude/skills/onboarding/
+!/.claude/skills/coletar/
+!/.claude/skills/aplicar/
+/.claude/skills/onboarding/*
+/.claude/skills/coletar/*
+/.claude/skills/aplicar/*
+!/.claude/skills/onboarding/SKILL.md
+!/.claude/skills/coletar/SKILL.md
+!/.claude/skills/aplicar/SKILL.md
+
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/onboarding/
+!/.agents/skills/coletar/
+!/.agents/skills/aplicar/
+/.agents/skills/onboarding/*
+/.agents/skills/coletar/*
+/.agents/skills/aplicar/*
+!/.agents/skills/onboarding/SKILL.md
+!/.agents/skills/coletar/SKILL.md
+!/.agents/skills/aplicar/SKILL.md
 
 # Visualização pessoal das respostas de candidaturas; não publicar.
 /revisoes/
