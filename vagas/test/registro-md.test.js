@@ -129,6 +129,23 @@ test('campo sensível só aceita referência e padrões conhecidos de segredo s�
   assert.throws(() => registrarRespostas(pacote, { raizProjeto: raiz }), /DADO_SENSIVEL/);
 });
 
+test('perguntas de grupos de diversidade e inscrição como PcD mantêm só referência privada', (t) => {
+  const raiz = fixture(t);
+  for (const [i, pergunta] of [
+    'Do you belong to one of the groups below?',
+    'Would you like to apply as a disabled person?',
+    'Você pertence a algum dos grupos de diversidade?',
+  ].entries()) {
+    const pacote = entrada(`diversidade-${i}`);
+    pacote.campos = [{ pergunta, texto: 'Seleção sensível fictícia', preenchida: true }];
+    assert.throws(() => registrarRespostas(pacote, { raizProjeto: raiz }), /DADO_SENSIVEL/);
+    pacote.campos = [{ pergunta, referenciaPrivada: 'ref:perfil-exemplo.diversidade', preenchida: true }];
+    assert.equal(registrarRespostas(pacote, { raizProjeto: raiz }).registrado, true);
+  }
+  assert.ok(!conteudo(raiz).includes('Seleção sensível fictícia'));
+  assert.ok(conteudo(raiz).includes('Referência privada: ref:perfil-exemplo.diversidade'));
+});
+
 test('migração é idempotente e recusa duas histórias, inclusive quando iguais', (t) => {
   const raiz = fixture(t);
   fs.mkdirSync(path.join(raiz, 'revisoes'));
