@@ -78,6 +78,7 @@ python3 verificar_resume.py base_resume_pt.pdf base_content_pt.json
    - `headline`: pode reordenar a ênfase desde que todo termo seja verdadeiro e já presente no perfil.
    - `tools_line`: subir as ferramentas que a vaga cita, se a pessoa as tem.
    - Não mexer em datas, empresas, cargos, números, formação, certificações.
+   - Antes de gerar o arquivo, aplicar [`review-escrita`](../review-escrita/SKILL.md) às frases autorais alteradas na cópia por vaga. Extrair essas frases para um texto de revisão dentro de `builds/<empresa>/`; não varrer `content.json` bruto. Conferir fatos e voz manualmente; o verificador mecânico só aponta indícios.
 5. **Gerar** o PDF (tudo dentro do projeto):
    ```
    python3 generate_resume.py builds/<empresa>/content.json "../../Curriculo/<Seu Nome> - <Seu Cargo> - <Empresa>.pdf"

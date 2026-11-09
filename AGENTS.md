@@ -33,6 +33,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](vagas/RODADA-DIARIA.md) |
 | O quadro: estado e histórico de cada vaga | `vagas/data/quadro.json`, escrito só por `vagas/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
 | Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md) |
+| Escrita de resumo, currículo e resposta aberta | [`Skills/review-escrita/SKILL.md`](Skills/review-escrita/SKILL.md) |
 | Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](aplicacao/RESPOSTAS.md) |
 | Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](aplicacao/PERFIL.md) |
 

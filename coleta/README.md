@@ -145,3 +145,7 @@ Conferir a fonte de estado antes de coletar, porque coletar sem saber o que est�
   status previsto acima; intenção de aplicar não equivale a envio.
 - **Não inventa nada no currículo.** A skill parte do `base_content` verificado e só reordena e realça. Vaga pede skill que você não tem: a skill não entra, vira linha em `Gaps`.
 - **Não edita `../vagas/data/quadro.json` à mão.**
+
+## Revisar os textos da triagem
+
+Antes de registrar resumo e gaps, aplicar [review-escrita](../Skills/review-escrita/SKILL.md) ao texto autoral. A varredura mecânica ajuda a encontrar frases vazias; a leitura editorial confere cada afirmação contra anúncio e currículo. Não varrer a descrição copiada do empregador como texto autoral. Requisito sem prova permanece em gaps.
