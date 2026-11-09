@@ -1,14 +1,23 @@
+import { hashPacoteRespostas } from '../src/revisao-respostas.js';
+import { pacoteEditorialCandidatura } from '../src/respostas.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validarBanco, validarCandidatura, respostaAutomatica, modeloCandidatura, contemMetatexto } from '../src/respostas.js';
 
 const entrada = (extra = {}) => ({ pergunta: 'Qual sua disponibilidade?', normalizada: 'qual sua disponibilidade',
   resposta: 'Disponibilidade imediata.', uso: 'direta', aprovada: true, fonte: 'config/perfil-candidatura.json#contratacao', escopo: 'geral', ...extra });
-const candidatura = (extra = {}) => ({ idExterno: 'teste:123', empresa: 'Vivo', idioma: 'pt-BR',
+const candidatura = (extra = {}) => revisarFixture({ idExterno: 'teste:123', empresa: 'Vivo', idioma: 'pt-BR',
   descricaoFonte: 'https://empresa.example/vagas/123', estado: 'rascunho',
   autorizacaoEnvio: { em: '2026-09-14', referencia: 'data/revisoes/vivo-2026-09-14.md#autorizacao-voce' },
   respostas: [{ pergunta: 'Qual sua disponibilidade?', resposta: 'Disponibilidade imediata.',
     fonte: 'config/perfil-candidatura.json#contratacao', escopo: 'geral', aprovada: true }], ...extra });
+
+function revisarFixture(c) {
+  c.autorRespostas = 'autor-sintetico';
+  c.fontesEscrita = ['respostas','perfil','voz','escrita'].map(papel => ({ papel, caminho: papel === 'perfil' ? 'config/perfil-candidatura.json' : `${papel}.md`, hash: 'a'.repeat(64) }));
+  c.revisaoEscrita = { revisor: 'editor-sintetico', decisao: 'aprovado', hashPacote: hashPacoteRespostas(pacoteEditorialCandidatura(c)), achados: [], criterios: Object.fromEntries(['pergunta','clareza','fatos','voz','escopo'].map(chave => [chave, { ok: true, evidencia: `As perguntas ${c.respostas.map(r => r.pergunta).join('; ')} recebem respostas comprovadas em config/perfil-candidatura.json#contratacao.` }])) };
+  return c;
+}
 
 test('texto final aprovado e referenciado passa; contextual aprovado não é automático', () => {
   assert.equal(validarBanco({ perguntas: [entrada()] }).ok, true);
@@ -37,10 +46,10 @@ test('candidatura permite geral e empresa exata; recusa outra empresa e país n�
   assert.equal(validarCandidatura(candidatura()).ok, true);
   for (const [escopo, esperado] of [['Vivo', true], ['Deel', false], ['Brasil', false]]) {
     const c = candidatura(); c.respostas[0].escopo = escopo;
-    assert.equal(validarCandidatura(c).ok, esperado);
+    assert.equal(validarCandidatura(revisarFixture(c)).ok, esperado);
   }
   const c = candidatura({ pais: 'Brasil' }); c.respostas[0].escopo = 'Brasil';
-  assert.equal(validarCandidatura(c).ok, true);
+  assert.equal(validarCandidatura(revisarFixture(c)).ok, true);
 });
 
 test('rascunho pendente bloqueia pré-envio e enviada precisa confirmação concreta', () => {
