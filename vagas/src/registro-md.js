@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const ESPERA = new Int32Array(new SharedArrayBuffer(4));
 const CHAVES_PERIGOSAS = new Set(['__proto__', 'prototype', 'constructor']);
-const PERGUNTA_SENSIVEL = /\b(?:cpf|rg|passaporte|passport|social security|national id|documento de identidade|identity document|data de nascimento|date of birth|birth date|raça|raca|race|etnia|ethnicity|gênero|genero|gender|orientação sexual|orientacao sexual|sexual orientation|deficiência|deficiencia|disability|disabled person|groups below|grupos de diversidade|street address|residential address|endereço|endereco|bairro|cep|postal code|zip code|pcd|religião|religiao|religion|antecedentes criminais|criminal record|autodeclaração|autodeclaracao|self.identification)\b/i;
+const PERGUNTA_SENSIVEL = /\b(?:cpf|rg|passaporte|passport|social security|national id|documento de identidade|identity document|data de nascimento|date of birth|birth date|raça|raca|race|etnia|ethnicity|gênero|genero|gender|orientação sexual|orientacao sexual|sexual orientation|lgbtqia|deficiência|deficiencia|disability|disabled person|groups below|grupos de diversidade|street address|residential address|endereço|endereco|bairro|cep|postal code|zip code|pcd|religião|religiao|religion|antecedentes criminais|criminal record|autodeclaração|autodeclaracao|self.identification)\b/i;
 const VALOR_SENSIVEL = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16})\b|\bBearer\s+[A-Za-z0-9._~+/-]{16,}/i;
 export const PONTEIRO_HISTORICO = '# Histórico migrado\n\nConsulte [Respostas preenchidas](../aplicacao/RESPOSTAS-PREENCHIDAS.md).\n';
 
