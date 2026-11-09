@@ -1,6 +1,16 @@
 # Receba avisos de versões e preserve seus dados ao atualizar
 
-As versões publicadas ficam em Releases, com acesso pelo [README](../README.md#receba-e-instale-atualizações). Cada release identifica uma tag, mudanças, limites e o código disponível para download. A versão 1.1.0 inclui a padronização de fonte de estado, registro Markdown, autonomia e atualização. O QA é local; não houve piloto real de candidaturas nesta entrega.
+As versões publicadas ficam em Releases, com acesso pelo [README](../README.md#receba-e-instale-atualizações). Cada release identifica uma tag, mudanças, limites e o código disponível para download. A versão 1.2.0 separa coleta e aplicação, organiza as fontes de respostas e incorpora revisão editorial independente. A validação desta distribuição usa testes locais e dados fictícios; não comprova candidaturas reais nem aumento de contratações.
+
+## Ao atualizar para a v1.2.0
+
+Esta versão altera modelos de perfil e fontes de respostas. Por isso, o atualizador automático recusa a transição de uma instalação anterior, preservando seus arquivos. Peça ao assistente para fazer a migração com a instalação parada, uma cópia dos dados dentro do projeto e a comparação das suas alterações locais. Preserve também `aplicacao/`, além dos dados e materiais listados neste guia.
+
+Depois de portar o código, confira os Markdown de `aplicacao/RESPOSTAS.md` e `aplicacao/PERFIL.md` e os JSONs existentes. Se o diagnóstico indicar `MIGRACAO_PENDENTE` porque há modelos neutros junto de JSONs personalizados, a importação explícita é `npm run respostas -- --importar-legado`, dentro de `vagas/`. O comando preserva o opt-in e recusa sobrescrever Markdown já editado; nesse caso, reconcilie o conteúdo com o assistente.
+
+Se houver histórico preenchido em `revisoes/respostas.md`, preserve a cópia e execute `npm run registrar:respostas -- --migrar-historico`, dentro de `vagas/`, antes de novos registros. A migração conserva o conteúdo e deixa um ponteiro para o novo destino. Se o destino já contiver outra história, o comando recusa a mistura; reconcilie os dois arquivos sem sobrescrevê-los. Sem histórico legado, essa etapa não é necessária.
+
+Conclua conferindo as projeções com `npm run respostas -- --conferir-projecoes` e as respostas com `npm run validar:respostas`. Confira a conexão Notion quando configurada antes de retomar candidaturas. A migração não autoriza novo preenchimento, consentimento ou envio.
 
 ## Como saber de uma versão nova
 
