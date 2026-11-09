@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { registrarRespostas } from '../src/registro-md.js';
+import { registrarRespostas, migrarHistorico, PONTEIRO_HISTORICO } from '../src/registro-md.js';
 
 const VAGAS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MODULO = pathToFileURL(path.join(VAGAS, 'src/registro-md.js')).href;
@@ -25,7 +25,7 @@ function entrada(id = 'vaga-1', resposta = 'Texto exato') {
   };
 }
 
-function conteudo(raiz) { return fs.readFileSync(path.join(raiz, 'revisoes/respostas.md'), 'utf8'); }
+function conteudo(raiz) { return fs.readFileSync(path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md'), 'utf8'); }
 
 function processo(raiz, pacote) {
   return new Promise((resolve, reject) => {
@@ -61,6 +61,11 @@ test('preserva integralmente conteúdo anterior e acrescenta ao fim', (t) => {
   fs.mkdirSync(path.join(raiz, 'revisoes'));
   const anterior = '# Respostas de formulário\n\nTexto legado sem newline final';
   fs.writeFileSync(path.join(raiz, 'revisoes/respostas.md'), anterior);
+  assert.throws(() => registrarRespostas(entrada(), { raizProjeto: raiz }), /HISTORICO_LEGADO_PENDENTE/);
+  const migracao = migrarHistorico({ raizProjeto: raiz });
+  assert.equal(migracao.bytes, Buffer.byteLength(anterior));
+  assert.equal(fs.readFileSync(path.join(raiz, 'revisoes/respostas.md'), 'utf8'), PONTEIRO_HISTORICO);
+  assert.equal(conteudo(raiz), anterior);
   registrarRespostas(entrada(), { raizProjeto: raiz });
   assert.ok(conteudo(raiz).startsWith(anterior));
   assert.ok(conteudo(raiz).endsWith('~~~\n'));
@@ -71,13 +76,15 @@ test('não regrava o arquivo quando nada foi preenchido e conserva bytes legados
   const vazio = entrada();
   vazio.campos = [{ pergunta: 'Pendente', texto: 'Rascunho', preenchida: false }];
   assert.equal(registrarRespostas(vazio, { raizProjeto: raiz }).registrado, false);
-  assert.equal(fs.existsSync(path.join(raiz, 'revisoes')), false);
+  assert.equal(fs.existsSync(path.join(raiz, 'aplicacao')), false);
   fs.mkdirSync(path.join(raiz, 'revisoes'));
   const arquivo = path.join(raiz, 'revisoes/respostas.md');
   const bytes = Buffer.from([0x23, 0x20, 0x6c, 0x65, 0x67, 0x61, 0x64, 0x6f, 0xff]);
   fs.writeFileSync(arquivo, bytes);
+  migrarHistorico({ raizProjeto: raiz });
+  assert.ok(fs.readFileSync(path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md')).equals(bytes));
   registrarRespostas(entrada(), { raizProjeto: raiz });
-  assert.ok(fs.readFileSync(arquivo).subarray(0, bytes.length).equals(bytes));
+  assert.ok(fs.readFileSync(path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md')).subarray(0, bytes.length).equals(bytes));
 });
 
 test('dois processos simultâneos preservam os dois pacotes; duplicata simultânea fica única', async (t) => {
@@ -98,13 +105,13 @@ test('rejeita caminho externo, protótipo e alvos com symlink ou hardlink', (t) 
   assert.throws(() => registrarRespostas(poluido, { raizProjeto: raiz }), /PACOTE_INVALIDO/);
   const real = path.join(raiz, 'real');
   fs.mkdirSync(real);
-  fs.symlinkSync(real, path.join(raiz, 'revisoes'));
+  fs.symlinkSync(real, path.join(raiz, 'aplicacao'));
   assert.throws(() => registrarRespostas(entrada(), { raizProjeto: raiz }), /CAMINHO_INSEGURO/);
-  fs.unlinkSync(path.join(raiz, 'revisoes'));
-  fs.mkdirSync(path.join(raiz, 'revisoes'));
+  fs.unlinkSync(path.join(raiz, 'aplicacao'));
+  fs.mkdirSync(path.join(raiz, 'aplicacao'));
   const origem = path.join(raiz, 'origem.md');
   fs.writeFileSync(origem, 'original');
-  fs.linkSync(origem, path.join(raiz, 'revisoes/respostas.md'));
+  fs.linkSync(origem, path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md'));
   assert.throws(() => registrarRespostas(entrada(), { raizProjeto: raiz }), /CAMINHO_INSEGURO/);
   assert.equal(fs.readFileSync(origem, 'utf8'), 'original');
 });
@@ -120,4 +127,72 @@ test('campo sensível só aceita referência e padrões conhecidos de segredo s�
   assert.ok(!conteudo(raiz).includes('123.456.789-00'));
   pacote.campos = [{ pergunta: 'Outro campo', texto: '123.456.789-00', preenchida: true }];
   assert.throws(() => registrarRespostas(pacote, { raizProjeto: raiz }), /DADO_SENSIVEL/);
+});
+
+test('migração é idempotente e recusa duas histórias, inclusive quando iguais', (t) => {
+  const raiz = fixture(t);
+  fs.mkdirSync(path.join(raiz, 'revisoes'));
+  fs.mkdirSync(path.join(raiz, 'aplicacao'));
+  const legado = path.join(raiz, 'revisoes/respostas.md');
+  const destino = path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md');
+  fs.writeFileSync(legado, 'legado');
+  fs.writeFileSync(destino, 'legado');
+  assert.throws(() => migrarHistorico({ raizProjeto: raiz }), /CONFLITO_HISTORICOS/);
+  assert.equal(fs.readFileSync(legado, 'utf8'), 'legado');
+  assert.equal(fs.readFileSync(destino, 'utf8'), 'legado');
+  fs.unlinkSync(destino);
+  assert.equal(migrarHistorico({ raizProjeto: raiz }).migrado, true);
+  assert.equal(migrarHistorico({ raizProjeto: raiz }).migrado, false);
+  assert.equal(fs.readFileSync(legado, 'utf8'), PONTEIRO_HISTORICO);
+  assert.equal(fs.readFileSync(destino, 'utf8'), 'legado');
+});
+
+test('migra sobre placeholder novo de zero bytes sem perder histórico legado', (t) => {
+  const raiz = fixture(t);
+  fs.mkdirSync(path.join(raiz, 'revisoes'));
+  fs.mkdirSync(path.join(raiz, 'aplicacao'));
+  const legado = path.join(raiz, 'revisoes/respostas.md');
+  const destino = path.join(raiz, 'aplicacao/RESPOSTAS-PREENCHIDAS.md');
+  const bytes = Buffer.from([0x23, 0x20, 0xff, 0x0a]);
+  fs.writeFileSync(legado, bytes);
+  fs.writeFileSync(destino, Buffer.alloc(0));
+  assert.equal(migrarHistorico({ raizProjeto: raiz }).migrado, true);
+  assert.ok(fs.readFileSync(destino).equals(bytes));
+  assert.equal(fs.readFileSync(legado, 'utf8'), PONTEIRO_HISTORICO);
+});
+
+test('ponteiro antigo adulterado ou sem destino bloqueia gravação', (t) => {
+  const raiz = fixture(t);
+  fs.mkdirSync(path.join(raiz, 'revisoes'));
+  const legado = path.join(raiz, 'revisoes/respostas.md');
+  fs.writeFileSync(legado, PONTEIRO_HISTORICO);
+  assert.throws(() => registrarRespostas(entrada(), { raizProjeto: raiz }), /CONFLITO_HISTORICOS/);
+  fs.writeFileSync(legado, PONTEIRO_HISTORICO + 'outra resposta');
+  assert.throws(() => registrarRespostas(entrada(), { raizProjeto: raiz }), /HISTORICO_LEGADO_PENDENTE/);
+});
+
+test('recusa symlink e hardlink no histórico legado sem tocar a origem', (t) => {
+  const raiz = fixture(t);
+  const origem = path.join(raiz, 'original.md');
+  fs.writeFileSync(origem, 'original');
+  fs.mkdirSync(path.join(raiz, 'revisoes'));
+  const legado = path.join(raiz, 'revisoes/respostas.md');
+  fs.symlinkSync(origem, legado);
+  assert.throws(() => migrarHistorico({ raizProjeto: raiz }), /CAMINHO_INSEGURO/);
+  fs.unlinkSync(legado);
+  fs.linkSync(origem, legado);
+  assert.throws(() => migrarHistorico({ raizProjeto: raiz }), /CAMINHO_INSEGURO/);
+  assert.equal(fs.readFileSync(origem, 'utf8'), 'original');
+});
+
+test('novos blocos distinguem rascunho de envio com evidência explícita', (t) => {
+  const raiz = fixture(t);
+  assert.equal(registrarRespostas(entrada(), { raizProjeto: raiz }).registrado, true);
+  assert.match(conteudo(raiz), /Estado: rascunho/);
+  const enviada = entrada('vaga-enviada');
+  enviada.contexto.estado = 'enviada';
+  assert.throws(() => registrarRespostas(enviada, { raizProjeto: raiz }), /PACOTE_INVALIDO/);
+  enviada.contexto.evidenciaEnvio = 'Confirmação visível na plataforma, protocolo 1234';
+  registrarRespostas(enviada, { raizProjeto: raiz });
+  assert.match(conteudo(raiz), /Estado: enviada\n\nEvidência de envio: Confirmação visível/);
 });

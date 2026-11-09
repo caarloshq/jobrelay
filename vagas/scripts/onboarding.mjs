@@ -15,6 +15,7 @@ import { RAIZ, perfil, palavras } from '../src/config.js';
 import { DIR_DADOS } from '../src/config.js';
 import { configuracao as fonteConfigurada, selecionar as selecionarFonte } from '../src/fonte-estado.js';
 import { instrucaoOnboarding, lerPolitica, normalizarEscolhas, salvarPolitica } from '../src/onboarding-autonomia.js';
+import { lerFontesInstalacao, atualizarPerfilInstalacao } from '../src/fontes-instalacao.js';
 
 console.log(formatarVersaoGit(await verificarVersaoGit({ cwd: RAIZ })));
 import { validar as validarMercado, idiomaDoCurriculo } from '../src/mercado.js';
@@ -22,7 +23,6 @@ import { validar as validarMercado, idiomaDoCurriculo } from '../src/mercado.js'
 const DIR_ADAPT = join(RAIZ, '..', 'Skills', 'adapt-resume');
 const DIR_MATERIAIS = join(DIR_ADAPT, 'materiais-fonte');
 const ARQ_PERFIL = join(RAIZ, 'config', 'perfil.json');
-const ARQ_CAND = join(RAIZ, 'config', 'perfil-candidatura.json');
 
 const lerJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
 
@@ -95,7 +95,7 @@ function extrair() {
 // ---------- estado ----------
 
 export function estado() {
-  const cand = existsSync(ARQ_CAND) ? lerJson(ARQ_CAND) : {};
+  const cand = lerFontesInstalacao().perfil;
   const politica = lerPolitica(DIR_DADOS);
   const fonte = fonteConfigurada();
   const basePt = existsSync(join(DIR_ADAPT, 'base_content_pt.json')) ? lerJson(join(DIR_ADAPT, 'base_content_pt.json')) : null;
@@ -183,7 +183,7 @@ const gravarJson = (p, obj) => writeFileSync(p, JSON.stringify(obj, null, 2) + '
 function estadoParaTela() {
   const p = lerJson(ARQ_PERFIL);
   const env = lerEnv();
-  const cand = existsSync(ARQ_CAND) ? lerJson(ARQ_CAND) : {};
+  const cand = lerFontesInstalacao().perfil;
   const fonteEstado = fonteConfigurada();
   const politica = lerPolitica(DIR_DADOS);
   mkdirSync(DIR_MATERIAIS, { recursive: true });
@@ -261,11 +261,15 @@ function salvarPasso(passo, d = {}) {
     p.nome = texto(d.nome);
     p.cargo_alvo = texto(d.cargo_alvo);
     p.pais = texto(d.pais, 80);
+    atualizarPerfilInstalacao([
+      { caminho: ['identidade', 'nome_completo'], valor: p.nome },
+      { caminho: ['identidade', 'nome_profissional'], valor: p.nome },
+      { caminho: ['identidade', 'pais'], valor: p.pais },
+    ]);
     const li = lerJson(ARQ_LINKEDIN);
     li.busca.keywords = `${p.cargo_alvo} remote`;
     if (d.pais && d.pais !== 'outro') { li.busca.location = d.pais; li.busca.geoId = GEO[d.pais] || li.busca.geoId; }
     gravarJson(ARQ_LINKEDIN, li);
-    if (existsSync(ARQ_CAND)) { const c = lerJson(ARQ_CAND); c.identidade.nome_completo = p.nome; c.identidade.nome_profissional = p.nome; c.identidade.pais = p.pais; gravarJson(ARQ_CAND, c); }
   } else if (passo === 2) {
     p.mercado = { ...p.mercado, foco: d.foco, prioridade: d.foco === 'ambos' ? d.prioridade || null : null };
   } else if (passo === 3) {
@@ -306,7 +310,6 @@ function salvarPasso(passo, d = {}) {
     salvarPolitica(DIR_DADOS, escolhas.politica);
     // Escolher Chrome não é autorização para preencher ou enviar. A revisão
     // individual do perfil e das respostas acontece depois, com o assistente.
-    if (existsSync(ARQ_CAND)) { const c = lerJson(ARQ_CAND); c.autorizado = false; c.autorizado_em = null; gravarJson(ARQ_CAND, c); }
   } else if (passo === 7) {
     const token = d.token ? String(d.token).trim() : '';
     gravarEnv({ APIFY_TOKEN: token });

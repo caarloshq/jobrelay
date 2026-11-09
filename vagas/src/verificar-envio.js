@@ -1,8 +1,7 @@
 // Verificação local antes de qualquer interação de candidatura. O retorno não
 // arbitra navegador nem substitui a conferência do anúncio e do formulário.
-import { join } from 'node:path';
-import { RAIZ, DIR_DADOS } from './config.js';
-import { lerJsonSeguro } from './persistencia.js';
+import { DIR_DADOS } from './config.js';
+import { lerFontesInstalacao } from './fontes-instalacao.js';
 import * as cache from './cache.js';
 import { configuracao, carregarFonte } from './fonte-estado.js';
 import { hidratar } from './hidratar.js';
@@ -33,7 +32,7 @@ export function avaliarPrecondicoes({ vaga, card, autorizado, transmissao, fonte
 export function verificarEnvio(idExterno, { agora = new Date() } = {}) {
   if (typeof idExterno !== 'string' || !idExterno.trim()) throw new Error('ID_OBRIGATORIO');
   const id = idExterno.trim();
-  const perfil = lerJsonSeguro(join(RAIZ, 'config', 'perfil-candidatura.json'));
+  const { perfil } = lerFontesInstalacao();
   const fonte = configuracao();
   const estado = carregarFonte();
   const card = estado.vagas[id];

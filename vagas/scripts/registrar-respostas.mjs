@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { registrarRespostas, raizDoProjeto } from '../src/registro-md.js';
+import { registrarRespostas, migrarHistorico, raizDoProjeto } from '../src/registro-md.js';
 
 function arquivoEntrada(nome) {
   if (typeof nome !== 'string' || !nome) throw new Error('USO: --arquivo <JSON dentro do projeto>');
@@ -22,6 +22,11 @@ async function stdin() {
 }
 
 try {
+  if (process.argv.length === 3 && process.argv[2] === '--migrar-historico') {
+    const resultado = migrarHistorico();
+    process.stdout.write(`${resultado.migrado ? 'Histórico migrado' : resultado.motivo}\n`);
+    process.exit(0);
+  }
   const bruto = process.argv.length === 2
     ? await stdin()
     : process.argv.length === 4 && process.argv[2] === '--arquivo'

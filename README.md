@@ -12,7 +12,7 @@ Você precisa de **Node.js 20 ou mais recente, Python 3, Git e Claude Code ou Co
 
 Cole no assistente:
 
-> Instale https://github.com/caarloshq/jobrelay em uma pasta própria, sem sobrescrever projetos existentes. Leia AGENTS.md, ONBOARDING.md e docs/instalar-com-agente.md. Faça o onboarding comigo: profissão, currículo, filtros, quadro local ou minha conexão Notion, e escolha entre só mapear vagas ou configurar candidaturas com minha conexão Chrome. Não peça credenciais no chat. Se eu escolher autonomia, crie uma tarefa nativa a cada quatro horas apontando para vagas/RODADA-DIARIA.md, com Apify paga no máximo uma vez por dia. Mostre no chat o prompt, a tarefa criada e o próximo horário. Se não houver agendador, entregue o prompt e informe que a tarefa ainda não foi criada. Preserve meus dados nas atualizações e confirme antes de qualquer gasto ou ação sem autorização.
+> Instale https://github.com/caarloshq/jobrelay em uma pasta própria, sem sobrescrever projetos existentes. Leia AGENTS.md, ONBOARDING.md, coleta/README.md, aplicacao/README.md e docs/instalar-com-agente.md. Faça o onboarding comigo: profissão, currículo, filtros, quadro local ou minha conexão Notion; pergunte separadamente se as respostas ficam só em Markdown local ou também no meu Notion; e escolha entre só mapear vagas ou configurar candidaturas com minha conexão Chrome. Não peça credenciais no chat. Se eu escolher autonomia, crie uma tarefa nativa a cada quatro horas apontando para vagas/RODADA-DIARIA.md, com Apify paga no máximo uma vez por dia. Mostre no chat o prompt, a tarefa criada e o próximo horário. Se não houver agendador, entregue o prompt e informe que a tarefa ainda não foi criada. Preserve meus dados nas atualizações e confirme antes de qualquer gasto ou ação sem autorização.
 
 O assistente conduz a configuração; você fornece seus dados e confirma as escolhas. O [guia de instalação com agente](docs/instalar-com-agente.md) explica as conexões e a conclusão do onboarding.
 
@@ -50,7 +50,7 @@ npm run quadro
 
 Se você já estiver na pasta `vagas`, execute apenas os dois comandos `npm`. Para recolher as fontes novamente no mesmo dia, use `npm run rodada -- --forcar`; essa opção preserva o limite diário da Apify. Quem escolhe Notion acompanha a database configurada.
 
-A nota das vagas organiza a leitura; ela não representa sua chance de contratação. Confira o currículo e as respostas antes de usá-los. O assistente deve salvar as perguntas e os textos efetivamente preenchidos em `revisoes/respostas.md`, inclusive em rascunhos. O registro usa um comando local e depende de o aplicador conferir os campos; não captura o Chrome automaticamente.
+A nota das vagas organiza a leitura; ela não representa sua chance de contratação. Confira o currículo, as [respostas abertas](aplicacao/RESPOSTAS.md) e o [perfil de aplicação](aplicacao/PERFIL.md) antes de usá-los. O assistente deve salvar as perguntas e os textos efetivamente preenchidos em `aplicacao/RESPOSTAS-PREENCHIDAS.md`, inclusive em rascunhos. O registro usa um comando local e depende de o aplicador conferir os campos; não captura o Chrome automaticamente.
 
 ## Receba e instale atualizações
 

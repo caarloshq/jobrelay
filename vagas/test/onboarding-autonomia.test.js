@@ -26,6 +26,7 @@ test('Chrome e Notion geram instrução de confirmação sem autorizar envio', (
   assert.match(prompt, /no máximo uma execução da Apify por dia/);
   assert.match(prompt, /não autoriza preenchimento ou envio irrestrito/);
   assert.match(prompt, /database ID 123456781234123412341234567890ab/);
+  assert.match(prompt, /respostas só nos Markdown locais.*Markdown local \+ minha página Notion/);
   assert.doesNotMatch(prompt, /token\s*=/i);
 });
 

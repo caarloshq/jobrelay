@@ -26,9 +26,9 @@ Leia isto antes de confiar em qualquer promessa deste arquivo. O `critic` pegou 
 | Modelo de e-mail para enviar o currículo | ✅ `../Skills/adapt-resume/modelos-email.md`, seis modelos. **Texto pronto, envio na mão** |
 | Currículo automático acima de 75% | ✅ corte em `config/perfil.json`, executado na rodada |
 | Currículo no card | ⚠️ o card do quadro mostra resumo, gaps e link; o PDF fica em `../Skills/adapt-resume/builds/<empresa>/` |
-| **Candidatar-se pelo navegador** | ⚠️ **manual, conduzido pelo Claude no Chrome dele.** Não há código: é o `RODADA-DIARIA.md` §8 mais o Chrome logado. Gupy, InHire e LinkedIn são permitidos; conferir comportamento atual no navegador |
-| Perfil de respostas de formulário | ✅ `config/perfil-candidatura.json`. Fatos e autorizações; composição e conferência em `RESPOSTAS.md` |
-| Banco de perguntas de formulário | ✅ `data/perguntas.json`, versionado. Aprovação tem escopo; reutilização conforme `RESPOSTAS.md` |
+| **Candidatar-se pelo navegador** | ⚠️ **manual, conduzido pelo Claude no Chrome dele.** Não há código: segue `../aplicacao/README.md` mais o Chrome logado. Gupy, InHire e LinkedIn são permitidos; conferir comportamento atual no navegador |
+| Perfil de respostas de formulário | ✅ `../aplicacao/PERFIL.md`. Fatos e autorizações; composição e conferência em `../aplicacao/README.md` |
+| Banco de perguntas de formulário | ✅ `../aplicacao/RESPOSTAS.md`, editável em Markdown. Aprovação tem escopo; reutilização conforme `../aplicacao/README.md` |
 
 ## O que o Node faz sozinho
 
@@ -170,7 +170,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
    mudanca foi medida: em 08/09, das treze vagas abertas, duas morreram por esse bloqueio e mais sete por local.
    ⚠️ **Na Simplificada, o LinkedIn oferece os curriculos ja enviados numa lista. Escolher pelo IDIOMA DA VAGA:**
    anuncio em portugues leva o curriculo em portugues, anuncio em ingles leva o em ingles.
-9. **Respostas seguem `RESPOSTAS.md`.** O perfil guarda autorizações e fatos;
+9. **Respostas seguem `../aplicacao/README.md`.** O perfil guarda autorizações e fatos;
    o banco separa texto, instrução e escopo. Não inferir negativa de ausência no
    currículo. Pesquisa de empresa gera rascunho para conferência. Dados sensíveis
    permanecem no perfil privado, consultados só no atributo perguntado.
@@ -205,7 +205,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
 - **Fonte que o quadro não conhece não vira outra fonte.** Duas vagas foram publicadas em 2026-07-30 com o campo vazio porque o board de então não tinha a opção. Preencher com "Vagas Remotas" seria inventar dado, e mexer nas opções do select já apagou 19 valores de `Status` hoje. Se for corrigir, adicionar a opção **fora** da rodada e conferir que nada zerou.
 - **Nunca inventar id ao registrar uma vaga.** Copiar o `idExterno` do coletor, literal. Ids em estilo slug (`vagasremotas:codepath-senior-product-designer`) foram invenção minha na primeira leva e nunca casaram de volta: cinco vagas já publicadas apareceram como novas. O `arquivo.aplicar()` hoje cura isso casando pelo **link**, mas a cura não é desculpa para criar o problema.
 - **`CONCLUIDOS` em `src/arquivo.js` compara pelo NOME da opção do Status, não pelo ID.** Quando você renomeou `Sem retorno`→`Cancelada` e `Descartada`→`Revisar` em 2026-08-05, a lista continuou com os nomes velhos — vaga marcada `Cancelada` ia voltar a ser oferecida como se ainda estivesse aberta, porque o código não reconhecia o novo rótulo. Renomear opção no Notion é seguro pros dados (mesmo ID, atribuição preservada); o que não é seguro é qualquer lugar do código que compara string literal contra o nome da opção. Se o Status ganhar outro rename, `CONCLUIDOS` e os testes de `arquivo.test.js` têm que mudar junto.
-- **Dedupe por prioridade de fonte assume que a fonte mais forte continua viva.** Medido em 2026-08-05: 2 de 2 vagas checadas, a InHire (prioridade 10, vence o LinkedIn) tinha morrido enquanto o espelho da mesma vaga no LinkedIn (prioridade 7) continuava de pé. O vencedor do dedupe nunca é revalidado depois de escolhido — por isso a fila `Revisar` existe (`RODADA-DIARIA.md` §1.5): checa link morto e, se achar, deixa a gêmea viva assumir, mesmo que ela tivesse prioridade menor.
+- **Dedupe por prioridade de fonte assume que a fonte mais forte continua viva.** Medido em 2026-08-05: 2 de 2 vagas checadas, a InHire (prioridade 10, vence o LinkedIn) tinha morrido enquanto o espelho da mesma vaga no LinkedIn (prioridade 7) continuava de pé. O vencedor do dedupe nunca é revalidado depois de escolhido — por isso a fila `Revisar` existe (`../coleta/README.md` §1.5): checa link morto e, se achar, deixa a gêmea viva assumir, mesmo que ela tivesse prioridade menor.
 
 - **O arc.dev anuncia 9.193 vagas e só umas 5 servem.** A mesma página traz dois acervos no `__NEXT_DATA__`: `arcJobs`, que são as vagas do próprio Arc, com página de detalhe, descrição, faixa por hora e países aceitos; e `externalJobs`, o acervo agregado, que traz só título, empresa e data. **A vaga externa não tem link**: a rota `/remote-jobs/details/<slug>-<chave>` devolve 404 para ela. Vaga sem link é linha onde ninguém consegue se candidatar. Não "conserte" isso passando a ler `externalJobs`.
 - **As rotas de categoria do Arc são por skill, não por profissão.** `/remote-jobs/product-design`, `/ux-design`, `/ui-design`, `/ux-ui-design`, `/design-systems` e `/figma` existem. `/remote-jobs/design` e `/designer` **não**: devolvem 308 para a lista geral, e seguir o redirect faz parecer que funcionaram.
