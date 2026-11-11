@@ -1,107 +1,98 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { gapLines } from "./gaps.ts"
+import { compatibilityItems } from "./gaps.ts"
+import type { Job } from "./jobs.ts"
 
-test("explicit labels and written emojis retain their meaning without modifying copy", () => {
+const job: Job = {
+  id: "ficticio:1",
+  titulo: "Exemplo",
+  empresa: "Empresa fictícia",
+  compatibilidade: 90,
+  status: "Avaliar",
+  historico: [],
+  resumo: "A vaga pede Figma. A pessoa comprova protótipos em Figma.",
+  gaps: "A vaga pede cinco anos; a pessoa registra três. GraphQL não comprovado.",
+}
+
+test("only authored comparisons with exact source quotes are displayed", () => {
+  const items = [
+    {
+      requisito: "Figma",
+      estado: "atendido" as const,
+      origem: {
+        campo: "resumo" as const,
+        trecho: "A pessoa comprova protótipos em Figma.",
+      },
+    },
+    {
+      requisito: "5+ anos (base registra 3)",
+      estado: "lacuna" as const,
+      origem: {
+        campo: "gaps" as const,
+        trecho: "A vaga pede cinco anos; a pessoa registra três.",
+      },
+    },
+    {
+      requisito: "GraphQL",
+      estado: "nao_comprovado" as const,
+      origem: { campo: "gaps" as const, trecho: "GraphQL não comprovado." },
+    },
+  ]
   assert.deepEqual(
-    gapLines(
-      "Requisitos atendidos: Figma\nBloqueio: residência obrigatória\n✅ Inglês confirmado\n🚫 Não atende ao requisito"
-    ),
-    [
-      { heading: "Requisitos atendidos", text: "Figma", marker: "✅" },
-      { heading: "Bloqueio", text: "residência obrigatória", marker: "🚫" },
-      { text: "Inglês confirmado", marker: "✅" },
-      { text: "Não atende ao requisito", marker: "🚫" },
-    ]
+    compatibilityItems({ ...job, itensCompatibilidade: items }),
+    items
   )
 })
 
-test("missing evidence, negated blockers and next actions remain neutral", () => {
-  for (const text of [
-    "Não há bloqueios.",
-    "Sem bloqueio confirmado.",
-
-    "Próxima ação: revisar currículo",
-    "Nenhum envio.",
-  ]) {
-    assert.equal(gapLines(text)[0]?.marker, undefined, text)
-  }
-})
-
-test("markdown subtitles and list bullets become text structure, HTML stays inert text", () => {
-  assert.deepEqual(
-    gapLines(
-      "## Pontos a conferir\n- **Mobilidade:** Sem evidência.\n<script>alert(1)</script>"
-    ),
-    [
-      { heading: "Pontos a conferir", text: "" },
-      { heading: "Mobilidade", text: "Sem evidência." },
-      { text: "<script>alert(1)</script>" },
-    ]
-  )
-})
-
-test("explicit pending clauses take priority over prepared or confirmed clauses", () => {
-  for (const text of [
-    "Currículo preparado e aguarda revisão.",
-    "Falta conferir o formulário.",
-    "Anúncio não informa salário.",
-    "Mobilidade ainda não comprovada.",
-    "Candidatura ainda não foi enviada.",
-    "Inglês a confirmar.",
-  ]) {
-    assert.equal(gapLines(text)[0]?.marker, "🚫", text)
-  }
-  for (const text of [
-    "Anúncio conferido e publicado.",
-    "Currículo preparado.",
-  ]) {
-    assert.equal(gapLines(text)[0]?.marker, "✅", text)
-  }
-})
-
-test("known plain subtitles are emphasized and reference URLs stay unchanged", () => {
-  const lines = gapLines(
-    "Antes de enviar\nCurrículo preparado e aguarda revisão.\nPontos de atenção\nMobilidade ainda não comprovada.\nConferência de 11/11/2026\nAnúncio conferido e publicado.\nReferências\nhttps://example.com/job\nSkills/adapt-resume/builds/exemplo.pdf"
-  )
-  assert.deepEqual(
-    lines.filter((line) => line.heading).map((line) => line.heading),
-    [
-      "Antes de enviar",
-      "Pontos de atenção",
-      "Conferência de 11/11/2026",
-      "Referências",
-    ]
-  )
-  assert.deepEqual(
-    lines.filter((line) => line.marker).map((line) => line.marker),
-    ["🚫", "🚫", "✅"]
-  )
-  assert.deepEqual(lines.slice(-2), [
-    { text: "https://example.com/job" },
-    { text: "Skills/adapt-resume/builds/exemplo.pdf" },
-  ])
-})
-
-test("future intentions and URLs never become completed confirmations", () => {
-  for (const text of [
-    "O formulário será conferido no navegador.",
-    "O currículo será preparado após a revisão.",
-    "O currículo vai ser preparado.",
-    "Anúncio a ser publicado.",
+test("legacy operational text and score never become qualification claims", () => {
+  for (const gaps of [
+    "Currículo preparado e anúncio publicado.",
+    "Candidatura enviada.",
+    "Salário não divulgado.",
     "https://example.com/preparado.pdf",
-    "Skills/adapt-resume/preparado.pdf",
-    "Referência: https://example.com/preparado.pdf",
+    "Falta conferir o formulário.",
   ]) {
-    assert.equal(gapLines(text)[0]?.marker, undefined, text)
+    assert.deepEqual(
+      compatibilityItems({ ...job, gaps, compatibilidade: 100 }),
+      []
+    )
   }
 })
 
-test("reference URLs and paths never become pending items", () => {
-  for (const text of [
-    "Referência: https://example.com/pendente.json",
-    "Referência: Skills/aguardando/revisao.md",
-  ]) {
-    assert.equal(gapLines(text)[0]?.marker, undefined, text)
-  }
+test("missing, invalid or untraceable structured evidence is omitted without altering raw data", () => {
+  const input = {
+    ...job,
+    itensCompatibilidade: [
+      {
+        requisito: "Figma",
+        estado: "atendido",
+        origem: {
+          campo: "resumo",
+          trecho: "Experiência que não consta na fonte",
+        },
+      },
+      {
+        requisito: "GraphQL",
+        estado: "incapaz",
+        origem: { campo: "gaps", trecho: "GraphQL não comprovado." },
+      },
+      {
+        requisito: "Figma",
+        estado: "atendido",
+        origem: { campo: "resumo", trecho: "" },
+      },
+      {
+        requisito: "",
+        estado: "atendido",
+        origem: { campo: "resumo", trecho: "A vaga pede Figma." },
+      },
+    ],
+  } as Job
+  const before = structuredClone(input)
+  assert.deepEqual(compatibilityItems(input), [])
+  assert.deepEqual(input, before)
+  assert.deepEqual(
+    compatibilityItems({ ...job, itensCompatibilidade: null }),
+    []
+  )
 })

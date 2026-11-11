@@ -1022,3 +1022,29 @@ button svg {
 .job-card .meta-second { display: contents; }
 .job-card .meta-chip { min-height: 20px; padding: 2px 6px; }
 .job-card .card-bottom { min-height: 20px; flex-shrink: 0; }
+
+.compatibility-checklist {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.compatibility-checklist li {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.compatibility-state {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.legacy-gap-notes {
+  margin-top: 20px;
+}
+.legacy-gap-notes h4 {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
