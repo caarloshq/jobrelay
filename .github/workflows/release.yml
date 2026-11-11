@@ -62,7 +62,7 @@ jobs:
         run: |
           mkdir -p data
           TMPDIR="$PWD/data" npm test
-      - name: Upgrade real da v1.3.0 para o commit da tag
+      - name: Upgrade real da release anterior para o commit da tag
         working-directory: vagas
         env:
           JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ steps.release.outputs.commit }}

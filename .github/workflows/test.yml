@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22.23.4"
-      - name: Upgrade da v1.3.0 para o commit exato, sem rede
+      - name: Upgrade da release anterior para o commit exato, sem rede
         env:
           JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ github.sha }}
         run: node --test test/upgrade-release.test.js
