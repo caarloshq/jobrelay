@@ -52,7 +52,7 @@ test("movement is durable in a fresh Node process and metadata/history are prese
   }
 })
 
-test("unknown job/status, write lock and hard links do not mutate the board", () => {
+test("unknown job/status and write lock preserve state; atomic writes preserve linked backups", () => {
   const { dir, file } = fixture()
   try {
     const before = fs.readFileSync(file, "utf8")
@@ -66,12 +66,11 @@ test("unknown job/status, write lock and hard links do not mutate the board", ()
     )
     fs.unlinkSync(file + ".lock")
     fs.linkSync(file, path.join(dir, "linked.json"))
-    assert.throws(() => store.read(), /inválido/)
-    assert.throws(
-      () => store.move({ id: "demo:aurora", status: "Aplicar" }),
-      /inválido/
-    )
-    assert.equal(fs.readFileSync(file, "utf8"), before)
+    assert.equal(store.read().vagas.length, 5)
+    store.move({ id: "demo:aurora", status: "Aplicar" })
+    assert.equal(store.read().vagas[0]!.status, "Aplicar")
+    assert.equal(fs.readFileSync(path.join(dir, "linked.json"), "utf8"), before)
+    assert.equal(fs.statSync(file).nlink, 1)
     assert.equal(fs.existsSync(file + ".lock"), false)
   } finally {
     fs.rmSync(dir, { recursive: true })

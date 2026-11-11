@@ -63,14 +63,24 @@ A pessoa usuária apontou o vão entre tags e compatibilidade e a ausência de R
 
 locationLabel usa modelo explícito primeiro e, se ausente, mostra Remoto quando o próprio título diz Remote, Remoto/Remota ou Work From Home. Não infere país; evita repetir Remoto se já estiver no campo Local e modelo. Seis testes passaram, lint/build/detector sem achados. Revisão independente confirmou a lógica e apontou conferir limites de espaço; os20 casos reais foram medidos no navegador. Não há prova para combinações sintéticas com todos os campos em duas linhas fora deste protótipo. Print: revisoes/tema-2026-11-11/cards-sem-vao-remoto.png.
 
+### Divisória e respiros finais dos cards
+
+A pessoa usuária pediu divisória entre empresa e atributos, respiro nas logos e remoção da sobra inferior. O ajuste vigente usa padding interno de 4 px em todas as logos, distância de 2 px entre título e empresa e 16 px de respiro acima e abaixo da divisória. Cards uniformes de 148 px, com hover cinza e clique em toda a superfície. Conferência no navegador cobriu imagens PNG e ICO, clique na logo, no título e no espaço vazio, além de arraste sem abrir detalhes. Build/lint/detector passaram. Captura: revisoes/tema-2026-11-11/cards-hover-clique.png.
+
+A prévia voltou a falhar porque uma cópia externa passou a compartilhar o inode do JSON de teste. Corrigido exclusivamente no store do protótipo: leitura aceita arquivo regular com hardlink, ainda com realpath/O_NOFOLLOW/inode/dev; toda escrita usa novo temporário e rename, preservando a cópia vinculada. Teste confirma backup intacto e destino novo com um link após mover. Oito testes passaram; revisão independente sem bloqueios. A proteção do backend operacional permanece intacta.
+
 
 ### Ordem final dos detalhes e critérios da release
 
-Confiança permanece no topo. O painel segue Sobre a vaga, Resumo, Próxima ação, Gaps, Candidatura e Datas. Gaps têm subtítulos em negrito e indicadores ✅/🚫 para confirmação ou pendência explícita; referências e frases futuras não geram confirmação. A apresentação preserva o texto e não decide descarte de vagas.
+Confiança permanece no topo. O painel segue Sobre a vaga, Resumo, Gaps, Candidatura, Datas, Próxima ação e Histórico. O último bloco permanece expandido e reúne timeline e notas anteriores. Gaps têm subtítulos em negrito e indicadores ✅/🚫 para confirmação ou pendência explícita; referências e frases futuras não geram confirmação. A apresentação preserva o texto e não decide descarte de vagas.
 
 Atualização automática fica ativa por padrão, respeitando desligamento explícito. O registro humano do onboarding é obrigatório antes da operação, inclusive nas instalações existentes sem recibo. Esses são critérios obrigatórios da próxima release.
 
 Reconferência independente aprovada no delta. Candidato isolado: 15 testes da interface passaram, tipos sem erros/avisos/hints, lint e build passaram. Conferência visual confirmou a ordem dos blocos e Gaps com negrito e ícones. O login real headless e a barra do modelo Notion continuam nos limites já documentados. A auditoria de status do Notion foi transferida a outro chat e não integra estes commits.
+
+Últimos ajustes de logos, divisória, hover e clique no card inteiro foram conferidos no navegador. Evidência vigente no fim de revisoes/tema-2026-11-11/review-astro.md; captura cards-hover-clique.png.
+
+Painel ajustado com Próxima ação perto do fim e Histórico único, aberto e por último. Os gaps estruturados e as próximas ações preparados na outra sessão foram aplicados à cópia de teste, preservando status e timeline. Prova no fim de revisoes/tema-2026-11-11/review-astro.md; captura painel-historico-unico.png.
 
 
 ### Gaps compara requisitos e experiência

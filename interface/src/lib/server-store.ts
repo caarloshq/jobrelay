@@ -212,12 +212,13 @@ export function createFileStore(filename: string) {
       "Configure um caminho absoluto para o quadro de teste.",
       503
     )
+  // Backup snapshots may share the inode. Reading is safe; writes always publish
+  // a new inode with rename, so linked backups are never edited in place.
   function safeFile(file: string) {
     const stat = fs.lstatSync(file)
     if (
       !stat.isFile() ||
       stat.isSymbolicLink() ||
-      stat.nlink !== 1 ||
       fs.realpathSync(file) !== file
     )
       throw new BoardError("Arquivo do quadro de teste inválido.", 503)
@@ -232,11 +233,7 @@ export function createFileStore(filename: string) {
     let data: BoardPayload
     try {
       const opened = fs.fstatSync(fd)
-      if (
-        opened.ino !== before.ino ||
-        opened.dev !== before.dev ||
-        opened.nlink !== 1
-      )
+      if (opened.ino !== before.ino || opened.dev !== before.dev)
         throw new BoardError("O arquivo do quadro mudou. Tente novamente.", 503)
       data = JSON.parse(fs.readFileSync(fd, "utf8"))
     } finally {

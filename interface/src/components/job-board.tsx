@@ -149,7 +149,10 @@ function CompanyLogo({
         src={src}
         onError={() => setFailedSrc(src)}
         alt={job.empresa || "Empresa não informada"}
-        style={{ objectFit: "contain", padding: job.logoBackground ? 3 : 0 }}
+        style={{
+          objectFit: "contain",
+          padding: 4,
+        }}
       />
       {!logoOnly && <AvatarFallback>{initials(job.empresa)}</AvatarFallback>}
     </Avatar>
@@ -967,13 +970,6 @@ export default function JobBoard() {
                   <ReadableText text={selected.resumo} />
                 </DetailSection>
               )}
-              <DetailSection title="Próxima ação" icon={<CheckCircleIcon />}>
-                {selected.pendencia?.trim() ? (
-                  <ReadableText text={selected.pendencia} />
-                ) : (
-                  <p className="muted">Nenhuma próxima ação registrada.</p>
-                )}
-              </DetailSection>
               <DetailSection title="Gaps" icon={<CheckCircleIcon />}>
                 <GapText job={selected} />
               </DetailSection>
@@ -1016,12 +1012,6 @@ export default function JobBoard() {
                       value={selected.curriculoCaminho}
                     />
                   </dl>
-                  {selected.gaps?.trim() && (
-                    <div className="legacy-gap-notes">
-                      <h4>Anotações anteriores</h4>
-                      <ReadableText text={selected.gaps} />
-                    </div>
-                  )}
                 </details>
               </DetailSection>
               <DetailSection title="Datas" icon={<CalendarBlankIcon />}>
@@ -1040,11 +1030,23 @@ export default function JobBoard() {
                   <p className="muted">Nenhuma data registrada.</p>
                 )}
               </DetailSection>
+              <DetailSection title="Próxima ação" icon={<CheckCircleIcon />}>
+                {selected.pendencia?.trim() ? (
+                  <ReadableText text={selected.pendencia} />
+                ) : (
+                  <p className="muted">Nenhuma próxima ação registrada.</p>
+                )}
+              </DetailSection>
               <DetailSection
                 title="Histórico"
                 icon={<ClockCounterClockwiseIcon />}
               >
                 <Timeline history={selected.historico} />
+                {selected.gaps?.trim() && (
+                  <div className="history-notes">
+                    <ReadableText text={selected.gaps} />
+                  </div>
+                )}
               </DetailSection>
             </div>
           )}
