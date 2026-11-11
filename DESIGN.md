@@ -89,11 +89,11 @@ components:
 
 # Design
 
-> Sistema das superfícies locais do JobRelay: o formulário de onboarding e o quadro. Escrito em 14 de Setembro de 2026 a partir de duas direções ("light mode" e "botões azuis") e derivado do sistema pessoal do Carlos Henrique (Montserrat, escala neutra de dez degraus, raios por elemento). O azul sai da família que já existia lá como tag (`#CAD6FF` sobre `#000766`), estendida num acento de ação.
+> Sistema das superfícies locais do JobRelay: o formulário de onboarding e o quadro. Escrito em 14 de Setembro de 2026 a partir de duas direções ("light mode" e "botões azuis") e derivado do sistema visual do autor (Montserrat, escala neutra de dez degraus, raios por elemento). O azul sai da família que já existia lá como tag (`#CAD6FF` sobre `#000766`), estendida num acento de ação.
 
 ## Visual identity
 
-Modo **Operate**: a pessoa está numa tarefa, configurar o sistema uma vez. A interface some no que ela está fazendo. Sóbria, quase monocromática: os neutros fazem a hierarquia, e o azul aparece só onde há ação ou estado (botão primário, passo atual, foco, seleção). A introdução usa uma ilustração vetorial explicativa do percurso perfil, avaliação e preparação, autorizada por Carlos em 11 de Novembro de 2026. As etapas do formulário preservam o modo Operate, sem decoração ou card dentro de card.
+Modo **Operate**: a pessoa está numa tarefa, configurar o sistema uma vez. A interface some no que ela está fazendo. Sóbria, quase monocromática: os neutros fazem a hierarquia, e o azul aparece só onde há ação ou estado (botão primário, passo atual, foco, seleção). A introdução usa uma ilustração vetorial explicativa do percurso perfil, avaliação e preparação, autorizada pelo autor em 11 de Novembro de 2026. As etapas do formulário preservam o modo Operate, sem decoração ou card dentro de card.
 
 ## Color
 
