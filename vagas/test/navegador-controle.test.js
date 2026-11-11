@@ -8,6 +8,9 @@ import { runInNewContext } from 'node:vm';
 import { prepararComando, limparAmbiente, detectarChrome, LEITURA_CAMPOS } from '../src/navegador.js';
 import { endpointDoPerfil, executarProtegido, urlCheckpoint, inventarioSeguro, lifecycleSeguro, processosDaInstalacao, argumentosSemLancamento } from '../src/navegador-controle.js';
 
+// O navegador exige Node.js 22; no Node 20 o núcleo é testado e estes casos ficam pulados (como em navegador.test.js).
+const nodeModerno = Number(process.versions.node.split('.')[0]) >= 22;
+const testBrowser = nodeModerno ? test : test.skip;
 const raizVagas = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const testes = path.join(raizVagas, 'data', 'testes-navegador-controle');
 fs.mkdirSync(testes, { recursive: true, mode: 0o700 });
@@ -24,7 +27,7 @@ function fixture(t, modo = 'chrome_assistido') {
   return { raiz, ambiente, executar, chrome };
 }
 
-test('spawn usa somente perfil próprio, configuração explícita e ambiente isolado', t => {
+testBrowser('spawn usa somente perfil próprio, configuração explícita e ambiente isolado', t => {
   const f = fixture(t); const p = prepararComando(['open', 'https://example.test'], f);
   assert.equal(p.comando, process.execPath); assert.equal(p.opcoes.shell, false); assert.equal(p.opcoes.cwd, f.raiz);
   assert.ok(p.args.includes('--no-auto-connect')); assert.ok(p.args.includes('--no-auto-dialog'));
@@ -39,7 +42,7 @@ test('spawn usa somente perfil próprio, configuração explícita e ambiente is
   for (const d of ['', 'perfil', 's', 'tmp', 'downloads', 'capturas']) assert.equal(fs.statSync(path.join(f.raiz, 'data/navegador', d)).mode & 0o777, 0o700);
 });
 
-test('mapeamento e política ausente recusam ações de escrita sem alterar a política', t => {
+testBrowser('mapeamento e política ausente recusam ações de escrita sem alterar a política', t => {
   const f = fixture(t, 'mapear'); const politica = path.join(f.raiz, 'data/politica-autonomia.json'); const antes = fs.readFileSync(politica);
   for (const args of [['fill', '@e1', 'texto'], ['click', '@e1'], ['press', 'Enter'], ['upload', '@e2', 'arquivo.pdf']]) assert.throws(() => prepararComando(args, f), /MODO_MAPEAMENTO/);
   assert.deepEqual(fs.readFileSync(politica), antes);
@@ -47,7 +50,7 @@ test('mapeamento e política ausente recusam ações de escrita sem alterar a po
   fs.unlinkSync(politica); assert.throws(() => prepararComando(['type', '@e1', 'texto'], f), /MODO_MAPEAMENTO/);
 });
 
-test('recusa JavaScript, batch, estado, perfil, provedores e flags globais em qualquer posição', t => {
+testBrowser('recusa JavaScript, batch, estado, perfil, provedores e flags globais em qualquer posição', t => {
   const f = fixture(t);
   for (const args of [
     ['eval', 'document.body.remove()'], ['wait', '--fn', 'fetch("https://evil")'], ['batch', 'open https://evil'],
@@ -59,13 +62,13 @@ test('recusa JavaScript, batch, estado, perfil, provedores e flags globais em qu
   ]) assert.throws(() => prepararComando(args, f), undefined, JSON.stringify(args));
 });
 
-test('Chrome explícito inválido não faz fallback e --version é executado sem shell', t => {
+testBrowser('Chrome explícito inválido não faz fallback e --version é executado sem shell', t => {
   const f = fixture(t); let chamadas = 0;
   assert.throws(() => detectarChrome({ executavelChrome: null, portaAcessoHumano: 4849 }, { ambiente: f.ambiente, executar(exe, args, opts) { chamadas++; assert.equal(opts.shell, false); assert.deepEqual(args, ['--version']); return { status: 1 }; } }), /não passou/);
   assert.equal(chamadas, 1);
 });
 
-test('runtime não segue links e não sobrescreve configuração alterada', t => {
+testBrowser('runtime não segue links e não sobrescreve configuração alterada', t => {
   const f = fixture(t); const runtime = path.join(f.raiz, 'data/navegador');
   fs.symlinkSync(path.join(f.raiz, 'config'), runtime, 'dir');
   assert.throws(() => prepararComando(['snapshot'], f), /sem links/); fs.unlinkSync(runtime);
@@ -75,7 +78,7 @@ test('runtime não segue links e não sobrescreve configuração alterada', t =>
   assert.equal(fs.readFileSync(cfg, 'utf8'), '{"profile":"privado"}');
 });
 
-test('campos usa somente leitura fixa e preserva argumentos pessoais como dados', t => {
+testBrowser('campos usa somente leitura fixa e preserva argumentos pessoais como dados', t => {
   const f = fixture(t); const p = prepararComando(['campos'], f);
   assert.deepEqual(p.args.slice(-2), ['eval', LEITURA_CAMPOS]);
   const valor = 'Texto com $(não executar); e "aspas"';
@@ -83,7 +86,7 @@ test('campos usa somente leitura fixa e preserva argumentos pessoais como dados'
   assert.deepEqual(fill.args.slice(-3), ['fill', '@e2', valor]); assert.equal(fill.opcoes.shell, false);
 });
 
-test('inspeção de campos omite valores e não inventa vazio para widget sem value', () => {
+testBrowser('inspeção de campos omite valores e não inventa vazio para widget sem value', () => {
   const base = { id: 'campo', name: 'campo', labels: [], offsetWidth: 100, offsetHeight: 20, getClientRects: () => [1], getAttribute: nome => nome === 'role' ? 'combobox' : null };
   const privado = { ...base, type: 'text', value: 'sentinela-privada-nao-exportar' };
   const personalizado = { ...base };
@@ -95,7 +98,7 @@ test('inspeção de campos omite valores e não inventa vazio para widget sem va
   assert.ok(!texto.includes('sentinela-privada-nao-exportar'));
 });
 
-test('upload limita leitura ao projeto e screenshot limita gravação à pasta privada', t => {
+testBrowser('upload limita leitura ao projeto e screenshot limita gravação à pasta privada', t => {
   const f = fixture(t); const pdf = path.join(f.raiz, 'teste.pdf'); fs.writeFileSync(pdf, '%PDF-teste');
   const upload = prepararComando(['upload', '@e1', 'teste.pdf'], f); assert.equal(upload.args.at(-1), pdf);
   assert.throws(() => prepararComando(['upload', '@e1', '/etc/passwd'], f), /dentro deste projeto/);
@@ -112,7 +115,7 @@ test('upload limita leitura ao projeto e screenshot limita gravação à pasta p
   assert.equal(fs.readFileSync(regular, 'utf8'), 'preservar');
 });
 
-test('diagnóstico confere versões mas não devolve um plano de abertura de browser', t => {
+testBrowser('diagnóstico confere versões mas não devolve um plano de abertura de browser', t => {
   const f = fixture(t); const p = prepararComando(['diagnostico'], f);
   assert.equal(p.diagnostico.autorizaEnvio, false); assert.equal(p.diagnostico.escritaPermitidaPelaPolitica, true);
   assert.equal(p.comando, undefined); assert.equal(p.diagnostico.agentBrowser, 'agent-browser 0.42.0');
@@ -120,7 +123,7 @@ test('diagnóstico confere versões mas não devolve um plano de abertura de bro
   assert.deepEqual(clean, { HOME: '/normal', PATH: '/bin' });
 });
 
-test('entrada JSON é validada sem ecoar conteúdo pessoal ou executar flags recebidas', () => {
+testBrowser('entrada JSON é validada sem ecoar conteúdo pessoal ou executar flags recebidas', () => {
   const script = path.join(raizVagas, 'scripts/navegador.mjs');
   for (const input of ['{"privado":"sentinela-nao-imprimir"', JSON.stringify(['fill', '@e1', '--profile=sentinela-nao-imprimir'])]) {
     const r = spawnSync(process.execPath, [script, '--stdin-json'], { input, encoding: 'utf8', timeout: 10000 });
@@ -144,7 +147,7 @@ function controleFixture(t, comando = ['fill', '@e1', 'sentinela-valor-pessoal']
   return { ...f, plano, comando, deps, acoes, leituras, mudarPid: n => { pids = n; }, dir: path.join(plano.controle.runtime, 'controle') };
 }
 
-test('sessão ativa recebe ação uma vez sem opções de lançamento; checkpoint não salva valores de formulário', async t => {
+testBrowser('sessão ativa recebe ação uma vez sem opções de lançamento; checkpoint não salva valores de formulário', async t => {
   const f = controleFixture(t); const r = await executarProtegido(f.plano, f.comando, f.deps);
   assert.equal(r.codigo, 0); assert.equal(f.acoes.length, 1); assert.equal(f.leituras.length, 2);
   for (const flag of ['--profile', '--executable-path', '--download-path', '--no-auto-connect']) assert.ok(!f.acoes[0].includes(flag));
@@ -158,7 +161,7 @@ test('sessão ativa recebe ação uma vez sem opções de lançamento; checkpoin
   }
 });
 
-test('PID trocado bloqueia antes da ação e reconciliação explícita só inventaria, sem reiniciar', async t => {
+testBrowser('PID trocado bloqueia antes da ação e reconciliação explícita só inventaria, sem reiniciar', async t => {
   const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   f.mudarPid({ daemonPid: 100, chromePid: 201 });
   await assert.rejects(executarProtegido(f.plano, f.comando, f.deps), /CONTROLE_PID_ALTERADO/);
@@ -170,14 +173,14 @@ test('PID trocado bloqueia antes da ação e reconciliação explícita só inve
   assert.ok(linhas.includes('"chromePid":200')); assert.ok(linhas.includes('"chromePid":201'));
 });
 
-test('mudança de configuração com abas abertas não relança o browser', async t => {
+testBrowser('mudança de configuração com abas abertas não relança o browser', async t => {
   const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   f.plano.args[f.plano.args.indexOf('--profile') + 1] += '-diferente';
   await assert.rejects(executarProtegido(f.plano, f.comando, f.deps), /CONTROLE_OPCOES_ALTERADAS/);
   assert.equal(f.acoes.length, 1);
 });
 
-test('falha de CDP antes de ação não faz retry nem substitui último checkpoint', async t => {
+testBrowser('falha de CDP antes de ação não faz retry nem substitui último checkpoint', async t => {
   const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   const antes = fs.readFileSync(path.join(f.dir, 'checkpoint.json'));
   f.deps.executar = () => ({ status: 1, stderr: 'sentinela-segredo CDP response channel closed' });
@@ -186,7 +189,7 @@ test('falha de CDP antes de ação não faz retry nem substitui último checkpoi
   assert.ok(!fs.readFileSync(path.join(f.dir, 'eventos.jsonl'), 'utf8').includes('sentinela'));
 });
 
-test('PID muda durante ação: preserva checkpoint anterior, suspende próximas ações e não consulta daemon novamente', async t => {
+testBrowser('PID muda durante ação: preserva checkpoint anterior, suspende próximas ações e não consulta daemon novamente', async t => {
   const f = controleFixture(t);
   f.deps.executarAcao = async () => { f.mudarPid({ daemonPid: 100, chromePid: 202 }); return { codigo: 0, lifecycle: { relaunchedBrowser: true } }; };
   const r = await executarProtegido(f.plano, f.comando, f.deps);
@@ -195,7 +198,7 @@ test('PID muda durante ação: preserva checkpoint anterior, suspende próximas 
   await assert.rejects(executarProtegido(f.plano, f.comando, f.deps), /CONTROLE_RECONCILIACAO_PENDENTE/);
 });
 
-test('browser desaparecido com checkpoint não inicia outra instância; sessão nova só abre por ação explícita', async t => {
+testBrowser('browser desaparecido com checkpoint não inicia outra instância; sessão nova só abre por ação explícita', async t => {
   const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   f.mudarPid({ daemonPid: 100, chromePid: null });
   await assert.rejects(executarProtegido(f.plano, ['open', 'https://example.test'], f.deps), /CONTROLE_BROWSER_AUSENTE/);
@@ -209,7 +212,7 @@ test('browser desaparecido com checkpoint não inicia outra instância; sessão 
   assert.ok(h.acoes[0].includes('--profile'));
 });
 
-test('troca de daemon ou restartedBackground suspende antes de nova leitura mesmo com Chrome igual', async t => {
+testBrowser('troca de daemon ou restartedBackground suspende antes de nova leitura mesmo com Chrome igual', async t => {
   for (const trocaPid of [true, false]) {
     const f = controleFixture(t);
     f.deps.executarAcao = async () => {
@@ -223,7 +226,7 @@ test('troca de daemon ou restartedBackground suspende antes de nova leitura mesm
   }
 });
 
-test('só reconciliar recupera trava de PID comprovadamente morto, sem tomar controlador vivo', async t => {
+testBrowser('só reconciliar recupera trava de PID comprovadamente morto, sem tomar controlador vivo', async t => {
   const f = controleFixture(t); fs.mkdirSync(f.dir, { recursive: true });
   const lock = path.join(f.dir, 'controlador.lock'); fs.writeFileSync(lock, '999999');
   f.deps.pidVivo = () => false;
@@ -236,7 +239,7 @@ test('só reconciliar recupera trava de PID comprovadamente morto, sem tomar con
   assert.equal(fs.readFileSync(lock, 'utf8'), '123'); assert.ok(!fs.existsSync(path.join(f.dir, 'recuperacao.lock')));
 });
 
-test('close deliberado preserva histórico e permite open explícito sem apagar checkpoint', async t => {
+testBrowser('close deliberado preserva histórico e permite open explícito sem apagar checkpoint', async t => {
   const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   f.deps.executarAcao = async (p, args) => { f.acoes.push(args); f.mudarPid({ daemonPid: null, chromePid: null }); return { codigo: 0, lifecycle: {} }; };
   const fechar = await executarProtegido(f.plano, ['close'], f.deps); assert.equal(fechar.codigo, 0);
@@ -250,7 +253,7 @@ test('close deliberado preserva histórico e permite open explícito sem apagar 
   const historico = fs.readFileSync(path.join(f.dir, 'checkpoints.jsonl'), 'utf8'); assert.ok(historico.includes('"chromePid":200')); assert.ok(historico.includes('"encerradaDeliberadamente":true'));
 });
 
-test('trava concorrente e registro inválido falham fechados sem deixar a própria trava pendurada', async t => {
+testBrowser('trava concorrente e registro inválido falham fechados sem deixar a própria trava pendurada', async t => {
   const f = controleFixture(t); fs.mkdirSync(f.dir, { recursive: true });
   fs.writeFileSync(path.join(f.dir, 'controlador.lock'), 'outro-controlador');
   await assert.rejects(executarProtegido(f.plano, f.comando, f.deps), /CONTROLE_OCUPADO/);
@@ -259,7 +262,7 @@ test('trava concorrente e registro inválido falham fechados sem deixar a própr
   assert.ok(!fs.existsSync(path.join(f.dir, 'controlador.lock')));
 });
 
-test('checkpoint rejeita credenciais/query/hash e campos alheios; lifecycle não copia settings sensíveis', () => {
+testBrowser('checkpoint rejeita credenciais/query/hash e campos alheios; lifecycle não copia settings sensíveis', () => {
   assert.equal(urlCheckpoint('https://jobs.ashbyhq.com/empresa/job-id/apply?token=segredo#x'), 'https://jobs.ashbyhq.com/empresa/job-id/apply');
   assert.equal(urlCheckpoint('https://user:pass@localiza.gupy.io/qualquer'), 'https://localiza.gupy.io/[autenticacao]');
   assert.equal(urlCheckpoint('https://localiza.gupy.io/auth/callback/segredo'), 'https://localiza.gupy.io/[autenticacao]');
@@ -271,7 +274,7 @@ test('checkpoint rejeita credenciais/query/hash e campos alheios; lifecycle não
   assert.ok(!JSON.stringify(out).includes('sentinela'));
 });
 
-test('inspeção de processos só retorna PIDs do perfil exato, sem argv ou outro Chrome pessoal', t => {
+testBrowser('inspeção de processos só retorna PIDs do perfil exato, sem argv ou outro Chrome pessoal', t => {
   const f = controleFixture(t); fs.writeFileSync(path.join(f.plano.controle.runtime, 's/jobrelay.pid'), '100');
   const perfil = f.plano.controle.perfil;
   const pids = processosDaInstalacao(f.plano, () => ({ status: 0, stdout: `100 1 daemon\n200 100 Chrome --user-data-dir=${perfil} --headless\n201 1 Chrome --user-data-dir=${perfil}2\n202 200 Chrome --type=renderer --user-data-dir=${perfil}\n` }));
@@ -280,7 +283,7 @@ test('inspeção de processos só retorna PIDs do perfil exato, sem argv ou outr
 });
 
 
-test('troca de daemon entre chamadas bloqueia antes de CDP e ação mesmo com Chrome igual', async t => {
+testBrowser('troca de daemon entre chamadas bloqueia antes de CDP e ação mesmo com Chrome igual', async t => {
   const f = controleFixture(t);
   await executarProtegido(f.plano, f.comando, f.deps);
   const leituras = f.leituras.length, acoes = f.acoes.length;
@@ -302,7 +305,7 @@ function reconexaoFixture(t) {
   return f;
 }
 
-test('reconectar anexa namespace separado ao mesmo Chrome e próximas chamadas usam só transporte novo', async t => {
+testBrowser('reconectar anexa namespace separado ao mesmo Chrome e próximas chamadas usam só transporte novo', async t => {
   const f = reconexaoFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   const n = f.acoes.length;
   let socketEnv; const acaoOriginal = f.deps.executarAcao;
@@ -325,7 +328,7 @@ test('reconectar anexa namespace separado ao mesmo Chrome e próximas chamadas u
   await assert.rejects(executarProtegido(f.plano, ['close'], f.deps), /CONTROLE_CLOSE_ANEXADO_RECUSADO/);
 });
 
-test('reconectar recusa aba perdida antes de connect sem substituir checkpoint', async t => {
+testBrowser('reconectar recusa aba perdida antes de connect sem substituir checkpoint', async t => {
   const f = reconexaoFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   const antes = fs.readFileSync(path.join(f.dir, 'checkpoint.json'), 'utf8'), n = f.acoes.length;
   f.deps.targets = async () => [{ type: 'page', targetId: 'outra', url: 'about:blank' }];
@@ -333,7 +336,7 @@ test('reconectar recusa aba perdida antes de connect sem substituir checkpoint',
   assert.equal(f.acoes.length, n); assert.equal(fs.readFileSync(path.join(f.dir, 'checkpoint.json'), 'utf8'), antes);
 });
 
-test('reconectar falho não tenta novamente nem promove transporte incerto', async t => {
+testBrowser('reconectar falho não tenta novamente nem promove transporte incerto', async t => {
   const f = reconexaoFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
   let chamadas = 0; f.deps.executarAcao = async () => { chamadas++; return { codigo: 1, lifecycle: { classeErro: 'canal_cdp' } }; };
   await assert.rejects(executarProtegido(f.plano, ['reconectar'], f.deps), /CONTROLE_RECONEXAO_FALHOU/);
@@ -342,7 +345,7 @@ test('reconectar falho não tenta novamente nem promove transporte incerto', asy
   assert.equal(chamadas, 1);
 });
 
-test('transporte anexado bloqueia Chrome/daemon/endpoint alterados antes de ação', async t => {
+testBrowser('transporte anexado bloqueia Chrome/daemon/endpoint alterados antes de ação', async t => {
   for (const mudanca of ['chrome', 'daemon', 'endpoint']) {
     const f = reconexaoFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
     await executarProtegido(f.plano, ['reconectar'], f.deps); const n = f.acoes.length;
@@ -353,7 +356,7 @@ test('transporte anexado bloqueia Chrome/daemon/endpoint alterados antes de aç�
   }
 });
 
-test('endpoint do perfil exige arquivo próprio, path estrito e listener loopback do PID exato', t => {
+testBrowser('endpoint do perfil exige arquivo próprio, path estrito e listener loopback do PID exato', t => {
   const f = controleFixture(t); const port = path.join(f.plano.controle.perfil, 'DevToolsActivePort');
   fs.writeFileSync(port, '9000\n/devtools/browser/teste-endpoint\n');
   const run = (exe, args) => { assert.equal(exe, 'lsof'); assert.ok(args.includes('200')); return { status: 0, stdout: 'p200\nf99\nn127.0.0.1:9000\n' }; };
@@ -367,7 +370,7 @@ test('endpoint do perfil exige arquivo próprio, path estrito e listener loopbac
 });
 
 
-test('duas recuperações explícitas preservam proprietário, targets e metadados anteriores sem replay', async t => {
+testBrowser('duas recuperações explícitas preservam proprietário, targets e metadados anteriores sem replay', async t => {
   const f = reconexaoFixture(t); const sessoes = new Map(); let proximoPid = 101;
   f.deps.processos = p => ({ chromePid: 200, daemonPid: p.controle.sessao ? sessoes.get(p.controle.sessao) || null : 100 });
   f.deps.executarAcao = async (p, args) => {
@@ -398,7 +401,7 @@ test('duas recuperações explícitas preservam proprietário, targets e metadad
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(f.dir, 'transporte.json'))), meta2);
 });
 
-test('recuperação repetida recusa proprietário ou endpoint alterado sem criar nova sessão', async t => {
+testBrowser('recuperação repetida recusa proprietário ou endpoint alterado sem criar nova sessão', async t => {
   for (const caso of ['proprietario', 'endpoint']) {
     const f = reconexaoFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
     await executarProtegido(f.plano, ['reconectar'], f.deps); const n = f.acoes.length;
@@ -409,7 +412,7 @@ test('recuperação repetida recusa proprietário ou endpoint alterado sem criar
   }
 });
 
-test('falhas pós-ação preservam causa segura, ação única e checkpoint anterior sem registrar conteúdo privado', async t => {
+testBrowser('falhas pós-ação preservam causa segura, ação única e checkpoint anterior sem registrar conteúdo privado', async t => {
   const casos = [
     ['status', 'endpoint_cli', 'subprocesso_status'],
     ['timeout', 'endpoint_cli', 'spawn_timeout'],
@@ -462,7 +465,7 @@ test('falhas pós-ação preservam causa segura, ação única e checkpoint ante
 });
 
 
-test('posse humana bloqueia guard direto, inclusive reconciliação e reconexão, antes de sondar', async t => {
+testBrowser('posse humana bloqueia guard direto, inclusive reconciliação e reconexão, antes de sondar', async t => {
   const f = controleFixture(t);
   fs.writeFileSync(path.join(f.plano.controle.runtime, 'acesso-humano.json'), JSON.stringify({ ativo: true }));
   let sondagens = 0;
@@ -474,7 +477,7 @@ test('posse humana bloqueia guard direto, inclusive reconciliação e reconexão
   assert.equal(fs.existsSync(f.dir), false);
 });
 
-test('mudança externa de target ou URL exige reconciliação antes de agir', async t => {
+testBrowser('mudança externa de target ou URL exige reconciliação antes de agir', async t => {
   for (const alterado of [{ targetId: 'aba-outra', url: 'https://localiza.gupy.io/candidates/applications/123/steps/456/curriculum' }, { targetId: 'aba-1', url: 'https://localiza.gupy.io/jobs/456' }]) {
     const f = controleFixture(t); await executarProtegido(f.plano, f.comando, f.deps);
     const checkpoint = fs.readFileSync(path.join(f.dir, 'checkpoint.json'), 'utf8');
@@ -487,19 +490,19 @@ test('mudança externa de target ou URL exige reconciliação antes de agir', as
   }
 });
 
-test('diagnóstico lifecycle aceita somente classes fixas, sem nomes ou valores arbitrários', () => {
+testBrowser('diagnóstico lifecycle aceita somente classes fixas, sem nomes ou valores arbitrários', () => {
   const result = lifecycleSeguro(JSON.stringify({ lifecycle: { restoreStatus: 'sentinela', saveStatus: 'segredo', settings: { changes: [{ name: 'senhasecreta', effect: 'tokensecreto', from: 'pessoal', to: 'credencial' }] } } }));
   assert.deepEqual(result, { settings: [{ nome: 'omitido' }] });
 });
 
 
-test('inventário exige targetId único para não recuperar por URL ambígua', () => {
+testBrowser('inventário exige targetId único para não recuperar por URL ambígua', () => {
   assert.throws(() => inventarioSeguro([{ type: 'page', url: 'https://example.test' }]), /CONTROLE_INVENTARIO_INVALIDO/);
   assert.throws(() => inventarioSeguro([{ type: 'page', targetId: 'duplicado', url: 'about:blank' }, { type: 'page', targetId: 'duplicado', url: 'about:blank' }]), /CONTROLE_INVENTARIO_INVALIDO/);
 });
 
 
-test('guard direto recusa atualização iniciada entre checagem e sondagem', async t => {
+testBrowser('guard direto recusa atualização iniciada entre checagem e sondagem', async t => {
   const f = controleFixture(t); const lock = path.join(f.raiz, 'data/operacao/.atualizacao.lock');
   f.deps.processos = () => { fs.mkdirSync(path.dirname(lock), { recursive: true }); fs.mkdirSync(lock); return { chromePid: 200, daemonPid: 100 }; };
   await assert.rejects(executarProtegido(f.plano, f.comando, f.deps), /CONTROLE_ATUALIZACAO_ATIVA/);
