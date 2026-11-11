@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # Isolated synthetic persistence test runs.
 .local-tests/
+
+# O modelo distribuído fica em docs/interface-ambiente.exemplo.
+.env.example

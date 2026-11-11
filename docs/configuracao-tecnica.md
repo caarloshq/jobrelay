@@ -34,7 +34,7 @@ cd vagas && npm run onboarding
 
 | | |
 |---|---|
-| **Node 20+** | `node --version`. Zero dependência de biblioteca, então não tem `npm install` |
+| **Node 22.23.4+ recomendado** | `node --version`. O núcleo aceita 20; navegador exige 22 e o quadro Astro exige 22.23.4. Rode `npm ci` em vagas para instalar a dependência opcional do navegador |
 | **Python 3** | gera o PDF do currículo. `npm run setup` instala o que falta |
 | **Claude Code ou Codex** | é ele que entrevista, lê os anúncios e dá os 40 pontos que o código não dá |
 | **Conta na Apify** | só no último bloco. É o que traz as vagas do LinkedIn |

@@ -44,3 +44,7 @@ __pycache__/
 
 # Visualização pessoal das respostas de candidaturas; não publicar.
 /revisoes/
+
+# Ajuste opcional próprio da instalação; o padrão vive no código.
+/vagas/config/navegador.json
+/interface/.env.example

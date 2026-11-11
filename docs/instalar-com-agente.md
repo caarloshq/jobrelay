@@ -4,7 +4,7 @@ Para começar, copie o [prompt de instalação do README](../README.md#instale-c
 
 ## Pelo terminal
 
-Este caminho é opcional. Você precisa de Node.js 20 ou mais recente, Python 3 e Git. O assistente pode verificar e ajudar a preparar o ambiente antes da instalação.
+Este caminho é opcional. Recomendamos Node.js 22.23.4 ou mais recente, Python 3 e Git para o pacote completo. O núcleo de coleta e o onboarding aceitam Node.js 20; o navegador assistido exige Node.js 22 e o quadro experimental Astro exige 22.23.4. O assistente pode verificar e ajudar a preparar o ambiente antes da instalação.
 
 ```bash
 git clone https://github.com/caarloshq/jobrelay.git jobrelay

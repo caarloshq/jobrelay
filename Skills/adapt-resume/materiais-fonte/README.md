@@ -1,12 +1,9 @@
 # Materiais-fonte
 
-O formulário salva os materiais nesta pasta, sem enviá-los para serviços externos:
+O formulário de onboarding grava aqui dois PDFs, com nome fixo:
 
-1. `curriculo.pdf` ou `curriculo.docx`: currículo obrigatório.
-2. `linkedin.pdf` ou `linkedin.docx`: perfil do LinkedIn, opcional.
-3. `adicional.pdf`, `adicional.docx` ou `adicional.txt`: material adicional, opcional.
-
-O limite é de 15 MB por arquivo. O TXT deve usar UTF-8. Se houver formatos antigos do mesmo material, a tela usa o mais recente; os anteriores são preservados.
+1. `curriculo.pdf`: seu currículo atual. Obrigatório.
+2. `linkedin.pdf`: seu perfil do LinkedIn salvo como PDF ("Mais" → "Salvar como PDF"). Opcional.
 
 Colocou à mão? Use os mesmos nomes e rode, dentro de `vagas/`:
 
@@ -14,4 +11,4 @@ Colocou à mão? Use os mesmos nomes e rode, dentro de `vagas/`:
 npm run onboarding -- --extrair
 ```
 
-Cada material vira `<nome>.extraido.txt`, que é o que o agente lê. Esta pasta inteira está no `.gitignore`, menos este README. Regra 1 do projeto vale aqui: nunca inventar. Cada frase do `base_content` tem que ser rastreável a um trecho destes materiais, ou a uma resposta sua na entrevista.
+Cada PDF vira `<nome>.extraido.txt`, que é o que o agente lê. Esta pasta inteira está no `.gitignore`, menos este README. Regra 1 do projeto vale aqui: nunca inventar. Cada frase do `base_content` tem que ser rastreável a um trecho destes materiais, ou a uma resposta sua na entrevista.

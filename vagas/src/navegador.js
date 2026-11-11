@@ -50,7 +50,12 @@ function diretoriosPrivados(raiz) {
 }
 
 function configuracao(raiz) {
-  const cfg = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'navegador.json'), 'utf8'));
+  let cfg;
+  try { cfg = JSON.parse(fs.readFileSync(path.join(raiz, 'config', 'navegador.json'), 'utf8')); }
+  catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    cfg = { versao: 1, transportePadrao: 'headless', agentBrowserVersion: VERSAO_AGENT_BROWSER, executavelChrome: null, portaAcessoHumano: 4849 };
+  }
   if (cfg.versao !== 1 || cfg.transportePadrao !== 'headless' || cfg.agentBrowserVersion !== VERSAO_AGENT_BROWSER ||
       (cfg.executavelChrome !== null && typeof cfg.executavelChrome !== 'string') ||
       (!Number.isInteger(cfg.portaAcessoHumano) || cfg.portaAcessoHumano < 1024 || cfg.portaAcessoHumano > 65535) ||
