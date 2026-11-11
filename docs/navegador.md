@@ -11,7 +11,7 @@ cd vagas
 npm run navegador -- diagnostico
 ```
 
-Se o diagnóstico não encontrar o Chrome, configure o caminho absoluto em `vagas/config/navegador.json`, campo `executavelChrome`, ou na variável `JOBRELAY_CHROME_EXECUTAVEL`. O diagnóstico confere versões e caminhos; não comprova autenticação em nenhum portal.
+O arquivo de configuração é opcional e não acompanha atualizações: sem ele, o comando usa os padrões internos. Para personalizar, copie `docs/navegador-config.exemplo.json` para `vagas/config/navegador.json`; configurações locais existentes permanecem. Se o diagnóstico não encontrar o Chrome, configure o caminho absoluto em `vagas/config/navegador.json`, campo `executavelChrome`, ou na variável `JOBRELAY_CHROME_EXECUTAVEL`. O diagnóstico confere versões e caminhos; não comprova autenticação em nenhum portal.
 
 ## A pessoa faz o login, o assistente aguarda
 

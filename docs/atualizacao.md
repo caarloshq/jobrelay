@@ -10,6 +10,14 @@ A v1.3.0 reúne o README simplificado, a instalação guiada, as entradas de onb
 
 O download em Releases corresponde à tag publicada, incluindo as skills e o guia da raiz. No Claude Code, as entradas são `/onboarding`, `/coletar` e `/aplicar`; no Codex, escolha a skill no menu ou use `$onboarding`, `$coletar` e `$aplicar` onde houver suporte à menção. Os adaptadores são arquivos comuns para funcionar também em ZIP, sem depender de links simbólicos.
 
+## Migração da v1.3.0 e de commits intermediários
+
+A transição da release estável v1.3.0 para o candidato da v1.4.0 foi testada com o atualizador real em uma instalação fictícia local. O teste preservou perfis, dados, configurações próprias, confirmação humana do onboarding e a opção de desligar a atualização. Isso não dispensa os demais bloqueios do atualizador na instalação de cada pessoa.
+
+Quem instalou um commit intermediário de `main` pode ter `vagas/config/navegador.json` ou `interface/.env.example` rastreados pelo Git. A nova distribuição mantém esses ajustes como arquivos locais e coloca os modelos em `docs/`. A retirada de um arquivo rastreado em caminho protegido pode produzir `RELEASE_ALTERA_DADOS_PROTEGIDOS`. Não há garantia de atualização automática desses checkouts intermediários.
+
+Se esse bloqueio ocorrer, siga a migração assistida de [ATUALIZAR.md](../ATUALIZAR.md): pare a operação, faça uma cópia datada das configurações e dados dentro do projeto e compare o commit instalado com a tag estável escolhida. Preserve os arquivos locais ao ajustar o rastreamento e reconciliar o código. Não apague configurações, não substitua dados pelos exemplos e não enfraqueça as proteções para forçar o avanço. Confira o resultado antes de retomar a operação.
+
 ## Ao atualizar para a v1.2.0
 
 Esta versão altera modelos de perfil e fontes de respostas. Por isso, o atualizador automático recusa a transição de uma instalação anterior, preservando seus arquivos. Peça ao assistente para fazer a migração com a instalação parada, uma cópia dos dados dentro do projeto e a comparação das suas alterações locais. Preserve também `aplicacao/`, além dos dados e materiais listados neste guia.

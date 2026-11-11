@@ -14,3 +14,5 @@ A avaliação visual está vinculada à [spec 006](../specs/pendentes/006-tema-q
 ## Testar uma cópia persistente
 
 Configure `JOBRELAY_PROTOTYPE_FILE` em `.env.local` com caminho absoluto para um JSON privado no formato BoardPayload (`vagas`, `status`, `contagem`, `demo`). Execute `pnpm build` e `pnpm start`. O servidor lê esse arquivo a cada requisição e grava os movimentos com histórico. O arquivo não deve estar no checkout público; não publique dados reais. Isso é uma cópia de teste, sem sincronização ou mudança de fonte operacional. Sem essa variável, continuam valendo o proxy configurado ou os cinco exemplos em memória. Não configure o protótipo e o proxy ao mesmo tempo.
+
+O quadro requer Node.js 22.23.4 ou mais recente. O modelo de variáveis fica em [docs/interface-ambiente.exemplo](../docs/interface-ambiente.exemplo); copie seu conteúdo para `.env.local` apenas se precisar configurar proxy ou cópia privada. Esse arquivo local não é distribuído nem substituído por atualizações.
