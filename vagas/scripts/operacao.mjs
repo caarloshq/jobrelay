@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { exigirOnboardingHumano } from '../src/onboarding-humano.js';
 import { operar } from '../src/operacao.js';
 
 const argv = process.argv.slice(2);
@@ -23,6 +24,7 @@ try {
     try { args = JSON.parse(json); } catch { throw new Error('JSON_ARGUMENTO_INVALIDO'); }
     if (!args || Array.isArray(args) || typeof args !== 'object') throw new Error('JSON_ARGUMENTO_INVALIDO');
   }
+  if (['iniciar', 'retomar', 'intencao', 'pronta'].includes(acao)) exigirOnboardingHumano(dados);
   const resultado = await operar(dados, acao, args);
   process.stdout.write(`${JSON.stringify({ ok: true, resultado })}\n`);
 } catch (erro) {

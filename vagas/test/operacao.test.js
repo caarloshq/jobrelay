@@ -1,3 +1,4 @@
+import { criarSessaoFormulario } from '../src/onboarding-humano.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -104,6 +105,10 @@ test('entrada legada só obtém posse temporária sem operação ativa', async t
 
 test('dois processos disputam iniciar; controle durável impede bootstrap silencioso após perda do estado', async t => {
   const dados = fixture(t);
+  // Passagem sintética apenas na fixture; não configura a instalação real.
+  const formulario = criarSessaoFormulario(dados);
+  for (let passo = 1; passo <= 7; passo++) formulario.registrarPasso(passo);
+  formulario.confirmar(true);
   const cli = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../scripts/operacao.mjs');
   const rodar = dono => new Promise((resolve, reject) => {
     const filho = spawn(process.execPath, [cli, 'iniciar', '--dados', dados, '--json', JSON.stringify({ dono, bootstrapNovo: true })], { env: { PATH: process.env.PATH || '' } });

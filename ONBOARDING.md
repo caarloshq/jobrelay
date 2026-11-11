@@ -14,6 +14,8 @@ npm start
 
 Cada etapa salva suas respostas neste computador quando você continua. O formulário não envia suas respostas nem seus arquivos a um servidor externo. Você pode fechar a página e voltar depois.
 
+O preenchimento do HTML é obrigatório e deve ser feito por você, inclusive em instalações antigas sem esse registro. Leia e preencha os sete passos e confirme o resumo. A IA pode ajudar com a instalação e explicar campos; suas escolhas e a confirmação ficam com você. Reiniciar o servidor mantém os dados salvos, mas exige percorrer os passos novamente antes de confirmar.
+
 ## 1. Informe o cargo que procura
 
 Preencha seu nome, o cargo desejado e o país onde mora. Use o nome de cargo que você costuma encontrar nos anúncios.

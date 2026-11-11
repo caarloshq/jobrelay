@@ -7,6 +7,9 @@ const alvos = { rodada: '../src/coletar.js', apify: './apify.mjs', enriquecer: '
 const acao = process.argv[2];
 if (!Object.hasOwn(alvos, acao)) throw new Error('ENTRADA_INVALIDA: use rodada, apify ou enriquecer.');
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// URL própria para a pré-checagem: a rodada importa a versão instalada após o update.
+const { exigirOnboardingHumano } = await import('../src/onboarding-humano.js?preflight');
+exigirOnboardingHumano(process.env.VAGAS_DIR_DADOS || path.join(raiz, 'vagas', 'data'));
 const resultado = await atualizarAutomaticamente({ raiz });
 console.log(`[Atualização: ${resultado.status}] ${resultado.tag || resultado.motivo || ''}`);
 if (resultado.trava === 'revisao_necessaria' || resultado.registro === 'falhou' ||

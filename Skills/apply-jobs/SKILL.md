@@ -5,6 +5,8 @@ description: Conduzir candidaturas da fila existente do JobRelay. Use quando a p
 
 # Aplicar às vagas da fila
 
+Antes de operar, cumpra a [regra de onboarding humano obrigatório](../../AGENTS.md#o-formulário-html-é-obrigatório-e-pertence-ao-humano). Rode `cd vagas && npm run onboarding`; sem registro humano, aguarde a pessoa concluir o HTML. Não preencha nem contorne por ela.
+
 O procedimento e seus critérios de encerramento vivem em
 [Aplicação](../../aplicacao/README.md#objetivo-e-encerramento-da-fila). Leia essa
 seção antes de começar: ela define o objetivo, a cobertura da fila por

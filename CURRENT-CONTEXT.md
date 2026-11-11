@@ -19,3 +19,7 @@ A revisão encontrou e levou à correção de truncamento de fontes, chaves JSON
 ## Fontes
 
 [Spec da estrutura](specs/concluidas/004-estrutura-coleta-aplicacao.md), [aplicação](aplicacao/README.md) e [revisão de escrita](Skills/review-escrita/SKILL.md).
+
+## O onboarding público exige preenchimento humano
+
+A regra pública em `AGENTS.md` exige preenchimento e confirmação humanos do HTML, para instalações novas e existentes sem registro. As entradas de coleta e candidatura e a conclusão da configuração recusam ausência do registro. A frase de recusa pedida pelo mantenedor fica na regra canônica. A revisão corrigiu o carregamento de módulos antes da atualização e a navegação durante gravação. A validação usa fixtures isoladas; configurações preenchidas na prévia ficam fora do commit. Sem push ou release nesta rodada. O registro não é prova de identidade contra alteração do código local.

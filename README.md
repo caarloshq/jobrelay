@@ -19,7 +19,7 @@ Abra o **Claude Code ou o Codex** e cole:
 Instale https://github.com/caarloshq/jobrelay em uma pasta própria, sem sobrescrever meus projetos. Leia AGENTS.md e me acompanhe na configuração: meu currículo, as vagas que procuro e onde quero acompanhar as oportunidades. Pergunte se quero só buscar vagas ou também autorizar candidaturas. Crie uma tarefa para checar atualizações a cada três dias, seguindo ATUALIZAR.md, e confirme a próxima execução. Se não houver agendador disponível, me avise. Use meus dados sem inventar informações, não peça senhas ou chaves de acesso no chat e me avise antes de usar serviços pagos.
 ```
 
-O assistente guia o onboarding, que é a configuração inicial da sua busca. Tenha seu currículo em PDF. Você escolhe as conexões e confere os materiais antes de usá-los.
+Você deve preencher pessoalmente o onboarding HTML e confirmar o resumo. Essa etapa é obrigatória, inclusive em instalações existentes sem registro humano; o assistente não pode fazê-la nem contorná-la por você. O assistente orienta a instalação e a preparação posterior do currículo. Tenha seu currículo em PDF. Você escolhe as conexões e confere os materiais antes de usá-los.
 
 Prefere baixar a pasta? [Baixe o ZIP](https://github.com/caarloshq/jobrelay/releases/latest/download/jobrelay.zip), extraia e abra a pasta no assistente. Peça para seguir o `AGENTS.md`. O download corresponde à [última release publicada](https://github.com/caarloshq/jobrelay/releases/latest).
 
