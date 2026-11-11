@@ -54,3 +54,9 @@ O [guia de atualização na raiz](ATUALIZAR.md) identifica o repositório origin
 Criado por [Carlos Henrique](https://www.linkedin.com/in/caarloshq), Product Designer, a partir da própria busca de trabalho. [Repositório original](https://github.com/caarloshq/jobrelay).
 
 [Ferramentas e fontes utilizadas](docs/CREDITOS.md) · [Licença MIT](LICENSE)
+
+## Requisitos e quadro experimental
+
+Use Node.js **22.23.4 ou mais recente** para o pacote completo. O núcleo de coleta e o onboarding continuam compatíveis com Node.js 20; o navegador assistido exige Node.js 22, Chrome ou Chromium instalado e as dependências locais de `vagas/`. O quadro Astro em `interface/` exige Node.js 22.23.4 e instalação própria de dependências.
+
+`npm run quadro`, dentro de `vagas/`, continua abrindo o quadro operacional existente. O quadro Astro é experimental e tem execução separada; consulte [suas instruções](interface/README.md). Exemplos, cópias privadas e testes locais não comprovam sincronização operacional com Notion nem login real. Os formatos de materiais estão em [materiais do onboarding](docs/materiais-onboarding.md).

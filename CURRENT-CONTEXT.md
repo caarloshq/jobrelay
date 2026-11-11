@@ -1,5 +1,11 @@
 # Contexto atual do JobRelay
 
+## Candidata 1.4.0 preparada para revisão
+
+A revisão para lançamento corrigiu a origem das mudanças de status no quadro operacional e o caminho de atualização desde a release estável v1.3.0, preservando as proteções de dados. Metadados e nota estão preparados para 1.4.0. Os commits de correção ficam separados da preparação da versão, sem reescrever histórico publicado. Evidências, testes e limites estão na [spec 007](specs/pendentes/007-release-1.4.0.md); a nota curta fica em [docs/releases/v1.4.0.md](docs/releases/v1.4.0.md).
+
+Atualização automática ativa por padrão e confirmação humana obrigatória permanecem critérios da release. O quadro Astro continua experimental e separado da entrada operacional. Nenhuma tag, release ou mudança de visibilidade foi publicada nesta preparação; a estratégia comercial está em uma frente separada. As seções abaixo preservam o registro das rodadas anteriores.
+
 ## Revisão para publicação, 11 de Novembro
 
 Commit e push autorizados nesta continuação. O pacote público exclui perfis preenchidos, materiais pessoais e o arquivo de vagas do protótipo. O scaffold Astro foi integrado como código normal; o histórico Git original foi preservado em cópia e bundle locais ignorados. A interface continua um protótipo, com exemplos fictícios por padrão ou arquivo privado explicitamente configurado; isso não comprova integração operacional com Notion.
