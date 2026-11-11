@@ -6,6 +6,9 @@ on:
 
 jobs:
   radar:
+    strategy:
+      matrix:
+        node: ["20", "22.23.4"]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -14,7 +17,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Dependências dos testes de materiais
+        run: pip install reportlab pypdf python-docx
+      - name: Conferir lockfile Node
+        run: npm ci --ignore-scripts
       - name: Testes do radar, sem rede
         run: npm test
       - name: Nenhum dado pessoal em arquivo versionável
@@ -38,3 +48,39 @@ jobs:
           python3 verificar_resume.py /tmp/pt.pdf base_content_pt.json
           python3 generate_resume.py base_content_en.json /tmp/en.pdf
           python3 verificar_resume.py /tmp/en.pdf base_content_en.json
+
+  interface:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: interface
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.4"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "11.25.0"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm exec eslint src/components/job-board.tsx src/lib src/pages/api
+      - run: node --test src/lib/*.test.ts
+      - run: pnpm build
+
+  upgrade:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vagas
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.4"
+      - name: Upgrade da v1.3.0 para o commit exato, sem rede
+        env:
+          JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ github.sha }}
+        run: node --test test/upgrade-release.test.js

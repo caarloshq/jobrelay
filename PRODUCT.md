@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Repositório público, Node 20+ sem dependência de biblioteca, Python 3 só pra gerar o PDF do currículo. O onboarding continua HTML autocontido, servido por Node. A interface do quadro em `interface/` usa Astro + React e componentes shadcn/Base UI do preset bIkfnxQ por pedido explícito de Carlos em 11 de Novembro. A versão HTML anterior permanece preservada até a integração. Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
+Repositório público. O núcleo de coleta e o onboarding aceitam Node.js 20; o navegador assistido usa a dependência opcional agent-browser e exige Node.js 22. O pacote completo, incluindo a interface Astro, requer Node.js 22.23.4 ou mais recente. Python 3 lê os materiais e gera o currículo. O onboarding continua HTML autocontido, servido por Node. A interface do quadro em `interface/` usa Astro + React e componentes shadcn/Base UI do preset bIkfnxQ por pedido explícito de Carlos em 11 de Novembro. A versão HTML anterior permanece preservada até a integração. Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
 
 ## Users
 
@@ -22,7 +22,7 @@ Situação de uso: sentada no computador, uma tarde, com o currículo em PDF e o
 
 Procurar vaga remota todo dia em portais, ATS e LinkedIn, pontuar cada uma de 0 a 100 contra o currículo real da pessoa, e deixar o currículo adaptado pronto pras que passam do corte. O onboarding existe pra trocar a configuração de exemplo pela dela sem ela editar um JSON.
 
-Sucesso do onboarding: ela termina o formulário, abre o agente, e a primeira rodada traz vaga da profissão dela, no mercado que ela escolheu, com o currículo dela na base. Nenhum dado pessoal sai da máquina.
+Sucesso do onboarding: ela termina o formulário, abre o agente, e a primeira rodada traz vaga da profissão dela, no mercado que ela escolheu, com o currículo dela na base. O formulário salva os dados nesta instalação. O assistente pode transmitir materiais e respostas para Notion ou sites de candidatura conforme a autorização da pessoa.
 
 ## Positioning
 
@@ -40,7 +40,7 @@ O formulário grava em arquivos do próprio repositório: `vagas/config/perfil.j
 
 ## Capabilities and Constraints
 
-- **Tudo local.** Nenhum dado do formulário vai pra servidor externo. O único serviço de fora é a Apify, e só com o token que a pessoa cola.
+- **Formulário salvo localmente.** O formulário grava respostas e arquivos nesta instalação. A operação do assistente pode usar Apify, Notion e sites de candidatura conforme as conexões e autorizações da pessoa; esse fluxo pode transmitir dados aos respectivos serviços.
 - **Token nunca aparece de volta na tela** depois de salvo: o formulário mostra "presente" e oferece trocar.
 - **Sem conta, sem login, sem cadastro.** A página abre em `localhost` e pronto.
 - **Candidatura automática chega desligada** e só liga por decisão explícita da pessoa.
