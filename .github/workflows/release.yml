@@ -1,0 +1,121 @@
+name: publicar release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - name: Conferir tag estável, commit, versão e notas
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const tag = process.env.RELEASE_TAG;
+          if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(tag || '')) throw new Error('A publicação exige uma tag estável vX.Y.Z, sem RC ou prerelease.');
+          const pkg = JSON.parse(fs.readFileSync('vagas/package.json', 'utf8'));
+          const lock = JSON.parse(fs.readFileSync('vagas/package-lock.json', 'utf8'));
+          if (tag !== `v${pkg.version}` || lock.version !== pkg.version || lock.packages?.['']?.version !== pkg.version) throw new Error('A tag e as versões do pacote/lockfile precisam ser idênticas.');
+          const notes = `docs/releases/${tag}.md`;
+          if (!fs.statSync(notes).isFile() || !fs.readFileSync(notes, 'utf8').trim()) throw new Error('As notas desta versão precisam existir e ter conteúdo.');
+          NODE
+          commit="$(git rev-parse HEAD)"
+          test "$commit" = "$(git rev-parse "${GITHUB_SHA}^{commit}")"
+          test "$commit" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dependências dos materiais e currículo
+        run: pip install reportlab pypdf python-docx
+      - name: Instalar dependências locais do núcleo
+        working-directory: vagas
+        run: npm ci --ignore-scripts
+      - name: Testes do núcleo
+        working-directory: vagas
+        run: |
+          mkdir -p data
+          TMPDIR="$PWD/data" npm test
+      - name: Upgrade real da v1.3.0 para o commit da tag
+        working-directory: vagas
+        env:
+          JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ steps.release.outputs.commit }}
+        run: node --test test/upgrade-release.test.js
+      - name: Conferir ausência de dados pessoais no pacote
+        working-directory: vagas
+        run: npm run checar:publico
+      - name: Testes do currículo
+        run: python3 -m unittest discover -s Skills/adapt-resume/tests -p 'test_*.py'
+      - name: Gerar e conferir os currículos nos dois idiomas
+        working-directory: Skills/adapt-resume
+        run: |
+          python3 generate_resume.py base_content_pt.json "$RUNNER_TEMP/jobrelay-pt.pdf"
+          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-pt.pdf" base_content_pt.json
+          python3 generate_resume.py base_content_en.json "$RUNNER_TEMP/jobrelay-en.pdf"
+          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-en.pdf" base_content_en.json
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - name: Instalar interface pelo lockfile
+        working-directory: interface
+        run: pnpm install --frozen-lockfile
+      - name: Tipos e lint da interface
+        working-directory: interface
+        run: |
+          pnpm typecheck
+          pnpm exec eslint src/components/job-board.tsx src/lib src/pages/api
+      - name: Testes da interface
+        working-directory: interface
+        run: node --test src/lib/*.test.ts
+      - name: Build da interface
+        working-directory: interface
+        run: pnpm build
+      - name: Gerar ZIP somente dos arquivos rastreados no commit
+        env:
+          RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
+        run: |
+          git archive --format=zip --prefix=jobrelay/ --output="$RUNNER_TEMP/jobrelay.zip" "$RELEASE_COMMIT"
+          test -s "$RUNNER_TEMP/jobrelay.zip"
+          unzip -t "$RUNNER_TEMP/jobrelay.zip"
+      - name: Publicar nova release estável com o ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            printf 'A release %s já existe; nada será sobrescrito.\n' "$RELEASE_TAG" >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/jobrelay.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "JobRelay $RELEASE_TAG" \
+            --notes-file "docs/releases/$RELEASE_TAG.md" \
+            --latest
