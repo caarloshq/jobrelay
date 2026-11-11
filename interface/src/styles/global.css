@@ -285,9 +285,12 @@ button svg {
   border: 1px solid var(--card-border);
   padding: 0;
   gap: 0;
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 .job-card:hover {
+  background-color: var(--muted);
   border-color: #a3a3a3;
 }
 .job-card-content {
@@ -342,7 +345,7 @@ button svg {
   display: block;
   color: var(--muted-foreground);
   font-size: 12px;
-  margin-top: 4px;
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -383,7 +386,7 @@ button svg {
   min-width: 0;
 }
 .card-bottom {
-  margin-top: 8px;
+  margin-top: auto;
   padding-top: 0;
   display: flex;
   align-items: center;
@@ -1012,16 +1015,27 @@ button svg {
 }
 
 .job-card .metadata {
-  margin-top: 8px;
+  margin-top: 16px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 16px;
+  min-height: 37px;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 4px;
-  max-height: 44px;
+  max-height: 61px;
   flex-shrink: 0;
 }
-.job-card .meta-second { display: contents; }
-.job-card .meta-chip { min-height: 20px; padding: 2px 6px; }
-.job-card .card-bottom { min-height: 20px; flex-shrink: 0; }
+.job-card .meta-second {
+  display: contents;
+}
+.job-card .meta-chip {
+  min-height: 20px;
+  padding: 2px 6px;
+}
+.job-card .card-bottom {
+  min-height: 20px;
+  flex-shrink: 0;
+}
 
 .compatibility-checklist {
   display: grid;
@@ -1048,3 +1062,5 @@ button svg {
   margin-bottom: 12px;
   font-weight: 600;
 }
+
+.history-notes { margin-top: 20px; }
