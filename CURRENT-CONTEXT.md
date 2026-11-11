@@ -71,3 +71,10 @@ Confiança permanece no topo. O painel segue Sobre a vaga, Resumo, Próxima aç�
 Atualização automática fica ativa por padrão, respeitando desligamento explícito. O registro humano do onboarding é obrigatório antes da operação, inclusive nas instalações existentes sem recibo. Esses são critérios obrigatórios da próxima release.
 
 Reconferência independente aprovada no delta. Candidato isolado: 15 testes da interface passaram, tipos sem erros/avisos/hints, lint e build passaram. Conferência visual confirmou a ordem dos blocos e Gaps com negrito e ícones. O login real headless e a barra do modelo Notion continuam nos limites já documentados. A auditoria de status do Notion foi transferida a outro chat e não integra estes commits.
+
+
+### Gaps compara requisitos e experiência
+
+A checklist do detalhe contém somente comparações curtas com evidência literal: atendido, lacuna comprovada ou não comprovado. O frontend não interpreta texto operacional como qualificação. Ações ficam em Próxima ação; anotações originais continuam em Dados técnicos. Histórico é o último bloco e fica expandido. O contrato opcional itensCompatibilidade é transportado pelo GET quando existe; o motor operacional ainda não produz esses itens.
+
+A prévia usa cópia privada curada de 20 vagas e 42 itens; a revisão independente conferiu os trechos e a preservação dos campos/históricos originais. Nenhum dado pessoal, dataset ou configuração da prévia entra no commit. Candidato seletivo sobre a55e55e exclui alterações de outras frentes em logo, cards e store. Passaram 11 testes da interface, 14 de modelo/quadro, tipos, lint e build; conferência visual confirmou a checklist e o Histórico aberto. Commit solicitado; nenhum novo push solicitado.

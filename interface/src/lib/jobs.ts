@@ -1,3 +1,9 @@
+export type CompatibilityItem = {
+  requisito: string
+  estado: "atendido" | "lacuna" | "nao_comprovado"
+  origem: { campo: "resumo" | "gaps"; trecho: string }
+}
+
 export type History = {
   em: string
   de: string | null
@@ -20,6 +26,7 @@ export type Job = {
   lida?: boolean | null
   resumo?: string | null
   gaps?: string | null
+  itensCompatibilidade?: CompatibilityItem[] | null
   fonte?: string | null
   pendencia?: string | null
   publicadaEm?: string | null

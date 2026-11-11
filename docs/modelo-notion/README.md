@@ -20,3 +20,9 @@ Este arquivo é um contrato declarativo para o assistente, não um backup nativo
 Algumas conexões permitem criar porcentagem, mas não configurar a barra, os grupos internos ou todos os detalhes das views. Verifique a capacidade e o resultado antes de anunciar conclusão. Quando faltar suporte, explique o item pendente e oriente o ajuste na interface do Notion: Confiança em porcentagem, exibição em barra, máximo 1 e valor visível; quatro grupos na ordem do JSON; campos técnicos ocultos. Não substitua a barra silenciosamente nem declare paridade visual sem conferência.
 
 O modelo usa 19 campos operacionais. Não transporta as fórmulas legadas Estrelas e Idade nem o botão Concluir. Isso não autoriza excluir propriedades de quadros pessoais existentes. Não altere configurações de candidatura, opt-in ou registros de onboarding ao criar o quadro.
+
+## Gaps compara a vaga com a experiência
+
+Use uma checklist curta por requisito, com ✅ para o que a experiência comprova e 🚫 para lacuna ou requisito não comprovado. Escreva “Não comprovado” quando faltar evidência; isso não prova incapacidade. Não use publicação do anúncio, currículo preparado, envio, salário desconhecido ou referências técnicas como evidência de compatibilidade. Ações de candidatura ficam em **Pendência**; o histórico fica no corpo da página, separado de Gaps. Os 19 campos do Notion permanecem os mesmos.
+
+No quadro local, `itensCompatibilidade` é opcional no contrato da API. Cada item contém `requisito`, `estado` (`atendido`, `lacuna` ou `nao_comprovado`) e `origem` com `campo` (`resumo` ou `gaps`) e `trecho` literal. O agente compara as evidências antes de escrever o item; o frontend não infere experiência de texto livre nem da nota. Sem itens com fonte válida, a interface informa que a compatibilidade por requisito ainda não foi registrada. O texto legado permanece consultável em Dados técnicos.

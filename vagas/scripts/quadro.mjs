@@ -32,7 +32,7 @@ function metadados(v) {
 
 // Apenas projeta dados já existentes. Não deriva ações, datas de envio ou currículo.
 function detalhes(v, q = {}) {
-  const campos = ['pendencia', 'publicadaEm', 'prazo', 'aplicadaEm', 'resultado', 'curriculo', 'curriculoCaminho'];
+  const campos = ['pendencia', 'publicadaEm', 'prazo', 'aplicadaEm', 'resultado', 'curriculo', 'curriculoCaminho', 'itensCompatibilidade'];
   return Object.fromEntries(campos.map(campo => [campo, q[campo] ?? v[campo] ?? null]));
 }
 

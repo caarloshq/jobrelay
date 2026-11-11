@@ -78,7 +78,7 @@ import {
   type History,
 } from "@/lib/jobs"
 
-import { gapLines } from "@/lib/gaps"
+import { compatibilityItems } from "@/lib/gaps"
 
 // Cores conferidas no campo Status do Quadro de Vagas no Notion.
 const stageVisuals = {
@@ -463,33 +463,34 @@ function ReadableText({ text }: { text: string }) {
     </div>
   )
 }
-function GapText({ text }: { text: string }) {
-  return (
-    <div className="detail-prose gap-prose">
-      {gapLines(text).map((line, index) => (
-        <p key={index}>
-          {line.marker && (
+function GapText({ job }: { job: Job }) {
+  const items = compatibilityItems(job)
+  return items.length ? (
+    <ul className="compatibility-checklist">
+      {items.map((item, index) => (
+        <li key={index}>
+          <span aria-hidden="true">
+            {item.estado === "atendido" ? "✅" : "🚫"}
+          </span>
+          <span>
+            {item.requisito}
             <span
-              className="gap-marker"
-              aria-label={
-                line.marker === "✅"
-                  ? "Confirmação no texto"
-                  : "Pendência ou impedimento no texto"
+              className={
+                item.estado === "atendido" ? "sr-only" : "compatibility-state"
               }
             >
-              {line.marker}{" "}
+              {item.estado === "atendido"
+                ? " · Atende"
+                : item.estado === "lacuna"
+                  ? " · Lacuna"
+                  : " · Não comprovado"}
             </span>
-          )}
-          {line.heading && (
-            <strong>
-              {line.heading}
-              {line.text ? ": " : ""}
-            </strong>
-          )}
-          {line.text}
-        </p>
+          </span>
+        </li>
       ))}
-    </div>
+    </ul>
+  ) : (
+    <p className="muted">Compatibilidade por requisito ainda não registrada.</p>
   )
 }
 const keyboardCoordinates: KeyboardCoordinateGetter = (
@@ -973,11 +974,9 @@ export default function JobBoard() {
                   <p className="muted">Nenhuma próxima ação registrada.</p>
                 )}
               </DetailSection>
-              {selected.gaps?.trim() && (
-                <DetailSection title="Gaps" icon={<CheckCircleIcon />}>
-                  <GapText text={selected.gaps} />
-                </DetailSection>
-              )}
+              <DetailSection title="Gaps" icon={<CheckCircleIcon />}>
+                <GapText job={selected} />
+              </DetailSection>
               <DetailSection title="Candidatura" icon={<PaperPlaneTiltIcon />}>
                 {(selected.aplicadaEm ||
                   selected.resultado ||
@@ -1009,13 +1008,6 @@ export default function JobBoard() {
                   </dl>
                 )}
                 <details className="detail-disclosure">
-                  <summary>
-                    <ClockCounterClockwiseIcon />
-                    Histórico
-                  </summary>
-                  <Timeline history={selected.historico} />
-                </details>
-                <details className="detail-disclosure">
                   <summary>Dados técnicos</summary>
                   <dl className="job-properties">
                     <DetailField label="ID externo" value={selected.id} />
@@ -1024,6 +1016,12 @@ export default function JobBoard() {
                       value={selected.curriculoCaminho}
                     />
                   </dl>
+                  {selected.gaps?.trim() && (
+                    <div className="legacy-gap-notes">
+                      <h4>Anotações anteriores</h4>
+                      <ReadableText text={selected.gaps} />
+                    </div>
+                  )}
                 </details>
               </DetailSection>
               <DetailSection title="Datas" icon={<CalendarBlankIcon />}>
@@ -1041,6 +1039,12 @@ export default function JobBoard() {
                 ) : (
                   <p className="muted">Nenhuma data registrada.</p>
                 )}
+              </DetailSection>
+              <DetailSection
+                title="Histórico"
+                icon={<ClockCounterClockwiseIcon />}
+              >
+                <Timeline history={selected.historico} />
               </DetailSection>
             </div>
           )}

@@ -12,7 +12,7 @@
       "## Use a fila certa",
       "- **Quadro:** vagas organizadas por etapa.\n- **Para aplicar:** vagas escolhidas para candidatura.\n- **Precisa de atenção:** revisões e ações pendentes.\n- **Candidaturas:** envios confirmados e entrevistas.\n- **Todas as vagas:** consulta completa, com as vagas encerradas.",
       "## Para o assistente",
-      "Use o quadro como estado das vagas. Confira a página antes de atualizar e preserve os dados existentes. Registre a próxima ação em **Pendência** e o histórico em **Gaps**. Só altere **Status** com um evento confirmado. Sem remuneração publicada, deixe **Salário** vazio. A **Confiança** organiza a prioridade, sem comprovar elegibilidade. Use o logo confirmado da empresa como ícone e mantenha a página sem capa."
+      "Use o quadro como estado das vagas. Confira a página antes de atualizar e preserve os dados existentes. Registre ações operacionais em **Pendência** e o histórico no corpo da página. Use **Gaps** apenas para comparar requisitos da vaga com a experiência, distinguindo atendido, lacuna comprovada e não comprovado. Só altere **Status** com um evento confirmado. Sem remuneração publicada, deixe **Salário** vazio. A **Confiança** organiza a prioridade, sem comprovar elegibilidade. Use o logo confirmado da empresa como ícone e mantenha a página sem capa."
     ],
     "databaseName": "Quadro de Vagas",
     "defaultView": "Todas as vagas",
@@ -159,7 +159,7 @@
       "type": "select"
     },
     "Gaps": {
-      "description": "Requisitos sem evidência e histórico de conferências.",
+      "description": "Checklist curto de requisitos da vaga versus experiência, com evidência. Diferencie atendido, lacuna comprovada e não comprovado. Ações operacionais ficam em Pendência; histórico no corpo da página.",
       "name": "Gaps",
       "type": "text"
     },
