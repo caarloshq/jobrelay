@@ -1,5 +1,7 @@
 # JobRelay: instruções para o agente
 
+Rode `cd vagas && npm run regras` para consultar (ou iniciar) o registro local. Leia o [fluxo vigente da rodada](vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+
 Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. As duas entradas operacionais estão em [coleta](coleta/README.md) e [aplicação](aplicacao/README.md).
 
 ## Pedido de atualização: antes do onboarding
@@ -40,7 +42,7 @@ Se a saída disser **"Perfil ainda NÃO configurado"**, o projeto está com valo
 
 Olhe os blocos marcados `ok`: eles vieram do **formulário** (`npm start`, que o `npm run setup` já abre no primeiro uso), que a pessoa preenche no navegador e que grava perfil, mercado, salário, busca do LinkedIn, token e os arquivos de currículo. **Não repergunte o que está `ok`.** Se os blocos 1, 2 e 5 estiverem em `falta`, peça pra pessoa rodar `npm start` e preencher o formulário primeiro: é mais rápido que entrevistar. O agente pode iniciar o servidor em segundo plano; deve deixar o preenchimento e a confirmação para o humano.
 
-O que sobra pra você, sempre: seguir docs/modelo-notion/README.md se o quadro Notion ainda precisa ser criado, orientar o acesso humano em docs/navegador.md depois da confirmação HTML, e perguntar se as respostas ficam só nos Markdown locais ou também numa página Notion da pessoa; o bloco 3 (montar o currículo base a partir dos arquivos em `materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
+O que sobra pra você, sempre: seguir docs/modelo-notion/README.md se o quadro Notion ainda precisa ser criado, orientar o acesso humano em docs/navegador.md depois da confirmação HTML, e perguntar se as respostas ficam só nos Markdown locais ou também numa página Notion da pessoa; o bloco 3 (montar o currículo base a partir dos arquivos em `materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). No bloco 4, pergunte também se ela quer testar a captura beta do LinkedIn: explique que é opcional, que exige entrar no LinkedIn pelo painel do navegador e ofereça uma rodada de teste antes de deixá-la ligada. Sem resposta, se o teste falhar ou se ela recusar depois dele, a captura continua desligada. Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
 
 A sua parte é **entrevista**, não formulário: o formulário já pegou os fatos; você pergunta de volta antes de escrever qualquer frase de currículo. Regras que valem nela:
 

@@ -1,30 +1,60 @@
-# Atualização automática antes da rodada
+# Consulte a release e confirme antes de instalar
 
-`atualizarAutomaticamente({ raiz })`, em `vagas/src/atualizacao.js`, consulta a última release **estável** de o repositório canônico do projeto. O chamador deve executá-la antes de importar o código da coleta e antes de adquirir posse com `entrarEscritor`. Quando a atualização termina, importe o ponto de entrada da rodada: assim a rodada usa os módulos da release recém-instalada.
+O nome histórico `atualizarAutomaticamente` identifica a API de pré-checagem. Ela consulta a última release estável do repositório original e exige confirmação específica antes de buscar objetos Git ou baixar o ZIP. Consultar não instala. A opção `atualizarAutomaticamente: false` continua desligando essa pré-checagem nas entradas operacionais; ela não muda a autorização de candidaturas.
+
+A entrada operacional primeiro verifica a confirmação humana do onboarding. Depois chama a pré-checagem, antes de importar os módulos da operação e de adquirir sua posse. Somente os resultados `atualizado`, `sem_atualizacao` ou `desativada`, sem falha de registro ou trava, permitem continuar. Falha de rede, bloqueio e `aguardando_confirmacao` interrompem a entrada. A pessoa pode confirmar a atualização ou desligar a checagem nas preferências; o assistente não escolhe por ela.
 
 ```js
-import { atualizarAutomaticamente } from './vagas/src/atualizacao.js';
-const resultado = await atualizarAutomaticamente({ raiz: '/caminho/absoluto/da/instalacao' });
-// status: atualizado | sem_atualizacao | bloqueado
-// Em seguida, importar dinamicamente a entrada da rodada.
+import { atualizarAutomaticamente, podeIniciarOperacao } from './vagas/src/atualizacao.js';
+const resultado = await atualizarAutomaticamente({ raiz }); // raiz absoluta
+// aguardando_confirmacao: apresentar tag, identidade e notas; aguardar a pessoa.
+// Após aceite explícito dessa release, em outra chamada:
+const instalado = await atualizarAutomaticamente({
+  raiz, confirmacao: { aceita: true, ...resultado.confirmacao_necessaria },
+});
+if (!podeIniciarOperacao(instalado)) throw new Error('Atualização pendente');
+// Só agora importar dinamicamente o módulo da operação.
 ```
 
-O módulo exige um checkout Git no branch. Aceita somente `origin` HTTPS igual a `https://github.com/caarloshq/jobrelay.git` ou a `https://github.com/caarloshq/job-scrapper.git`. A segunda URL preserva instalações anteriores à renomeação que ainda dependem do redirecionamento do GitHub. A API e as releases usam o repositório canônico do JobRelay; o módulo busca a tag na origem canônica, confere sua identidade, exige que o commit instalado seja ancestral do commit publicado e faz somente `git merge --ff-only`. Outro host, sufixo ou esquema de URL bloqueia a atualização, assim como RC, histórico divergente, código local modificado ou conflito. Não há `stash`, `reset`, `force` nem retomada por prazo.
+Não transforme esse exemplo em aceite automático: a segunda chamada depende da resposta humana. A aprovação não fica salva para releases futuras. A API consulta novamente os metadados e recusa um aceite cuja tag, identidade da tag ou digest do ZIP tenham mudado.
 
-Se quiser atualizar a URL da origem na sua instalação antiga, execute na raiz do checkout:
+## Use o comando em duas etapas
+
+Na raiz da instalação, `node vagas/scripts/atualizar.mjs` consulta e imprime JSON. Código de saída 3 indica confirmação pendente; 2 indica bloqueio. Depois do aceite da pessoa, use os valores exatos de `confirmacao_necessaria`:
 
 ```bash
-git remote set-url origin https://github.com/caarloshq/jobrelay.git
+# Git
+node vagas/scripts/atualizar.mjs --confirmar v1.5.0 --sha IDENTIDADE_DA_TAG
+# ZIP: acrescentar o digest exibido na consulta
+node vagas/scripts/atualizar.mjs --confirmar v1.5.0 --sha IDENTIDADE_DA_TAG --asset-sha256 DIGEST_SHA256
 ```
 
-Essa troca é opcional e manual; o atualizador não altera o remote.
+Os identificadores acima são espaços para os valores consultados, não argumentos prontos. A próxima operação faz sua pré-checagem novamente. Nenhum comando de atualização inicia coleta, candidatura ou envio.
 
-Uma trava exclusiva fica em `vagas/data/operacao/.atualizacao.lock` até o resultado ser registrado em `vagas/data/atualizacao.json`. A entrada que adquire posse da operação também precisa recusar essa trava; a atualização recusa uma operação ativa ou seus locks. O registro contém somente status, código do motivo, tag, commit e horário; não carrega `.env` nem grava credenciais. Se a aplicação do Git for tentada e falhar, ou se o `HEAD` final não for o commit da release, o resultado é `ATUALIZACAO_APLICACAO_INCERTA` e a trava permanece. A próxima rodada não deve começar. Confirme a parada dos processos, inspecione `HEAD`, índice, árvore e dados preservados, e só então faça manutenção explícita da trava; não há retomada automática ou expiração por prazo.
+## Git exige avanço linear e preserva a árvore local
 
-Uma release que altera `vagas/config/`, `vagas/data/`, `revisoes/`, `Curriculo/`, materiais e builds do currículo, bases de currículo, respostas ou qualquer `.env` é recusada. Alterações locais somente nesses caminhos são aceitas se a release não os toca. A atualização também recusa links simbólicos, hardlinks de destinos, submódulos e mudanças de atributos/filtros Git nos caminhos que seriam atualizados.
+O atualizador aceita somente `origin` igual a `https://github.com/caarloshq/jobrelay.git` ou ao endereço legado exato `https://github.com/caarloshq/job-scrapper.git`. Usa a API e a origem canônicas do JobRelay. Não altera remotes, não aceita forks nesse caminho e não usa `main` como substituto da release estável.
 
-Instalações baixadas como ZIP não têm histórico Git e retornam `RAIZ_GIT_INVALIDA`. Para migrar, prepare um checkout Git separado, copie os dados e arquivos pessoais para ele com a instalação parada, confira cada caminho e depois passe a executar a rodada nesse checkout. Não substitua a pasta ZIP no lugar nem descarte `vagas/data/`.
+Após o aceite, busca a tag em uma referência temporária, confere sua identidade, exige que o commit instalado seja ancestral do destino e executa somente `git merge --ff-only`. Código local alterado, histórico divergente, links, submódulos, filtros locais ou mudanças de atributos impedem a instalação. Não há `stash`, `reset`, `force` ou retomada por prazo. Mudanças da release em caminhos pessoais protegidos são recusadas, inclusive remoções. Alterações locais nesses caminhos podem permanecer se a release não os altera.
 
-Para diagnóstico manual, execute `node vagas/scripts/atualizar.mjs` na raiz. Ele retorna JSON e código 2 quando bloqueado. A execução real consulta GitHub e pode modificar o código instalado; os testes `node --test vagas/test/atualizacao.test.js` usam somente fixtures locais.
+## ZIP usa digest, staging e backup dentro da instalação
 
-Instalações anteriores à renomeação precisam primeiro seguir a [migração para JobRelay](atualizacao.md#se-você-instalou-antes-da-mudança-para-jobrelay), porque o atualizador antigo recusa o redirecionamento da API. A compatibilidade das duas URLs Git descrita aqui passa a valer depois dessa atualização.
+O número da versão sozinho não comprova equivalência. Depois de instalar, o atualizador registra a identidade da release e os hashes dos arquivos geridos em `vagas/data/atualizacao-instalacao.json`. A próxima consulta só reconhece a mesma release como instalada se esse registro e os arquivos conferirem. Sem esse registro, a mesma versão também exige aceite e verificação do pacote.
+
+Uma instalação sem `.git` precisa ter `vagas/package.json` identificando `jobrelay` e uma versão estável. O atualizador aceita somente o asset `jobrelay.zip` da release canônica, com `digest` SHA-256 publicado pela API do GitHub. Se o digest não estiver disponível, bloqueia: não substitui essa prova por tamanho, ETag ou confiança no nome. Depois do aceite, aceita redirecionamento HTTPS somente para `release-assets.githubusercontent.com` e confere os bytes antes de abrir o pacote.
+
+O leitor recusa caminhos que escapem de `jobrelay/`, aliases de caixa, duplicatas, links, volumes múltiplos, ZIP64, métodos desconhecidos e limites de tamanho excedidos. Confere tamanho e CRC de cada entrada. O pacote precisa identificar o produto e a versão de destino. Uma mudança de dependências declaradas exige migração assistida; o atualizador não executa scripts do pacote nem instala dependências.
+
+A allowlist instala código e testes de `vagas/src`, `vagas/scripts` e `vagas/test`, skills, adaptadores, documentação, onboarding, quadro, fontes e assets da interface e arquivos de produto explicitamente listados em `permitidoZip`. Ela exclui dados pessoais, configurações locais, diretórios de dependências, Git e automações de publicação. Recusa caminhos desconhecidos fora da allowlist, mantendo fora da substituição as configurações da interface, histórico de contexto, specs e workflows de publicação. Quando há manifesto de uma atualização anterior, também recusa a remoção de um arquivo gerido. Não remove arquivos antigos desconhecidos. Uma release que dependa de remoções ou de caminhos fora dessa lista exige migração assistida; esse caminho não comprova igualdade byte a byte de toda a pasta com a tag.
+
+Os arquivos escolhidos passam primeiro pelo staging em `vagas/data/atualizacao-backups/<id>/staging`. A mesma pasta guarda um manifesto e a cópia dos arquivos substituídos. Cada destino é conferido contra alterações concorrentes antes da troca. Se uma gravação falhar, o atualizador tenta restaurar os arquivos já trocados e remove os recém-criados por ele. Os backups permanecem para inspeção. Se a reversão não puder ser comprovada, a trava permanece e impede nova operação.
+
+## Dados e regras locais ficam protegidos
+
+São protegidos `.env` e variantes, `config/`, `data/`, `vagas/config/`, `vagas/data/`, revisões, currículos, fontes e builds do currículo, bases de currículo, perfis, respostas e histórico. `REGRAS-DO-PROJETO.md` e nomes de backup iniciados por `REGRAS-DO-PROJETO` também ficam protegidos. O ZIP ignora essas entradas do pacote; o Git recusa uma release que as altere. Não há substituição de fontes pessoais pelos exemplos públicos.
+
+Nesta versão, a atualização só coordena o destino padrão `vagas/data`. Se `VAGAS_DIR_DADOS` apontar para outro destino, a checagem ativa retorna `DADOS_OPERACAO_DIVERGENTES` antes da consulta. A opção de desligar a checagem continua permitindo usar o destino configurável sob as guardas normais da operação.
+
+A trava exclusiva `vagas/data/operacao/.atualizacao.lock` coordena a atualização com a operação. Uma operação ativa, lock de escrita/recuperação, estado inválido ou controle legado sem reconciliação bloqueia a atualização. O acesso humano ativo e os locks de comando, controlador e recuperação do navegador também bloqueiam; a verificação se repete antes de trocar código. PID files do runtime, checkpoint sem encerramento deliberado ou bloqueio pendente também impedem a troca, mesmo sem comando em execução. O atualizador não sonda nem fecha o browser para liberar esse estado. Não há expiração nem tomada de posse automática. O resultado fica em `vagas/data/atualizacao.json`, sem credenciais. Se o Git iniciar a aplicação e não confirmar o destino, ou se houver reversão ZIP incerta ou falha ao registrar o resultado, a trava pede revisão manual. Pare os processos e reconcilie código, dados e manifesto antes de mantê-la ou removê-la deliberadamente.
+
+Os testes do atualizador usam repositórios e ZIPs fictícios locais. Eles não consultam releases reais e não comprovam atualização de uma instalação externa. Instalações antigas podem precisar primeiro da [migração assistida](atualizacao.md).

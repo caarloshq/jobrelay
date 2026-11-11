@@ -1,5 +1,7 @@
 # Coleta e preparação de vagas
 
+Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+
 Esta é a entrada independente para buscar, avaliar e preparar vagas. Execute os comandos dentro de `vagas/`. A aplicação tem [runbook próprio](../aplicacao/README.md); o [ciclo completo](../vagas/RODADA-DIARIA.md) encadeia ambos quando autorizado. Leia também [as regras do subsistema](../vagas/AGENTS.md).
 
 A coleta conserva os papéis de busca, preparação, maestro e revisão. Ela atualiza o quadro local por padrão; Notion é opcional e exige a conexão e o snapshot da própria instalação. Nenhuma coleta autoriza o preenchimento ou envio de candidatura.

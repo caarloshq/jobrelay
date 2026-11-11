@@ -39,9 +39,13 @@ Para candidaturas no navegador, use o [navegador isolado do JobRelay](docs/naveg
 
 Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador. Faça o login diretamente no site. O assistente guia a conexão e pede as autorizações necessárias para candidatar. Serviços externos podem ter custos; ele deve avisar antes de usá-los.
 
+A captura de Vagas, Postagens e Feed do LinkedIn é um **teste beta opcional**, usando sua profissão e seus cargos. Se quiser testar, o login no LinkedIn é obrigatório: entre pelo painel do navegador e avise o assistente quando terminar. As outras fontes continuam disponíveis sem ativar esse teste.
+
 ## Receba e instale atualizações
 
 Na instalação pelo prompt, o assistente configura uma checagem **a cada três dias** e avisa quando houver uma nova versão. A tarefa depende do agendador e do computador disponíveis. Para instalar a atualização, peça **“atualize para a versão mais recente”**.
+
+Antes de baixar e instalar uma versão encontrada ao iniciar uma rodada, o assistente pede sua confirmação.
 
 O [guia de atualização na raiz](ATUALIZAR.md) identifica o repositório original, a [última release estável](https://github.com/caarloshq/jobrelay/releases/latest) e o caminho para preservar seus dados, inclusive em versões antigas.
 

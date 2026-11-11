@@ -20,13 +20,13 @@ Situação de uso: sentada no computador, uma tarde, com o currículo em PDF e o
 
 ## Product Purpose
 
-Procurar vaga remota todo dia em portais, ATS e LinkedIn, pontuar cada uma de 0 a 100 contra o currículo real da pessoa, e deixar o currículo adaptado pronto pras que passam do corte. O onboarding existe pra trocar a configuração de exemplo pela dela sem ela editar um JSON.
+Buscar vagas em portais, ATS e LinkedIn, avaliar a compatibilidade com o currículo real e os critérios escolhidos e organizar oportunidades no quadro. Quando a pessoa desejar candidatar-se e conceder as autorizações necessárias, preparar respostas, adaptar o currículo e operar os formulários, com prova de recebimento para contar um envio. O onboarding existe pra trocar a configuração de exemplo pela dela sem ela editar um JSON.
 
 Sucesso do onboarding: ela termina o formulário, abre o agente, e a primeira rodada traz vaga da profissão dela, no mercado que ela escolheu, com o currículo dela na base. O formulário salva os dados nesta instalação. O assistente pode transmitir materiais e respostas para Notion ou sites de candidatura conforme a autorização da pessoa.
 
 ## Positioning
 
-Não é agregador de vagas. É um filtro com viés declarado: o dela. O que ele faz que um site de vagas não faz: lê o anúncio inteiro contra o currículo, descarta o que não é remoto ou paga abaixo do piso, e adapta o currículo sem inventar uma linha.
+O assistente compara os anúncios com o perfil e os critérios da pessoa, mantém uma fila entre sessões e prepara materiais a partir de fatos verificados. Modelo de trabalho, mercado e piso salarial vêm da configuração da instalação. Não inventa experiência para preencher exigências da vaga.
 
 ## Operating Context
 
@@ -52,3 +52,16 @@ O formulário grava em arquivos do próprio repositório: `vagas/config/perfil.j
 - **Tema neutro do preset shadcn bIkfnxQ.** Direção de Carlos em 11 de Novembro de 2026: botões neutros, Montserrat preservada, sem instalar shadcn/Next. Substitui a direção anterior de botões azuis.
 - Texto sem travessão. Mês, dia e período com inicial maiúscula.
 - Tom: direto, em português, sem jargão de recrutamento e sem promessa de emprego.
+
+
+## Product Principles
+
+Coleta e aplicação são frentes independentes. Buscar não concede envio de candidaturas; trabalhar na fila existente não inicia coleta por associação. O ciclo completo respeita a escolha e as autorizações da pessoa.
+
+O Aplicador usa `Skills/adapt-resume/SKILL.md` para adaptar uma cópia da base à descrição real. O arquivo precisa de texto extraível, ordem de leitura e conferência após a importação no portal. Cobertura de termos não é nota de ATS nem garantia de aprovação.
+
+As regras de cada instalação ficam em `REGRAS-DO-PROJETO.md` e são consultadas no início e nas tarefas delegadas. Atualizações pedem confirmação antes de baixar e instalar e preservam dados e regras locais. Após a aplicação, perguntas e retomadas concluídas ou impedimento real registrado, o assistente oferece o Agente de melhorias; com aceite, ele executa correções enxutas apoiadas em problemas registrados.
+
+A próxima integração está documentada em `vagas/FLUXO-DA-RODADA.md`. Código e testes sintéticos não provam login, recebimento de candidatura nem recuperação de DOM em sites reais.
+
+A captura assistida do LinkedIn é beta e opcional. As consultas usam a profissão e os cargos da pessoa; perfil pendente não recebe um título de exemplo por fallback. O login no LinkedIn é obrigatório para Vagas, Postagens e Feed nesta captura assistida. A pessoa entra no painel local e o assistente confere a sessão após seu aviso. O Feed depende da conta e não é filtrado por cargo pelo produto. Ao final de cada frente, o assistente mostra seu resumo: vagas encontradas/adicionadas/descartadas na coleta; envios confirmados/pendências/não enviadas na aplicação.

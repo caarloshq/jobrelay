@@ -35,6 +35,7 @@ function fixture(t, alterarRelease = raiz => fs.writeFileSync(path.join(raiz, 'v
   comando(raiz, 'remote', 'add', 'origin', origem);
   const opcoes = {
     raiz,
+    confirmacao: { aceita: true, tag: 'v1.2.0', tagSha },
     consultarRelease: async () => ({ tag: 'v1.2.0', tagSha }),
     obterTag: async ({ ref }) => { comando(raiz, 'update-ref', ref, tagSha); },
   };
@@ -151,7 +152,7 @@ test('não segue link simbólico em destino', async t => {
 
 test('bloqueia tag alterada entre consulta e busca', async t => {
   const f = fixture(t);
-  const resultado = await atualizarAutomaticamente({ ...f.opcoes, consultarRelease: async () => ({ tag: 'v1.2.0', tagSha: f.inicial }) });
+  const resultado = await atualizarAutomaticamente({ ...f.opcoes, confirmacao: { aceita: true, tag: 'v1.2.0', tagSha: 'b'.repeat(40) }, consultarRelease: async () => ({ tag: 'v1.2.0', tagSha: 'b'.repeat(40) }) });
   assert.equal(resultado.motivo, 'TAG_MUDOU');
   assert.equal(comando(f.raiz, 'rev-parse', 'HEAD'), f.inicial);
 });
@@ -186,12 +187,12 @@ test('RC não entra pelo caminho automático', async t => {
   assert.equal(comando(f.raiz, 'rev-parse', 'HEAD'), f.inicial);
 });
 
-test('bloqueia instalação ZIP sem histórico Git', async t => {
+test('bloqueia diretório sem identidade de instalação ZIP', async t => {
   const raiz = fs.mkdtempSync(path.join(base, 'zip-'));
   t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
   fs.mkdirSync(path.join(raiz, 'vagas/data'), { recursive: true });
   const resultado = await atualizarAutomaticamente({ raiz, consultarRelease: async () => { throw new Error('não deveria consultar'); } });
-  assert.equal(resultado.motivo, 'RAIZ_GIT_INVALIDA');
+  assert.equal(resultado.motivo, 'ZIP_INSTALACAO_INVALIDA');
 });
 
 test('bloqueia hardlink em destino', async t => {
@@ -211,4 +212,54 @@ test('recusa alias de caixa de diretório de dados antes de atualizar', async t 
   const resultado = await atualizarAutomaticamente(f.opcoes);
   assert.equal(resultado.motivo, 'RELEASE_ALTERA_DADOS_PROTEGIDOS');
   assert.equal(comando(f.raiz, 'rev-parse', 'HEAD'), f.inicial);
+});
+
+
+test('pré-checagem não busca objetos e exige consentimento específico não persistido', async t => {
+  const f = fixture(t); let buscas = 0;
+  const obterTag = async () => { buscas++; throw new Error('não baixar'); };
+  const resultado = await atualizarAutomaticamente({ ...f.opcoes, confirmacao: null, obterTag });
+  assert.equal(resultado.status, 'aguardando_confirmacao');
+  assert.deepEqual(resultado.confirmacao_necessaria, { tag: 'v1.2.0', tagSha: f.destino });
+  assert.equal(buscas, 0);
+  const divergente = await atualizarAutomaticamente({ ...f.opcoes, confirmacao: { aceita: true, tag: 'v1.2.1', tagSha: f.destino }, obterTag });
+  assert.equal(divergente.motivo, 'CONFIRMACAO_DIVERGENTE'); assert.equal(buscas, 0);
+  assert.equal((await atualizarAutomaticamente({ ...f.opcoes, confirmacao: null, obterTag })).status, 'aguardando_confirmacao');
+  assert.equal(comando(f.raiz, 'rev-parse', 'HEAD'), f.inicial);
+});
+
+test('regras locais e backups são protegidos também quando a release tenta alterá-los', async t => {
+  for (const nome of ['REGRAS-DO-PROJETO.md', 'REGRAS-DO-PROJETO-2026-11.md.bak']) {
+    const f = fixture(t, raiz => fs.writeFileSync(path.join(raiz, nome), 'não substituir'));
+    assert.equal((await atualizarAutomaticamente(f.opcoes)).motivo, 'RELEASE_ALTERA_DADOS_PROTEGIDOS');
+  }
+});
+
+
+test('release já instalada não pede novo aceite nem busca a tag ausente', async t => {
+  const f = fixture(t);
+  assert.equal((await atualizarAutomaticamente(f.opcoes)).status, 'atualizado');
+  comando(f.raiz, 'tag', '-d', 'v1.2.0');
+  const r = await atualizarAutomaticamente({ ...f.opcoes, confirmacao: null, obterTag: async () => { throw new Error('não buscar'); } });
+  assert.equal(r.status, 'sem_atualizacao');
+});
+
+
+test('atualização aguarda posse humana e locks do navegador antes de consultar release', async t => {
+  for (const relativo of ['.comando.lock', '.comando.recuperacao.lock', 'controle/controlador.lock', 'controle/recuperacao.lock', 'acesso-humano.json']) {
+    const f = fixture(t); const arquivo = path.join(f.raiz, 'vagas/data/navegador', relativo);
+    fs.mkdirSync(path.dirname(arquivo), {recursive:true}); fs.writeFileSync(arquivo, relativo.endsWith('.json') ? JSON.stringify({ativo:true}) : '123');
+    let consultas=0; const r=await atualizarAutomaticamente({...f.opcoes,consultarRelease:async()=>{consultas++;throw new Error('não consultar');}});
+    assert.equal(r.motivo,relativo.endsWith('.json')?'ACESSO_HUMANO_ATIVO':'NAVEGADOR_OCUPADO'); assert.equal(consultas,0);
+    assert.equal(comando(f.raiz,'rev-parse','HEAD'), f.inicial);
+  }
+});
+
+
+test('atualização preserva sessão aberta ou checkpoint pendente, sem sondar browser', async t => {
+  for (const [nome,conteudo] of [['s/jobrelay.pid','123'], ['r/recuperacao.pid','123'], ['controle/checkpoint.json',JSON.stringify({fase:'antes',abasProtegidas:true})], ['controle/bloqueio.json',JSON.stringify({ativo:true})]]) {
+    const f=fixture(t); const arquivo=path.join(f.raiz,'vagas/data/navegador',nome);fs.mkdirSync(path.dirname(arquivo),{recursive:true});fs.writeFileSync(arquivo,conteudo);
+    let consultas=0;const r=await atualizarAutomaticamente({...f.opcoes,consultarRelease:async()=>{consultas++;throw new Error('não consultar');}});
+    assert.equal(r.motivo,'NAVEGADOR_SESSAO_PENDENTE');assert.equal(consultas,0);
+  }
 });

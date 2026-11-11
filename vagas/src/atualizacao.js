@@ -1,3 +1,4 @@
+const REPO_PUBLICO = 'https://github.com/caarloshq/jobrelay';
 // Atualização conservadora: somente release estável deste repositório, por avanço linear.
 // Chamar antes de entrarEscritor. A entrada de operação deve recusar .atualizacao.lock.
 import fs from 'node:fs';
@@ -5,6 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { baixarZip, instalarZip, permitidoZip } from './atualizacao-zip.js';
 
 const executar = promisify(execFile);
 const ORIGEM = 'https://github.com/caarloshq/jobrelay.git';
@@ -21,7 +23,9 @@ const TIMEOUT_GIT = 30000;
 const proteger = nome => {
   const p = nome.normalize('NFKC').replaceAll('\\', '/').toLowerCase();
   const partes = p.split('/');
-  return partes.some(n => n === '.env' || n.startsWith('.env.')) ||
+  return partes.some(n => n === '.env' || n.startsWith('.env.') || n.startsWith('regras-do-projeto')) ||
+    /(^|\/)(perfil|respostas|respostas-preenchidas)([.-]|$)/.test(p) ||
+    ['historico/', 'aplicacao/historico/', 'backups/', 'backup/'].some(prefixo => p.startsWith(prefixo)) ||
     ['config/', 'data/', 'vagas/config/', 'vagas/data/', 'revisoes/', 'curriculo/',
       'skills/adapt-resume/materiais-fonte/', 'skills/adapt-resume/builds/'].some(prefixo => p.startsWith(prefixo)) ||
     /(^|\/)(base_content_[^/]+\.json|base_resume_[^/]+\.(pdf|docx))$/.test(p);
@@ -89,10 +93,36 @@ async function releaseEstavel(fetchImpl) {
   if (release.draft !== false || release.prerelease !== false || !TAG.test(release.tag_name)) falhar('RELEASE_NAO_ESTAVEL');
   const ref = await respostaJson(`${API}/git/ref/tags/${encodeURIComponent(release.tag_name)}`, fetchImpl);
   if (ref.ref !== `refs/tags/${release.tag_name}` || !['tag', 'commit'].includes(ref.object?.type) || !SHA.test(ref.object?.sha)) falhar('TAG_INVALIDA');
-  return { tag: release.tag_name, tagSha: ref.object.sha };
+  const asset = release.assets?.find(a => a.name === 'jobrelay.zip');
+  return { tag: release.tag_name, tagSha: ref.object.sha,
+    assetUrl: asset?.browser_download_url, assetSha256: /^sha256:[a-f0-9]{64}$/.test(asset?.digest || '') ? asset.digest.slice(7) : undefined };
 }
 
 function estadoOperacao(dados) {
+  const navegador = path.join(dados, 'navegador'); seguroNoDisco(navegador, 'diretorio');
+  for (const relativo of ['.comando.lock', '.comando.recuperacao.lock', 'controle/controlador.lock', 'controle/recuperacao.lock']) {
+    try { fs.lstatSync(path.join(navegador, relativo)); falhar('NAVEGADOR_OCUPADO'); }
+    catch (erro) { if (erro.code !== 'ENOENT') throw erro; }
+  }
+  const acesso = path.join(navegador, 'acesso-humano.json'); seguroNoDisco(acesso, 'arquivo');
+  if (fs.existsSync(acesso)) {
+    let registro; try { if (fs.statSync(acesso).size > 65536) falhar('NAVEGADOR_ESTADO_INVALIDO'); registro = JSON.parse(fs.readFileSync(acesso, 'utf8')); }
+    catch { falhar('NAVEGADOR_ESTADO_INVALIDO'); }
+    if (typeof registro?.ativo !== 'boolean') falhar('NAVEGADOR_ESTADO_INVALIDO');
+    if (registro.ativo) falhar('ACESSO_HUMANO_ATIVO');
+  }
+  for (const nome of ['s', 'r']) {
+    const socket = path.join(navegador, nome); seguroNoDisco(socket, 'diretorio');
+    if (fs.existsSync(socket) && fs.readdirSync(socket).some(n => n.endsWith('.pid'))) falhar('NAVEGADOR_SESSAO_PENDENTE');
+  }
+  for (const nome of ['checkpoint.json', 'bloqueio.json']) {
+    const arquivo = path.join(navegador, 'controle', nome); seguroNoDisco(arquivo, 'arquivo');
+    if (!fs.existsSync(arquivo)) continue;
+    let registro; try { if (fs.statSync(arquivo).size > 65536) falhar('NAVEGADOR_ESTADO_INVALIDO'); registro = JSON.parse(fs.readFileSync(arquivo, 'utf8')); }
+    catch { falhar('NAVEGADOR_ESTADO_INVALIDO'); }
+    if (nome === 'bloqueio.json' && registro?.ativo !== false) falhar('NAVEGADOR_SESSAO_PENDENTE');
+    if (nome === 'checkpoint.json' && (registro?.fase !== 'encerrada' || registro.encerradaDeliberadamente !== true || registro.abasProtegidas !== false || registro.chromePid || registro.daemonPid || !Array.isArray(registro.tabs) || registro.tabs.length)) falhar('NAVEGADOR_SESSAO_PENDENTE');
+  }
   const pasta = path.join(dados, 'operacao');
   seguroNoDisco(pasta, 'diretorio');
   for (const nome of ['.escrita.lock', '.recuperacao.lock']) {
@@ -120,6 +150,20 @@ function gravarResultado(dados, resultado) {
   finally { if (fs.existsSync(temporario)) fs.unlinkSync(temporario); }
 }
 
+
+function validarRelease(release) { if (!TAG.test(release?.tag) || !SHA.test(release?.tagSha)) falhar('TAG_INVALIDA'); }
+function validarVersaoMaisNova(atual, nova) {
+  const a = atual.slice(1).split('+')[0].split('.').map(Number), b = nova.slice(1).split('+')[0].split('.').map(Number);
+  for (let i = 0; i < 3; i++) { if (b[i] > a[i]) return; if (b[i] < a[i]) falhar('RELEASE_NAO_MAIS_NOVA'); }
+  falhar('RELEASE_NAO_MAIS_NOVA');
+}
+function conferirConfirmacao(release, confirmacao, tipoInstalacao) {
+  const necessaria = { tag: release.tag, tagSha: release.tagSha, ...(tipoInstalacao === 'zip' ? { assetSha256: release.assetSha256 } : {}) };
+  if (confirmacao === null) return { status: 'aguardando_confirmacao', tipoInstalacao, tag: release.tag, confirmacao_necessaria: necessaria };
+  if (confirmacao?.aceita !== true || Object.entries(necessaria).some(([k,v]) => confirmacao[k] !== v)) falhar('CONFIRMACAO_DIVERGENTE');
+  return null;
+}
+
 function caminhosAlterados(saida) { return saida ? saida.split('\0').filter(Boolean) : []; }
 
 async function verificarDestino(raiz, commit, caminhos) {
@@ -133,7 +177,18 @@ async function verificarDestino(raiz, commit, caminhos) {
 }
 
 /** Retorna { status, motivo?, tag?, commit? }. Nunca lê .env nem inicia uma operação. */
-export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fetch, consultarRelease = null, obterTag = null, aplicarMerge = null } = {}) {
+export function podeIniciarOperacao(resultado) {
+  return ['atualizado', 'sem_atualizacao', 'desativada'].includes(resultado?.status) && !resultado.trava && resultado.registro !== 'falhou';
+}
+
+export function lerConfirmacao(args = []) {
+  if (!args.length) return null;
+  if (args.length !== 4 && args.length !== 6) throw new Error('CONFIRMACAO_INVALIDA');
+  if (args[0] !== '--confirmar' || args[2] !== '--sha' || !TAG.test(args[1]) || !SHA.test(args[3]) || (args.length === 6 && (args[4] !== '--asset-sha256' || !/^[a-f0-9]{64}$/.test(args[5])))) throw new Error('CONFIRMACAO_INVALIDA');
+  return { aceita: true, tag: args[1], tagSha: args[3], ...(args[5] ? { assetSha256: args[5] } : {}) };
+}
+
+export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fetch, consultarRelease = null, obterTag = null, aplicarMerge = null, confirmacao = null, antesGravarZip = null } = {}) {
   if (typeof raiz !== 'string' || !path.isAbsolute(raiz)) throw new TypeError('raiz absoluta obrigatória');
   // A injeção da aplicação serve apenas às fixtures offline, junto com release
   // e tag locais. A execução real sempre chama git merge --ff-only.
@@ -160,8 +215,38 @@ export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fe
   };
   try {
     conferirTrava();
+    if (process.env.VAGAS_DIR_DADOS && path.resolve(process.env.VAGAS_DIR_DADOS) !== dados) falhar('DADOS_OPERACAO_DIVERGENTES');
     estadoOperacao(dados);
-    if (!fs.existsSync(path.join(projeto, '.git'))) falhar('RAIZ_GIT_INVALIDA');
+    seguroNoDisco(path.join(projeto, '.git'));
+    const tipoInstalacao = fs.existsSync(path.join(projeto, '.git')) ? 'git' : 'zip';
+    if (tipoInstalacao === 'zip') {
+      seguroNoDisco(path.join(projeto, 'vagas/package.json'), 'arquivo');
+      let pacote; try { pacote = JSON.parse(fs.readFileSync(path.join(projeto, 'vagas/package.json'), 'utf8')); } catch { falhar('ZIP_INSTALACAO_INVALIDA'); }
+      if (pacote?.name !== 'jobrelay' || !TAG.test(`v${pacote.version}`)) falhar('ZIP_INSTALACAO_INVALIDA');
+      const release = consultarRelease ? await consultarRelease() : await releaseEstavel(fetchImpl);
+      validarRelease(release);
+      const registroPath = path.join(dados, 'atualizacao-instalacao.json'); seguroNoDisco(registroPath, 'arquivo');
+      if (fs.existsSync(registroPath)) {
+        let instalado; try { instalado = JSON.parse(fs.readFileSync(registroPath, 'utf8')); } catch { falhar('ZIP_REGISTRO_INVALIDO'); }
+        if (instalado.contrato !== 1 || !Array.isArray(instalado.arquivos) || !instalado.arquivos.length) falhar('ZIP_REGISTRO_INVALIDO');
+        for (const e of instalado.arquivos) {
+          if (typeof e.nome !== 'string' || e.nome.includes('\\') || e.nome.split('/').some(p => !p || p === '.' || p === '..') || proteger(e.nome) || !permitidoZip(e.nome) || !/^[a-f0-9]{64}$/.test(e.sha256)) falhar('ZIP_REGISTRO_INVALIDO');
+          const arquivo = path.join(projeto, e.nome); seguroNoDisco(arquivo, 'arquivo');
+          if (!fs.existsSync(arquivo) || crypto.createHash('sha256').update(fs.readFileSync(arquivo)).digest('hex') !== e.sha256) falhar('CODIGO_LOCAL_MODIFICADO');
+        }
+        if (`v${pacote.version}` === release.tag && instalado.tag === release.tag && instalado.tagSha === release.tagSha && instalado.assetSha256 === release.assetSha256) {
+          resultado = { status: 'sem_atualizacao', tipoInstalacao, tag: release.tag }; return resultado;
+        }
+      }
+      if (`v${pacote.version}` !== release.tag) validarVersaoMaisNova(`v${pacote.version}`, release.tag);
+      if (!/^[a-f0-9]{64}$/.test(release.assetSha256 || '') || release.assetUrl !== `${REPO_PUBLICO}/releases/download/${release.tag}/jobrelay.zip`) falhar('ASSET_NAO_VERIFICAVEL');
+      const pendente = conferirConfirmacao(release, confirmacao, tipoInstalacao);
+      if (pendente) { resultado = pendente; return resultado; }
+      const bytes = await baixarZip(release, fetchImpl);
+      const aplicado = instalarZip({ raiz: projeto, dados, bytes, release, proteger, seguroNoDisco,
+        conferir: () => { conferirTrava(); estadoOperacao(dados); }, antesGravar: consultarRelease ? antesGravarZip : null });
+      resultado = { status: 'atualizado', tipoInstalacao, tag: release.tag, ...aplicado }; return resultado;
+    }
     seguroNoDisco(path.join(projeto, '.git'));
     if (await git(projeto, 'rev-parse', '--show-toplevel') !== projeto) falhar('RAIZ_GIT_INVALIDA');
     if (!ORIGENS_PERMITIDAS.has(await git(projeto, 'remote', 'get-url', 'origin'))) falhar('ORIGEM_INVALIDA');
@@ -173,8 +258,24 @@ export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fe
     const branch = await git(projeto, 'symbolic-ref', '--quiet', '--short', 'HEAD');
     const statusInicio = await git(projeto, 'status', '--porcelain=v1', '-z', '--no-renames', '--untracked-files=all');
     const sujos = caminhosAlterados(statusInicio).map(l => l.slice(3));
+    for (const nome of sujos) seguroNoDisco(path.join(projeto, nome));
     const release = consultarRelease ? await consultarRelease() : await releaseEstavel(fetchImpl);
-    if (!TAG.test(release?.tag) || !SHA.test(release?.tagSha)) falhar('TAG_INVALIDA');
+    validarRelease(release);
+    // Metadados podem ser consultados; objetos Git e o ZIP só chegam após aceite.
+    const registroAnteriorPath = path.join(dados, 'atualizacao.json'); seguroNoDisco(registroAnteriorPath, 'arquivo');
+    let registroAnterior; try { registroAnterior = JSON.parse(fs.readFileSync(registroAnteriorPath, 'utf8')); } catch { /* sem prova anterior */ }
+    if (release.tagSha === inicio || (registroAnterior?.tag === release.tag && registroAnterior?.tagSha === release.tagSha && registroAnterior?.commit === inicio && ['atualizado', 'sem_atualizacao'].includes(registroAnterior?.status))) {
+      if (sujos.some(n => !proteger(n))) falhar('CODIGO_LOCAL_MODIFICADO');
+      resultado = { status: 'sem_atualizacao', tag: release.tag, tagSha: release.tagSha, commit: inicio }; return resultado;
+    }
+    let local; try { local = await git(projeto, 'rev-parse', `refs/tags/${release.tag}`); } catch { /* tag ainda não instalada */ }
+    if (local === release.tagSha) {
+      const commitLocal = await git(projeto, 'rev-parse', `refs/tags/${release.tag}^{commit}`);
+      if (commitLocal === inicio) { if (sujos.some(n => !proteger(n))) falhar('CODIGO_LOCAL_MODIFICADO'); resultado = { status: 'sem_atualizacao', tag: release.tag, tagSha: release.tagSha, commit: inicio }; return resultado; }
+    }
+    if (sujos.some(n => !proteger(n))) falhar('CODIGO_LOCAL_MODIFICADO');
+    const pendente = conferirConfirmacao(release, confirmacao, 'git');
+    if (pendente) { resultado = pendente; return resultado; }
     const sufixo = crypto.randomUUID().replaceAll('-', '');
     refTemporaria = `refs/codex-atualizacao/${sufixo}`;
     if (obterTag) await obterTag({ raiz: projeto, tag: release.tag, ref: refTemporaria });
@@ -184,7 +285,7 @@ export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fe
     if (!SHA.test(destino)) falhar('COMMIT_INVALIDO');
     if (destino === inicio) {
       if (sujos.some(n => !proteger(n))) falhar('CODIGO_LOCAL_MODIFICADO');
-      resultado = { status: 'sem_atualizacao', tag: release.tag, commit: destino }; return resultado;
+      resultado = { status: 'sem_atualizacao', tag: release.tag, tagSha: release.tagSha, commit: destino }; return resultado;
     }
     try { await git(projeto, 'merge-base', '--is-ancestor', inicio, destino); }
     catch { falhar('HISTORICO_DIVERGENTE'); }
@@ -203,13 +304,14 @@ export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fe
     else await git(projeto, 'merge', '--ff-only', '--no-stat', destino);
     if (await git(projeto, 'rev-parse', 'HEAD') !== destino) falhar('ATUALIZACAO_APLICACAO_INCERTA');
     mergeConfirmado = true;
-    resultado = { status: 'atualizado', tag: release.tag, commit: destino };
+    resultado = { status: 'atualizado', tag: release.tag, tagSha: release.tagSha, commit: destino };
     return resultado;
   } catch (erro) {
     resultado = { status: 'bloqueado', motivo: mergeTentado && !mergeConfirmado ? 'ATUALIZACAO_APLICACAO_INCERTA' : (erro.codigo || 'ATUALIZACAO_FALHOU') };
     return resultado;
   } finally {
     if (refTemporaria) { try { await git(projeto, 'update-ref', '-d', refTemporaria); } catch { /* referência temporária sem efeito na árvore */ } }
+    if (['ZIP_ROLLBACK_INCERTO', 'ZIP_APLICACAO_INCERTA'].includes(resultado?.motivo)) mergeTentado = true;
     if (mergeTentado && !mergeConfirmado) resultado.trava = 'revisao_necessaria';
     let registroConfirmado = false;
     try { gravarResultado(dados, resultado); registroConfirmado = true; }

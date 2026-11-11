@@ -48,3 +48,7 @@ __pycache__/
 # Ajuste opcional próprio da instalação; o padrão vive no código.
 /vagas/config/navegador.json
 /interface/.env.example
+
+# Regras pertencem à pessoa que instalou.
+/REGRAS-DO-PROJETO.md
+/vagas/config/linkedin-feed.json

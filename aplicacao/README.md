@@ -1,5 +1,7 @@
 # Aplicação em vagas
 
+Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+
 Esta é a entrada independente para preparar, preencher e acompanhar candidaturas já selecionadas. Leia [as regras de respostas](#protocolo-de-respostas), [o perfil](PERFIL.md), [as respostas abertas](RESPOSTAS.md) e [o histórico literal](RESPOSTAS-PREENCHIDAS.md). A [coleta](../coleta/README.md) é uma frente separada; a aplicação não dispara fontes, Apify nem uma rodada.
 
 O maestro/aplicador mantém o navegador e o registro; o preparador devolve rascunho e lacunas; o revisor confere o pacote e devolve falhas. O modo padrão é só mapear. Preenchimento e envio exigem o opt-in e as autorizações locais já definidos na instalação.
