@@ -75,6 +75,17 @@ const servidor = createServer((req, res) => {
   }
   if (req.method === 'GET' && url.pathname === '/api/vagas') return json(200, listar());
   if (req.method === 'POST' && url.pathname === '/api/status') {
+    const host = req.headers.host;
+    const origem = req.headers.origin;
+    // O navegador envia Origin; o proxy Node interno envia JSON sem Origin.
+    // Host também é restrito para não confiar em um par Host/Origin arbitrário.
+    if (![`localhost:${PORTA}`, `127.0.0.1:${PORTA}`].includes(host) ||
+        (origem !== undefined && origem !== `http://${host}`)) {
+      return json(403, { erro: 'Origem da solicitação inválida.' });
+    }
+    if (!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '')) {
+      return json(415, { erro: 'Envie a solicitação como application/json.' });
+    }
     let corpo = '';
     req.on('data', (c) => { corpo += c; if (corpo.length > 1e5) req.destroy(); });
     req.on('end', () => {
