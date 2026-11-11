@@ -78,6 +78,8 @@ import {
   type History,
 } from "@/lib/jobs"
 
+import { gapLines } from "@/lib/gaps"
+
 // Cores conferidas no campo Status do Quadro de Vagas no Notion.
 const stageVisuals = {
   Avaliar: { icon: MagnifyingGlassIcon, tone: "blue" },
@@ -458,6 +460,35 @@ function ReadableText({ text }: { text: string }) {
         .map((paragraph, index) => (
           <p key={index}>{paragraph}</p>
         ))}
+    </div>
+  )
+}
+function GapText({ text }: { text: string }) {
+  return (
+    <div className="detail-prose gap-prose">
+      {gapLines(text).map((line, index) => (
+        <p key={index}>
+          {line.marker && (
+            <span
+              className="gap-marker"
+              aria-label={
+                line.marker === "✅"
+                  ? "Confirmação no texto"
+                  : "Pendência ou impedimento no texto"
+              }
+            >
+              {line.marker}{" "}
+            </span>
+          )}
+          {line.heading && (
+            <strong>
+              {line.heading}
+              {line.text ? ": " : ""}
+            </strong>
+          )}
+          {line.text}
+        </p>
+      ))}
     </div>
   )
 }
@@ -930,6 +961,11 @@ export default function JobBoard() {
                   </p>
                 )}
               </DetailSection>
+              {selected.resumo?.trim() && (
+                <DetailSection title="Resumo" icon={<FileTextIcon />}>
+                  <ReadableText text={selected.resumo} />
+                </DetailSection>
+              )}
               <DetailSection title="Próxima ação" icon={<CheckCircleIcon />}>
                 {selected.pendencia?.trim() ? (
                   <ReadableText text={selected.pendencia} />
@@ -937,22 +973,11 @@ export default function JobBoard() {
                   <p className="muted">Nenhuma próxima ação registrada.</p>
                 )}
               </DetailSection>
-              <DetailSection title="Datas" icon={<CalendarBlankIcon />}>
-                {selected.publicadaEm || selected.prazo ? (
-                  <dl className="job-properties">
-                    <DetailField
-                      label="Publicada em"
-                      value={detailDate(selected.publicadaEm)}
-                    />
-                    <DetailField
-                      label="Prazo"
-                      value={detailDate(selected.prazo)}
-                    />
-                  </dl>
-                ) : (
-                  <p className="muted">Nenhuma data registrada.</p>
-                )}
-              </DetailSection>
+              {selected.gaps?.trim() && (
+                <DetailSection title="Gaps" icon={<CheckCircleIcon />}>
+                  <GapText text={selected.gaps} />
+                </DetailSection>
+              )}
               <DetailSection title="Candidatura" icon={<PaperPlaneTiltIcon />}>
                 {(selected.aplicadaEm ||
                   selected.resultado ||
@@ -1001,16 +1026,22 @@ export default function JobBoard() {
                   </dl>
                 </details>
               </DetailSection>
-              {selected.resumo?.trim() && (
-                <DetailSection title="Resumo" icon={<FileTextIcon />}>
-                  <ReadableText text={selected.resumo} />
-                </DetailSection>
-              )}
-              {selected.gaps?.trim() && (
-                <DetailSection title="Gaps" icon={<CheckCircleIcon />}>
-                  <ReadableText text={selected.gaps} />
-                </DetailSection>
-              )}
+              <DetailSection title="Datas" icon={<CalendarBlankIcon />}>
+                {selected.publicadaEm || selected.prazo ? (
+                  <dl className="job-properties">
+                    <DetailField
+                      label="Publicada em"
+                      value={detailDate(selected.publicadaEm)}
+                    />
+                    <DetailField
+                      label="Prazo"
+                      value={detailDate(selected.prazo)}
+                    />
+                  </dl>
+                ) : (
+                  <p className="muted">Nenhuma data registrada.</p>
+                )}
+              </DetailSection>
             </div>
           )}
         </SheetContent>
