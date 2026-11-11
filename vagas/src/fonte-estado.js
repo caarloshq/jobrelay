@@ -17,15 +17,14 @@ const falha = (motivo) => { throw new Error(`ESTADO_NOTION_INVALIDO: ${motivo}`)
 export function configuracao() {
   const atual = lerEstado(CONFIG, INICIAL);
   if (atual?.fonte === 'local') return atual;
-  if (atual?.fonte === 'notion' && texto(atual.databaseId)) return atual;
+  if (atual?.fonte === 'notion' && (texto(atual.databaseId) || atual.pendenteCriacao === true)) return atual;
   throw new Error('FONTE_ESTADO_INVALIDA: escolha local ou notion com databaseId.');
 }
 
 export function selecionar(fonte, databaseId = null) {
   if (fonte !== 'local' && fonte !== 'notion') throw new Error('FONTE_ESTADO_INVALIDA: use local ou notion.');
-  if (fonte === 'notion' && !texto(databaseId)) throw new Error('DATABASE_ID_OBRIGATORIO');
   const atual = configuracao();
-  const proxima = fonte === 'local' ? { fonte: 'local' } : { fonte, databaseId: texto(databaseId) };
+  const proxima = fonte === 'local' ? { fonte: 'local' } : { fonte, databaseId: texto(databaseId), ...(!texto(databaseId) ? { pendenteCriacao: true } : {}) };
   Object.keys(atual).forEach((chave) => delete atual[chave]);
   Object.assign(atual, proxima);
   salvarEstado(CONFIG, atual, DIR_DADOS);
@@ -45,6 +44,7 @@ export function normalizarSnapshot(snapshot, databaseId) {
   if (!Array.isArray(snapshot.paginas) || !snapshot.paginas.length) falha('paginas ausentes');
   const vagas = Object.create(null);
   const paginasVistas = new Set();
+  const idsVistos = new Set();
   let cursorEsperado = null;
   for (const [indice, pagina] of snapshot.paginas.entries()) {
     if (pagina?.cursorEntrada !== cursorEsperado || typeof pagina.temMais !== 'boolean' || !Array.isArray(pagina.vagas)) falha(`paginação incompleta na página ${indice + 1}`);
@@ -56,9 +56,12 @@ export function normalizarSnapshot(snapshot, databaseId) {
       const id = texto(linha?.idExterno);
       if (!id || !texto(linha.paginaId) || !texto(linha.status)) falha('linha sem paginaId, idExterno ou status');
       if (!STATUS_SUPORTADOS.has(linha.status.trim())) falha(`status desconhecido: ${linha.status}`);
-      if (['__proto__', 'constructor', 'prototype'].includes(id) || Object.hasOwn(vagas, id)) falha(`idExterno duplicado ou inválido: ${id}`);
+      if (['__proto__', 'constructor', 'prototype'].includes(id) || idsVistos.has(id)) falha(`idExterno duplicado ou inválido: ${id}`);
       if (paginasVistas.has(linha.paginaId)) falha(`paginaId duplicado: ${linha.paginaId}`);
       paginasVistas.add(linha.paginaId);
+      idsVistos.add(id);
+      // O exemplo do modelo permanece no Notion, mas nunca participa do ciclo.
+      if (id === 'exemplo:vaga-001') continue;
       vagas[id] = {
         paginaId: linha.paginaId.trim(), status: linha.status.trim(),
         gaps: typeof linha.gaps === 'string' ? linha.gaps : null,
@@ -73,6 +76,7 @@ export function normalizarSnapshot(snapshot, databaseId) {
 export function importar(snapshot) {
   const config = configuracao();
   if (config.fonte !== 'notion') throw new Error('FONTE_ESTADO_LOCAL: selecione Notion antes de importar.');
+  if (config.pendenteCriacao) throw new Error('NOTION_PENDENTE: aguarde o assistente criar e configurar o quadro no Notion.');
   const proximo = normalizarSnapshot(snapshot, config.databaseId);
   const atual = lerEstado(NOTION, null);
   if (atual?.databaseId === config.databaseId && dataIso(atual.sincronizadoEm) &&
@@ -96,6 +100,7 @@ export function importar(snapshot) {
 export function carregarFonte() {
   const config = configuracao();
   if (config.fonte === 'local') return lerEstado(LOCAL, { versao: 1, sincronizadoEm: null, vagas: {} });
+  if (config.pendenteCriacao) throw new Error('NOTION_PENDENTE: aguarde o assistente criar e configurar o quadro no Notion.');
   const espelho = lerEstado(NOTION, null);
   if (!espelho || espelho.fonte !== 'notion' || espelho.databaseId !== config.databaseId ||
       espelho.paginacao?.completa !== true || !dataIso(espelho.sincronizadoEm) ||

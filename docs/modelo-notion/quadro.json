@@ -1,0 +1,737 @@
+{
+  "version": 2,
+  "exportadoEm": "2026-11-11",
+  "nome": "Puxa Vagas",
+  "descricao": "Modelo saneado para criar um quadro na conta de quem usa, sem dados do mantenedor.",
+  "pagina": {
+    "title": "Puxa Vagas",
+    "icon": "💼",
+    "instructions": [
+      "Organize vagas e acompanhe suas candidaturas com o assistente.",
+      "Este modelo contém um único registro fictício. Não o inclua em buscas, avaliações ou candidaturas.",
+      "## Use a fila certa",
+      "- **Quadro:** vagas organizadas por etapa.\n- **Para aplicar:** vagas escolhidas para candidatura.\n- **Precisa de atenção:** revisões e ações pendentes.\n- **Candidaturas:** envios confirmados e entrevistas.\n- **Todas as vagas:** consulta completa, com as vagas encerradas.",
+      "## Para o assistente",
+      "Use o quadro como estado das vagas. Confira a página antes de atualizar e preserve os dados existentes. Registre a próxima ação em **Pendência** e o histórico em **Gaps**. Só altere **Status** com um evento confirmado. Sem remuneração publicada, deixe **Salário** vazio. A **Confiança** organiza a prioridade, sem comprovar elegibilidade. Use o logo confirmado da empresa como ícone e mantenha a página sem capa."
+    ],
+    "databaseName": "Quadro de Vagas",
+    "defaultView": "Todas as vagas",
+    "mainView": "Quadro"
+  },
+  "propriedades": {
+    "Aplicada em": {
+      "description": "",
+      "name": "Aplicada em",
+      "type": "date"
+    },
+    "Confiança": {
+      "description": "Prioridade heurística da vaga, de 0 a 1. Não comprova elegibilidade ou contratação.",
+      "name": "Confiança",
+      "number_format": "percent",
+      "type": "number",
+      "show_as": {
+        "type": "bar",
+        "color": "green",
+        "maxValue": 1,
+        "showValue": true
+      }
+    },
+    "Currículo": {
+      "description": "Currículo preparado para a vaga, em PDF ou DOCX.",
+      "name": "Currículo",
+      "type": "file"
+    },
+    "Currículo (caminho)": {
+      "description": "Caminho local do currículo preparado para a vaga. Não substitui o arquivo anexado.",
+      "name": "Currículo (caminho)",
+      "type": "text"
+    },
+    "Empresa": {
+      "description": "",
+      "name": "Empresa",
+      "type": "text"
+    },
+    "Fonte": {
+      "description": "",
+      "name": "Fonte",
+      "options": [
+        {
+          "name": "Gupy",
+          "color": "blue"
+        },
+        {
+          "name": "Remotar",
+          "color": "purple"
+        },
+        {
+          "name": "InHire",
+          "color": "pink"
+        },
+        {
+          "name": "Vagas Remotas",
+          "color": "brown"
+        },
+        {
+          "name": "Coluna Tech",
+          "color": "orange"
+        },
+        {
+          "name": "Himalayas",
+          "color": "yellow"
+        },
+        {
+          "name": "Greenhouse",
+          "color": "green"
+        },
+        {
+          "name": "Ashby",
+          "color": "gray"
+        },
+        {
+          "name": "Solta",
+          "color": "red"
+        },
+        {
+          "name": "Arc",
+          "color": "default"
+        },
+        {
+          "name": "UX Remote Talent",
+          "color": "default"
+        },
+        {
+          "name": "Built In",
+          "color": "default"
+        },
+        {
+          "name": "Remotli",
+          "color": "default"
+        },
+        {
+          "name": "We Work Remotely",
+          "color": "default"
+        },
+        {
+          "name": "Jobicy",
+          "color": "default"
+        },
+        {
+          "name": "Torre",
+          "color": "default"
+        },
+        {
+          "name": "RemoteOK",
+          "color": "default"
+        },
+        {
+          "name": "Crypto Jobs",
+          "color": "default"
+        },
+        {
+          "name": "Remotive",
+          "color": "default"
+        },
+        {
+          "name": "Working Nomads",
+          "color": "default"
+        },
+        {
+          "name": "NoDesk",
+          "color": "default"
+        },
+        {
+          "name": "Jobspresso",
+          "color": "default"
+        },
+        {
+          "name": "Get on Board",
+          "color": "default"
+        },
+        {
+          "name": "Landing.jobs",
+          "color": "default"
+        },
+        {
+          "name": "Hacker News Who is hiring",
+          "color": "default"
+        }
+      ],
+      "type": "select"
+    },
+    "Gaps": {
+      "description": "Requisitos sem evidência e histórico de conferências.",
+      "name": "Gaps",
+      "type": "text"
+    },
+    "ID externo": {
+      "description": "Chave de deduplicação no formato fonte:id. O exemplo fictício usa exemplo:vaga-001 e não entra na operação.",
+      "name": "ID externo",
+      "type": "text"
+    },
+    "Link": {
+      "description": "",
+      "name": "Link",
+      "type": "url"
+    },
+    "Local e modelo": {
+      "description": "Localização elegível e modelo de trabalho confirmados no anúncio.",
+      "name": "Local e modelo",
+      "type": "text"
+    },
+    "Pendência": {
+      "description": "Próxima ação necessária para avançar.",
+      "name": "Pendência",
+      "type": "text"
+    },
+    "Prazo": {
+      "description": "Prazo de inscrição publicado no anúncio.",
+      "name": "Prazo",
+      "type": "date"
+    },
+    "Publicada em": {
+      "description": "",
+      "name": "Publicada em",
+      "type": "date"
+    },
+    "Resultado": {
+      "description": "",
+      "name": "Resultado",
+      "options": [
+        {
+          "name": "Sem resposta",
+          "color": "gray"
+        },
+        {
+          "name": "Recusou",
+          "color": "red"
+        },
+        {
+          "name": "Respondeu",
+          "color": "yellow"
+        },
+        {
+          "name": "Entrevista",
+          "color": "purple"
+        },
+        {
+          "name": "Proposta",
+          "color": "green"
+        }
+      ],
+      "type": "select"
+    },
+    "Resumo": {
+      "description": "Descrição curta da vaga e da avaliação, com fatos confirmados.",
+      "name": "Resumo",
+      "type": "text"
+    },
+    "Salário": {
+      "description": "Remuneração publicada no anúncio. Sem valor divulgado, deixar vazio. Nunca usar estimativa, hífen ou travessão.",
+      "name": "Salário",
+      "type": "text"
+    },
+    "Senioridade": {
+      "description": "",
+      "name": "Senioridade",
+      "options": [
+        {
+          "name": "senior",
+          "color": "green"
+        },
+        {
+          "name": "pleno",
+          "color": "blue"
+        },
+        {
+          "name": "sem rotulo",
+          "color": "gray"
+        }
+      ],
+      "type": "select"
+    },
+    "Status": {
+      "description": "",
+      "name": "Status",
+      "options": [
+        {
+          "name": "Avaliar",
+          "color": "blue"
+        },
+        {
+          "name": "Aplicar",
+          "color": "red"
+        },
+        {
+          "name": "Aplicado por IA",
+          "color": "orange"
+        },
+        {
+          "name": "Já apliquei",
+          "color": "green"
+        },
+        {
+          "name": "Entrevista",
+          "color": "purple"
+        },
+        {
+          "name": "Cancelada",
+          "color": "gray"
+        },
+        {
+          "name": "Revisar",
+          "color": "red"
+        }
+      ],
+      "type": "select"
+    },
+    "Vaga": {
+      "description": "",
+      "name": "Vaga",
+      "type": "title"
+    }
+  },
+  "layout": {
+    "main": [
+      {
+        "type": "cover"
+      },
+      {
+        "type": "title",
+        "pinnedProperties": [
+          "Confiança"
+        ]
+      },
+      {
+        "type": "properties",
+        "sections": [
+          {
+            "name": "Sobre a vaga",
+            "properties": [
+              {
+                "property": "Status"
+              },
+              {
+                "property": "Empresa"
+              },
+              {
+                "property": "Salário",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Senioridade",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Local e modelo",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Link"
+              },
+              {
+                "property": "Fonte",
+                "visibility": "hide_if_empty"
+              }
+            ]
+          },
+          {
+            "name": "Próxima ação",
+            "properties": [
+              {
+                "property": "Pendência",
+                "visibility": "hide_if_empty"
+              }
+            ]
+          },
+          {
+            "name": "Datas",
+            "properties": [
+              {
+                "property": "Publicada em",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Prazo",
+                "visibility": "hide_if_empty"
+              }
+            ]
+          },
+          {
+            "name": "Candidatura",
+            "properties": [
+              {
+                "property": "Aplicada em",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Resultado",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "Currículo",
+                "visibility": "hide_if_empty"
+              },
+              {
+                "property": "ID externo",
+                "visibility": "hide"
+              },
+              {
+                "property": "Currículo (caminho)",
+                "visibility": "hide"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "property",
+        "property": "Resumo"
+      },
+      {
+        "type": "property",
+        "property": "Gaps"
+      },
+      {
+        "type": "editor"
+      },
+      {
+        "type": "discussions"
+      }
+    ],
+    "format": {
+      "propertyIcons": "show",
+      "pageFullWidth": false
+    }
+  },
+  "visualizacoes": [
+    {
+      "columnWidths": {
+        "Confiança": 100,
+        "Empresa": 200,
+        "Link": 200,
+        "Pendência": 280,
+        "Publicada em": 200,
+        "Salário": 200,
+        "Status": 200,
+        "Vaga": 300
+      },
+      "displayProperties": [
+        "Vaga",
+        "Confiança",
+        "Status",
+        "Pendência",
+        "Empresa",
+        "Salário",
+        "Local e modelo",
+        "Link",
+        "Publicada em",
+        "Prazo",
+        "Aplicada em",
+        "Resultado"
+      ],
+      "name": "Todas as vagas",
+      "sorts": [
+        {
+          "direction": "descending",
+          "property": "Confiança"
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "advancedFilter": {
+        "filters": [
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Avaliar"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Aplicar"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Aplicado por IA"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Já apliquei"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Entrevista"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Cancelada"
+            }
+          }
+        ],
+        "operator": "or",
+        "type": "group"
+      },
+      "cardLayoutMode": "compact",
+      "displayProperties": [
+        "Vaga",
+        "Empresa",
+        "Salário",
+        "Confiança",
+        "Pendência"
+      ],
+      "fullWidthProperties": [],
+      "groupBy": {
+        "hideEmptyGroups": false,
+        "property": "Status",
+        "propertyType": "select",
+        "sort": {
+          "type": "manual"
+        }
+      },
+      "name": "Quadro",
+      "sorts": [
+        {
+          "direction": "descending",
+          "property": "Confiança"
+        }
+      ],
+      "type": "board"
+    },
+    {
+      "advancedFilter": {
+        "filters": [
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Aplicar"
+            }
+          }
+        ],
+        "operator": "and",
+        "type": "group"
+      },
+      "columnWidths": {
+        "Pendência": 280,
+        "Vaga": 300
+      },
+      "displayProperties": [
+        "Vaga",
+        "Confiança",
+        "Empresa",
+        "Pendência",
+        "Prazo",
+        "Link",
+        "Currículo"
+      ],
+      "name": "Para aplicar",
+      "sorts": [
+        {
+          "direction": "descending",
+          "property": "Confiança"
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "advancedFilter": {
+        "filters": [
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Revisar"
+            }
+          },
+          {
+            "operator": "is_not_empty",
+            "property": "Pendência",
+            "propertyType": "text",
+            "type": "property"
+          }
+        ],
+        "operator": "or",
+        "type": "group"
+      },
+      "columnWidths": {
+        "Pendência": 320,
+        "Vaga": 300
+      },
+      "displayProperties": [
+        "Vaga",
+        "Confiança",
+        "Status",
+        "Pendência",
+        "Empresa",
+        "Link"
+      ],
+      "name": "Precisa de atenção",
+      "sorts": [
+        {
+          "direction": "descending",
+          "property": "Confiança"
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "advancedFilter": {
+        "filters": [
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Aplicado por IA"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Já apliquei"
+            }
+          },
+          {
+            "operator": "enum_is",
+            "property": "Status",
+            "propertyType": "select",
+            "type": "property",
+            "value": {
+              "type": "exact",
+              "value": "Entrevista"
+            }
+          }
+        ],
+        "operator": "or",
+        "type": "group"
+      },
+      "columnWidths": {
+        "Pendência": 280,
+        "Vaga": 300
+      },
+      "displayProperties": [
+        "Vaga",
+        "Confiança",
+        "Empresa",
+        "Status",
+        "Aplicada em",
+        "Resultado",
+        "Pendência",
+        "Currículo",
+        "Link"
+      ],
+      "name": "Candidaturas",
+      "sorts": [
+        {
+          "direction": "descending",
+          "property": "Aplicada em"
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "exemplos": [
+    {
+      "Vaga": "[Exemplo fictício] Designer de Produto",
+      "Empresa": "Localiza&Co",
+      "Status": "Avaliar",
+      "Confiança": 0.75,
+      "Fonte": "Gupy",
+      "Senioridade": "senior",
+      "Resultado": "Sem resposta",
+      "Link": "https://example.com/vaga-ficticia",
+      "ID externo": "exemplo:vaga-001",
+      "Resumo": "Registro fictício para mostrar a estrutura do quadro. Não representa uma vaga da Localiza&Co e não deve entrar na coleta ou nas candidaturas.",
+      "Gaps": "Sem avaliação: exemplo fictício.",
+      "Pendência": "Configurar o quadro com o assistente; não candidatar este exemplo.",
+      "Salário": null,
+      "Currículo": [],
+      "Currículo (caminho)": null
+    }
+  ],
+  "icones": {
+    "property": "page.icon",
+    "cover": null,
+    "sourcePolicy": "Use somente logo oficial comprovado na fonte ou no anúncio. Sem fonte confirmada, deixe sem ícone e registre a limitação no relatório técnico do assistente, sem preencher Pendência operacional, descartar a vaga ou bloquear candidatura.",
+    "exemplo": {
+      "idExterno": "exemplo:vaga-001",
+      "type": "external",
+      "url": "https://attachments.gupy.io/production/companies/581/career/679/images/2023-09-21_21-31_companyLogoUrl.png"
+    }
+  },
+  "operacao": {
+    "excludedIds": [
+      "exemplo:vaga-001"
+    ],
+    "missingSalary": null
+  },
+  "compatibilidade": {
+    "formato": "Contrato declarativo para criação assistida; não é importação nativa do Notion. Filtros e propriedades devem ser traduzidos para a ferramenta disponível.",
+    "conferenciaObrigatoria": [
+      "19 propriedades e suas opções",
+      "Quatro grupos, Status primeiro em Sobre a vaga, somente Confiança fixada",
+      "Cinco visualizações e seus filtros",
+      "Confiança: percent e barra verde, máximo 1, valor visível",
+      "Um exemplo fictício, Salário vazio e logo apenas no ícone"
+    ],
+    "seNaoSuportado": "Informe os detalhes não configurados e oriente o ajuste na interface do Notion. Não declare barra, layout ou filtros aplicados sem confirmação da ferramenta ou da pessoa.",
+    "ordemDasViews": "Todas as vagas é a primeira view no modelo criado; Quadro é a entrada de trabalho recomendada. Reordenar exige controle compatível."
+  },
+  "preferenciasPendentes": {
+    "confiancaBarra": {
+      "desejado": {
+        "type": "bar",
+        "color": "green",
+        "maxValue": 1,
+        "showValue": true
+      },
+      "status": "Formato percentual criado; barra não exposta pela DDL suportada. Requer ajuste pela interface."
+    }
+  }
+}

@@ -54,3 +54,16 @@ test('nome protegido e URLs com host ou sufixo alterados continuam bloqueados', 
     `https://api.github.com.evil.example/repos/${nome}/jobrelay/releases/latest`,
   ]) assert.equal(checar(t, conteudo).status, 1, conteudo);
 });
+
+test('nome de empresa exige separação de palavras; variáveis do sistema não vazam dados', t => {
+  assert.equal(checar(t, 'ambiente.PROGRAMFILES').status, 0);
+  assert.equal(checar(t, 'ambiente["PROGRAMFILES(X86)"]').status, 0);
+  // O nome protegido permanece na regra canônica, sem duplicar dado sensível
+  // no arquivo publicável do teste. Extraímos o literal da regra com limites.
+  const checker = fs.readFileSync(path.join(vagas, 'scripts/checar-publico.mjs'), 'utf8');
+  const empresa = checker.match(/\(\?<\!\[[^\]]+\]\)([a-z]+)\(\?!/i)?.[1];
+  assert.ok(empresa, 'regra de empresa com limites precisa existir');
+  for (const texto of [empresa, empresa.toUpperCase(), `empresa: ${empresa}`, `cliente_${empresa}_privado`]) {
+    assert.equal(checar(t, texto).status, 1);
+  }
+});

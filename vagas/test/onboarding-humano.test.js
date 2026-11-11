@@ -47,6 +47,7 @@ test('entrada bloqueia antes de atualizar e importa configuração somente após
   for (const arq of ['scripts/executar.mjs', 'src/onboarding-humano.js']) {
     writeFileSync(join(dir, 'vagas', arq), readFileSync(new URL('../' + arq, import.meta.url)));
   }
+  writeFileSync(join(dir, 'vagas/src/onboarding-autonomia.js'), 'export const lerPolitica = () => ({ atualizarAutomaticamente: true });');
   writeFileSync(join(dir, 'vagas/src/config.js'), "export const perfil = { versao: 1 }; export const DIR_DADOS = " + JSON.stringify(join(dir, 'vagas/data')) + ';');
   writeFileSync(join(dir, 'vagas/src/atualizacao.js'), `import { writeFileSync } from 'node:fs';
     export async function atualizarAutomaticamente() {

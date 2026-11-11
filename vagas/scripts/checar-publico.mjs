@@ -24,7 +24,7 @@ const REPO = resolve(RAIZ, '..');
 
 /** Padrões que denunciam dado pessoal. Case-insensitive. */
 const PADROES = [
-  /carlos/i, /amfi/i, /caarloshq/i, /carloshq/i,
+  /carlos/i, /(?<![\p{L}\p{N}])amfi(?![\p{L}\p{N}])/iu, /caarloshq/i, /carloshq/i,
   /62621f24/i,            // id da base do Notion do autor
   /florian[oó]polis/i,    // cidade do autor, usada como exemplo em regra
   /carlosxpd9/i,

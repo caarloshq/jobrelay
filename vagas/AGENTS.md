@@ -159,7 +159,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
 
 ## Regras invioláveis
 
-1. **Nunca inventar** fato, número, salário ou empresa. Sem menção clara de salário, o campo é `—`.
+1. **Nunca inventar** fato, número, salário ou empresa. Sem menção clara de salário no anúncio, deixe a propriedade `Salário` do Notion vazia (`null`); nunca use hífen, travessão ou estimativa. Preserve valores e intervalos publicados.
 2. O `Resumo` descreve a vaga e fecha com o encaixe. Todo fato de encaixe citado **existe** no `base_content`. Nada além disso.
 3. **Nunca sobrescrever** os `base_content_*.json`. Trabalhar em cópia, como manda a skill.
 4. Números travados: os que estiverem em `numeros_travados` no seu `base_content` (`Skills/adapt-resume/`).

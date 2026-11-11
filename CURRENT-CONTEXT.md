@@ -1,25 +1,64 @@
-# Contexto atual: JobRelay
+# Contexto atual do JobRelay
 
-> Última atualização: 2026-11-09
+## Revisão para publicação, 11 de Novembro
 
-## Coleta e aplicação são independentes
+Commit e push autorizados nesta continuação. O pacote público exclui perfis preenchidos, materiais pessoais e o arquivo de vagas do protótipo. O scaffold Astro foi integrado como código normal; o histórico Git original foi preservado em cópia e bundle locais ignorados. A interface continua um protótipo, com exemplos fictícios por padrão ou arquivo privado explicitamente configurado; isso não comprova integração operacional com Notion.
 
-`coleta/README.md` busca e avalia vagas. `aplicacao/README.md` usa a fila existente sem coletar. O ciclo completo continua em `vagas/RODADA-DIARIA.md`, com subagentes e controles preservados.
+O detalhe Astro segue o modelo Puxa Vagas: Confiança percentual com barra no topo; Sobre a vaga, Próxima ação, Datas e Candidatura; Status no primeiro grupo, campos técnicos e histórico recolhidos, logo disponível como ícone e salário desconhecido oculto. Resumo e Gaps permanecem em blocos próprios. A API apenas projeta metadados existentes, sem inferir datas, pendências ou currículo.
 
-Respostas e Perfil são Markdown editáveis, com pendências na primeira seção. Respostas preenchidas é histórico literal separado. Migração explícita preserva dados e opt-in de instalações existentes; o público mantém modelos neutros e histórico vazio.
+Revisão independente reconferiu o detalhe, a projeção e a correção de substituição dos materiais. PDF ilegível retorna erro e preserva o material ativo; versões substituídas ficam em histórico fora da extração ativa. No candidato limpo, 509 testes passaram e a checagem pública não encontrou dados pessoais. Tipos, lint, build e oito testes da interface passaram. Conferência no navegador confirmou o painel com logo, Confiança, ordem dos grupos e copy final. Login real no transporte headless e a barra nativa do modelo Notion continuam pendentes, conforme os limites abaixo. Push não cria release.
 
-## Preferência das respostas
+## Onboarding local em revisão
 
-Markdown está sempre presente e é o padrão. Onboarding pergunta somente local ou local + Notion, separadamente do quadro. O agente atualiza e compara o conteúdo remoto; os comandos Node registram apenas configuração, hashes e pendências. A conferência global deve cobrir ambos os Markdown antes de encerrar uma chave específica.
+Alterações em andamento, ainda sem commit, push ou release. Plano e decisões em [spec 005](specs/pendentes/005-onboarding-visual-materiais-conclusao.md).
 
-## Verificação e limites
+Abertura ilustrada com candidatura opcional explícita e botão centralizado. Cabeçalho reduzido ao nome. Currículo obrigatório PDF/DOCX, LinkedIn e adicional opcionais; adicional aceita TXT. Profissão repetida removida; níveis em duas colunas, salários em linhas separadas. Ícones, switches de recorrência e atualização, Notion sem pedir ID, resumo separado de sucesso com instruções/download. A regra de preenchimento humano permanece.
 
-A revisão encontrou e levou à correção de truncamento de fontes, chaves JSON duplicadas, importação parcial e confirmação de hash além do alcance conferido. Suíte integrada 468/468 e checker público executados; a publicação integra também a revisão de escrita recebida de outra sessão. Nenhuma nova release, automação, coleta ou candidatura pertence a esta mudança.
+Modelo portável Puxa Vagas em docs/modelo-notion/ contém 19 campos, quatro grupos, cinco visualizações e um exemplo fictício excluído do snapshot operacional. O onboarding cria a página e o quadro na conta da pessoa, sem IDs ou dados do mantenedor. Confiança usa porcentagem; a barra e outros detalhes de layout exigem conferência e ajuste manual se a conexão não expuser esses controles. O bundle declara a configuração desejada, sem afirmar importação nativa ou paridade visual automática.
 
-## Fontes
+Navegador headless genérico com agent-browser 0.42.0 fixado, painel local para login humano e bloqueio de comandos do assistente durante esse acesso. Procedimento em docs/navegador.md. Dados e sessões reais não devem ser copiados da instalação do mantenedor.
 
-[Spec da estrutura](specs/concluidas/004-estrutura-coleta-aplicacao.md), [aplicação](aplicacao/README.md) e [revisão de escrita](Skills/review-escrita/SKILL.md).
+46 testes técnicos passaram; seis testes ligados à última revisão de copy também passaram. Evidências locais ignoradas pelo Git em revisoes/onboarding-2026-11-11/. A revisão de escrita foi solicitada e aplicada. Gate visual completo e logins reais ainda não realizados. Abrir a prévia com npm start em vagas/.
 
-## O onboarding público exige preenchimento humano
+## Branches
 
-A regra pública em `AGENTS.md` exige preenchimento e confirmação humanos do HTML, para instalações novas e existentes sem registro. As entradas de coleta e candidatura e a conclusão da configuração recusam ausência do registro. A frase de recusa pedida pelo mantenedor fica na regra canônica. A revisão corrigiu o carregamento de módulos antes da atualização e a navegação durante gravação. A validação usa fixtures isoladas; configurações preenchidas na prévia ficam fora do commit. Sem push ou release nesta rodada. O registro não é prova de identidade contra alteração do código local.
+Após pedido explícito, codex/operacao-multiagente foi removida do remoto, pois já era ancestral da main e não tinha commits exclusivos. A consulta remota confirmou somente main. Essa operação não publicou as alterações do onboarding.
+
+Diagnóstico real do wrapper: dependência instalada localmente, mas Chrome/Chromium não encontrado neste computador. Não houve download de navegador; teste de login real depende de configurar um executável compatível. Erro e saída em revisoes/onboarding-2026-11-11/diagnostico-navegador.txt.
+
+
+## Tema e quadro local em avaliação, 11 de Novembro
+
+Spec [006](specs/pendentes/006-tema-quadro-onboarding-notion.md), implementação autorizada pela pessoa usuária, sem commit/push. Tema neutro do preset, Montserrat preservada; onboarding só recebeu CSS. Kanban inspirado no Todoist e painel lateral no Midday; busca/tabela/arraste mantidos. API transporta logo/localização/modelo/senioridade quando existem na fonte. Logos ausentes usam iniciais.
+
+Prévia em localhost:4184 usa cópia isolada dos cinco exemplos fictícios em revisoes/tema-2026-11-11/demo-data. A fonte original quadro.json tem dois hard links e a proteção de persistência recusa a leitura; ela não foi alterada nem a proteção contornada. localhost:4181 continua o onboarding original. Vinte testes passaram com TMPDIR dentro do projeto (o caminho macOS /var é symlink e é recusado pela validação). Detector: lista vazia. Conferência com navegador inclui abrir/fechar painel, foco, busca e tabela, sem POST ou preenchimento de onboarding.
+
+Radar Notion recebeu Senioridade nos cards e ordem Vaga/Empresa/Salário/Senioridade/Confiança/Link/Concluir. Agrupamento e ordenação preservados. Não há campos nativos de logo/localização e a conexão não expõe abertura em painel lateral: essa parte permanece pendente. Não afirmar paridade visual com o HTML. Gate visual completo ainda não autorizado.
+
+A prévia final é um sandbox visual sem persistência: cinco exemplos fictícios e logos vetoriais fictícias em memória, servidor revisoes/tema-2026-11-11/preview.mjs. Nenhuma ação da prévia altera candidaturas. O arquivo original com hard links continua pendente de investigação; não enfraquecer a proteção. A tentativa pelo navegador de acessar Notion retornou tela vazia, sem controles disponíveis; abertura em painel permanece pendente.
+
+## Quadro Astro em avaliação, continuação de 11 de Novembro
+
+Entrada visual atual: interface/, executando build servidor em http://127.0.0.1:4186 . Astro, componentes shadcn/Base UI do preset bIkfnxQ, Phosphor, dnd-kit. Cards com contorno cinza1px, altura224px e título truncado em uma linha; tabela equivalente; Sheet/Select; score com indicadores; timeline com autor/data/transição. Cabeçalho sem contagens ou explicações. Escrita revisada e frase óbvia da compatibilidade removida.
+
+Review solicitado passou no recorte visual/interativo; evidências em revisoes/tema-2026-11-11/review-astro.md. Tipos, lint, build e cinco testes passaram. Mouse, teclado, Select, tabela, busca, foco e painel390px exercitados em navegador; logs finais sem erro. O quadro usa exemplos em memória; não afirmar gravação real em disco. Botão para iniciar rodada não foi solicitado para implementação. Onboarding existente e Notion preservam seus estados anteriores. O scaffold Git foi preservado em cópia e bundle privados; interface/ está integrada como código normal ao repositório pai, sem Git aninhado. Spec006 permanece pendente pelas frentes de integração real/Notion.
+
+### Refinamentos do card e status
+
+O card inteiro é arrastável, sem alça; clique/Enter abre detalhes e Espaço inicia movimento por teclado. Rodapé sem divisória, texto “92% compatibilidade” à esquerda e barra à direita. Status usam StageLabel compartilhado nas colunas e Selects da tabela/painel, com ícones Phosphor e cores conferidas no Notion. Trocas Avaliar→Aplicar pelo painel e Aplicar→Avaliar pela tabela verificadas na prévia 4186. Estado continua apenas na memória do servidor de demonstração. Astro allowedDomains mantém os hosts/portas locais explícitos para preservar a checagem de Origin no build.
+
+### Protótipo com20 vagas reais copiadas
+
+A pessoa usuária esclareceu que o quadro é teste visual, não final. A prévia4186 passou a exibir20 vagas copiadas da consulta MCP ao Notion, selecionadas por compatibilidade entre Avaliar/Aplicar/Revisar. Dataset/histórico do teste ficam em arquivo privado externo ao checkout público, configurado em interface/.env.local. Arraste e Select persistem nesse arquivo; nenhuma sincronização com Notion, fonte operacional ou candidatura. Não apresentar o protótipo como integração real. Sete testes passaram e build/check passaram; revisão independente sem bloqueios para reinício normal.
+
+Prova final: arrasteLocalizaAvaliar→Aplicar, servidor reiniciado e navegador recarregado mantiveramstatus/histórico. Cards reais20medidos302x224px, truncados e semsobreposição. Corrigido agrupamento legado deAplicadoporIA para evitar duplicação quando existe coluna própria. Selectexercitado; consolelimpo. Captura em revisoes/tema-2026-11-11/vinte-vagas-prototipo.png.
+
+### Logos e densidade do protótipo
+
+Cards compactados para 176 px, com padding de 16 px e metadados sem altura reservada. As 20 vagas foram medidas com a mesma altura, sem sobreposição entre metadados e compatibilidade. Logos oficiais adicionadas a 19 cards no dataset privado; fonte de cada imagem registrada em logoFonte. Cliente não revelado permanece sem logo. CompanyLogo compartilhado na tabela e no painel; navegador confirmou 19 imagens carregadas, 19 na tabela e logo no painel. Typecheck, lint, build e detector passaram; revisão independente sem bloqueios. Captura: revisoes/tema-2026-11-11/logos-cards-compactos.png.
+
+### Compatibilidade próxima dos metadados e modelo explícito
+
+A pessoa usuária apontou o vão entre tags e compatibilidade e a ausência de Remoto nos títulos Work From Home. Rodapé passou de margin-top:auto para8px fixos; cards uniformes de148px com padding12px e metadados em linha com quebra. No protótipo de20 vagas, medição final confirmou148px em todos,8px entre tags e rodapé, sem sobreposição de cabeçalho/metadados/compatibilidade e sem corte do rodapé.
+
+locationLabel usa modelo explícito primeiro e, se ausente, mostra Remoto quando o próprio título diz Remote, Remoto/Remota ou Work From Home. Não infere país; evita repetir Remoto se já estiver no campo Local e modelo. Seis testes passaram, lint/build/detector sem achados. Revisão independente confirmou a lógica e apontou conferir limites de espaço; os20 casos reais foram medidos no navegador. Não há prova para combinações sintéticas com todos os campos em duas linhas fora deste protótipo. Print: revisoes/tema-2026-11-11/cards-sem-vao-remoto.png.

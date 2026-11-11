@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Repositório público, Node 20+ sem dependência de biblioteca, Python 3 só pra gerar o PDF do currículo. As superfícies visuais são páginas HTML autocontidas (CSS e JS inline, sem build), servidas por um servidor local mínimo em Node (`vagas/scripts/onboarding.mjs`, e depois o quadro). Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
+Repositório público, Node 20+ sem dependência de biblioteca, Python 3 só pra gerar o PDF do currículo. O onboarding continua HTML autocontido, servido por Node. A interface do quadro em `interface/` usa Astro + React e componentes shadcn/Base UI do preset bIkfnxQ por pedido explícito de Carlos em 11 de Novembro. A versão HTML anterior permanece preservada até a integração. Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
 
 ## Users
 
@@ -33,7 +33,7 @@ Não é agregador de vagas. É um filtro com viés declarado: o dela. O que ele 
 O fluxo do primeiro uso, e a ordem é fixa:
 
 ```
-Formulário (7 passos, salva local) → Agente monta o currículo base e os termos de busca → Primeira rodada → Quadro
+Introdução → Formulário (7 passos, salva local) → Resumo → Confirmação humana → Sucesso com instruções → Agente monta o currículo base e os termos de busca → Primeira rodada → Quadro
 ```
 
 O formulário grava em arquivos do próprio repositório: `vagas/config/perfil.json`, `vagas/config/linkedin.json`, `vagas/.env`, `Skills/adapt-resume/materiais-fonte/`. O agente lê esses arquivos; nunca repergunta o que o formulário já gravou.
@@ -44,11 +44,11 @@ O formulário grava em arquivos do próprio repositório: `vagas/config/perfil.j
 - **Token nunca aparece de volta na tela** depois de salvo: o formulário mostra "presente" e oferece trocar.
 - **Sem conta, sem login, sem cadastro.** A página abre em `localhost` e pronto.
 - **Candidatura automática chega desligada** e só liga por decisão explícita da pessoa.
-- **Não há imagem de produto nem marca própria.** O que assina é o nome do projeto. Os únicos assets são três prints da Apify, em `docs/img/apify/`.
+- **A introdução usa uma ilustração vetorial do fluxo; não há imagem de produto nem marca própria.** O que assina é o nome do projeto. Os outros assets são três prints da Apify, em `docs/img/apify/`.
 
 ## Brand Commitments
 
 - **Light mode.** Direção do Carlos, 2026-09-14.
-- **Botões azuis.** O acento do sistema é azul, e é a única cor além dos neutros. Direção do Carlos, 2026-09-14.
+- **Tema neutro do preset shadcn bIkfnxQ.** Direção de Carlos em 11 de Novembro de 2026: botões neutros, Montserrat preservada, sem instalar shadcn/Next. Substitui a direção anterior de botões azuis.
 - Texto sem travessão. Mês, dia e período com inicial maiúscula.
 - Tom: direto, em português, sem jargão de recrutamento e sem promessa de emprego.

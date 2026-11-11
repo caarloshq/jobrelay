@@ -9,12 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FAFAFA; --surface: #FFFFFF; --surface-2: #F3F5FB;
-    --border: #E5E5E5; --border-strong: #C7C7C7;
-    --text: #0D0D0D; --text-2: #464646; --text-3: #707070;
-    --accent: #1E3FD1; --accent-hover: #1633AB; --accent-soft: #CAD6FF; --accent-deep: #000766;
+    --bg: oklch(1 0 0); --surface: oklch(1 0 0); --surface-2: oklch(0.97 0 0);
+    --border: oklch(0.922 0 0); --border-strong: oklch(0.87 0 0);
+    --text: oklch(0.145 0 0); --text-2: oklch(0.371 0 0); --text-3: oklch(0.52 0 0);
+    --accent: oklch(0.205 0 0); --accent-hover: oklch(0.269 0 0); --accent-soft: oklch(0.97 0 0); --accent-deep: oklch(0.205 0 0);
     --ok: #0E7A4A; --ok-soft: #DCF3E7; --warn: #8A5A00; --warn-soft: #FFF1CC; --error: #B3261E; --error-soft: #FBE3E1;
-    --r: 4px; --r-control: 8px; --r-card: 16px;
+    --r: calc(0.45rem - 4px); --r-control: 0.45rem; --r-card: calc(0.45rem + 4px);
     --font: Montserrat, system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: ui-monospace, "SF Mono", Menlo, monospace;
   }
@@ -24,13 +24,12 @@
   .wrap { max-width: 640px; margin: 0 auto; padding: 40px 24px 128px; }
   header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
   header.top .nome { font-weight: 600; font-size: 16px; }
-  header.top .local { font: 400 14px/20px var(--mono); color: var(--text-3); }
 
-  ol.passos { list-style: none; margin: 24px 0 0; padding: 0; display: flex; gap: 6px; }
+  ol.passos { list-style: none; margin: 24px 0 0; padding: 0; display: flex; gap: 8px; }
   ol.passos li { flex: 1; height: 4px; border-radius: 9999px; background: var(--border); position: relative; overflow: hidden; }
   ol.passos li::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1), background .2s; }
   ol.passos li.atual::after { transform: scaleX(1); }
-  ol.passos li.feito::after { transform: scaleX(1); background: var(--accent-soft); }
+  ol.passos li.feito::after { transform: scaleX(1); background: var(--text-3); }
   ol.passos li span { position: absolute; left: -9999px; }
   .passo-rotulo { margin-top: 12px; font: 500 14px/20px var(--font); color: var(--text-3); }
   .passo-rotulo b { color: var(--accent); font-weight: 500; }
@@ -43,10 +42,10 @@
   @keyframes subir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   @keyframes marcar { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
-  h1, h2 { font: 600 24px/32px var(--font); letter-spacing: -0.01em; margin: 56px 0 8px; }
-  p.lead { color: var(--text-2); margin: 0 0 40px; }
+  h1, h2 { font: 600 24px/32px var(--font); letter-spacing: -0.01em; margin: 40px 0 12px; }
+  p.lead { color: var(--text-2); margin: 0 0 32px; }
   p { margin: 0 0 16px; }
-  .grupo { margin: 0 0 40px; }
+  .grupo { margin: 0 0 32px; }
   label.rotulo { display: block; font: 500 14px/20px var(--font); margin: 0 0 8px; }
   .ajuda { display: block; font: 400 14px/20px var(--font); color: var(--text-3); margin: 8px 0 0; }
   .ajuda.erro { color: var(--error); }
@@ -54,7 +53,7 @@
     width: 100%; height: 44px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--r-control);
     background: var(--surface); color: var(--text); font: 400 16px/24px var(--font); transition: border-color .15s, box-shadow .15s;
   }
-  textarea { height: auto; min-height: 120px; padding: 10px 12px; resize: vertical; line-height: 24px; }
+  textarea { height: auto; min-height: 120px; padding: 12px; resize: vertical; line-height: 24px; }
   input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
   input.invalido { border-color: var(--error); }
   .campos { display: grid; gap: 16px; }
@@ -80,11 +79,11 @@
   .zona span { color: var(--text-3); font-size: 14px; line-height: 20px; }
   .zona input { display: none; }
   ul.arquivos { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; }
-  ul.arquivos li { animation: subir .22s cubic-bezier(0.16, 1, 0.3, 1) both; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-control); background: var(--surface); font-size: 14px; line-height: 20px; }
+  ul.arquivos li { animation: subir .22s cubic-bezier(0.16, 1, 0.3, 1) both; display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--r-control); background: var(--surface); font-size: 14px; line-height: 20px; }
   ul.arquivos li .n { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   ul.arquivos li .s { color: var(--text-3); }
 
-  .tag { display: inline-block; padding: 0 10px; border-radius: 9999px; background: var(--accent-soft); color: var(--accent-deep); font: 500 14px/20px var(--font); vertical-align: middle; }
+  .tag { display: inline-block; padding: 0 12px; border-radius: 9999px; background: var(--accent-soft); color: var(--accent-deep); font: 500 14px/20px var(--font); vertical-align: middle; }
   .tag.ok { background: var(--ok-soft); color: var(--ok); }
   .tag.neutra { background: var(--surface-2); color: var(--text-2); }
 
@@ -100,7 +99,7 @@
   .btn:active { transform: scale(.98); }
   .btn.primario .ic { transition: transform .2s cubic-bezier(0.16, 1, 0.3, 1); }
   .btn.primario:hover .ic { transform: translateX(2px); }
-  .btn.primario { background: var(--accent); color: #fff; }
+  .btn.primario { background: var(--accent); color: oklch(0.985 0 0); }
   .btn.primario:hover { background: var(--accent-hover); }
   .btn.secundario { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
   .btn.secundario:hover { border-color: var(--text-3); }
@@ -112,7 +111,7 @@
   section[data-passo="8"] .ic-titulo { animation: marcar .5s cubic-bezier(0.16, 1, 0.3, 1) .1s both; }
 
   code, .mono { font: 400 14px/20px var(--mono); }
-  pre { margin: 0 0 16px; padding: 12px 16px; background: #0D0D0D; color: #FAFAFA; border-radius: var(--r-control); overflow-x: auto; font: 400 14px/20px var(--mono); }
+  pre { margin: 0 0 16px; padding: 12px 16px; background: var(--text); color: var(--surface); border-radius: var(--r-control); overflow-x: auto; font: 400 14px/20px var(--mono); }
   figure { margin: 0 0 24px; }
   figure img { display: block; width: 100%; max-width: 100%; border: 1px solid var(--border); border-radius: var(--r-control); }
   figcaption { font-size: 14px; line-height: 20px; color: var(--text-2); margin-top: 8px; }
@@ -120,8 +119,8 @@
   .prints figure:last-child { grid-column: 1 / -1; }
   @media (max-width: 520px) { .prints { grid-template-columns: 1fr; } }
 
-  table.resumo { width: 100%; border-collapse: collapse; margin: 0 0 40px; font-size: 14px; line-height: 20px; }
-  table.resumo th, table.resumo td { text-align: left; padding: 10px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.resumo { width: 100%; border-collapse: collapse; margin: 0 0 32px; font-size: 14px; line-height: 20px; }
+  table.resumo th, table.resumo td { text-align: left; padding: 12px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
   table.resumo th { font-weight: 500; color: var(--text-3); width: 40%; }
   .toggle { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--r-control); background: var(--surface); }
   .toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
@@ -129,25 +128,76 @@
   .toggle .d { font-size: 14px; line-height: 20px; color: var(--text-2); }
   .visually-hidden { position: absolute; left: -9999px; }
   .ic { flex: none; vertical-align: middle; }
-  .ic-titulo { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--r-control); background: var(--accent-soft); color: var(--accent-deep); vertical-align: middle; margin-right: 10px; }
+  .ic-titulo { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--r-control); background: var(--accent-soft); color: var(--accent-deep); vertical-align: middle; margin-right: 12px; }
   h1 .ic-titulo, h2 .ic-titulo { position: relative; top: -2px; }
   .ic-zona { display: block; color: var(--accent); margin: 0 auto 8px; width: 24px; }
+
+  [hidden] { display: none !important; }
+  #niveis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .opcao .t .ic { margin-right: 8px; }
+  .toggle { position: relative; align-items: flex-start; cursor: pointer; }
+  .toggle + .toggle { margin-top: 16px; }
+  .toggle input { position: absolute; opacity: 0; }
+  .switch { display: block; width: 44px; height: 24px; border-radius: 9999px; background: var(--text-3); flex: none; margin-top: 4px; transition: background .15s; }
+  .switch::after { content: ''; display: block; width: 16px; height: 16px; margin: 4px; border-radius: 50%; background: var(--surface); transition: transform .15s; }
+  .toggle input:checked + .switch { background: var(--accent); }
+  .toggle input:checked + .switch::after { transform: translateX(20px); }
+  .toggle:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .zona { position: relative; }
+  .zona input { display: block; position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .zona:focus-within { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .inicio-ilustracao { display: block; width: 100%; height: auto; margin: 24px 0; color: var(--accent); }
+  .como-funciona { list-style: none; padding: 0; margin: 0; display: grid; gap: 24px; }
+  .como-funciona li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; }
+  .como-funciona strong { display: block; font-weight: 500; }
+  .como-funciona p { margin: 4px 0 0; color: var(--text-2); font-size: 14px; line-height: 20px; }
+  .sucesso-sinal { display: inline-flex; color: var(--ok); background: var(--ok-soft); padding: 16px; border-radius: 50%; margin-bottom: 24px; }
+  .sucesso-acoes { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 8px; }
+  #instrucao { min-height: 240px; font-size: 14px; line-height: 20px; }
+  .acoes-inner { flex-wrap: wrap; }
+  .acoes.inicio .acoes-inner { justify-content: center; }
+  .salvo:empty { display: none; }
+  .salvo:not(:empty) { flex-basis: 100%; order: 3; }
+  @media (max-width: 520px) { header.top { flex-direction: column; gap: 8px; } .acoes-inner { gap: 8px; } .btn { padding: 0 12px; } ul.arquivos li { flex-wrap: wrap; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="nome">JobRelay</div>
-    <div class="local">Preenchimento humano obrigatório · dados neste computador</div>
   </header>
 
   <ol class="passos" id="passos" aria-label="Passos do onboarding"></ol>
   <div class="passo-rotulo" id="passo-rotulo"></div>
 
+
+  <section class="tela" data-passo="0">
+    <h1>Encontre vagas para o seu perfil</h1>
+    <p class="lead">O JobRelay busca vagas e compara os requisitos com seu currículo. Se você autorizar, o assistente também pode se candidatar por você.</p>
+    <svg class="inicio-ilustracao" viewBox="0 0 560 200" role="img" aria-label="Seu perfil orienta a busca, as vagas são avaliadas e o assistente prepara os materiais">
+      <g fill="var(--surface)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M46 24h92l26 26v120H46z"/><path d="M138 24v26h26"/>
+        <circle cx="86" cy="74" r="14" fill="var(--accent-soft)"/><path d="M65 112c0-22 42-22 42 0M65 134h72M65 146h52"/>
+        <path d="M184 96h32m-8-8 8 8-8 8"/>
+        <rect x="236" y="34" width="108" height="132" rx="8"/>
+        <path d="M252 58h76M252 86h12m12 0h52M252 114h12m12 0h52M252 142h12m12 0h34"/>
+        <circle cx="336" cy="100" r="26" fill="var(--accent-soft)"/><path d="m354 120 18 20m-46-40 7 7 13-15"/>
+        <path d="M382 96h30m-8-8 8 8-8 8"/>
+        <path d="M434 24h80l22 24v122H434z"/><path d="M514 24v24h22M450 70h58M450 86h46M450 102h54"/>
+        <circle cx="510" cy="148" r="26" fill="var(--accent-soft)"/><path d="m497 148 9 9 17-19"/>
+      </g>
+    </svg>
+    <ol class="como-funciona">
+      <li><span data-icone="user"></span><div><strong>Você escolhe o que procura</strong><p>Informe o cargo, as preferências e o seu currículo.</p></div></li>
+      <li><span data-icone="search"></span><div><strong>O JobRelay avalia as vagas</strong><p>Compara cada oportunidade com seus critérios e sua experiência.</p></div></li>
+      <li><span data-icone="file-text"></span><div><strong>O assistente prepara as candidaturas</strong><p>Adapta o currículo e pode se candidatar com sua autorização.</p></div></li>
+    </ol>
+  </section>
+
   <!-- 1 -->
   <section class="tela" data-passo="1">
     <h1>Que vaga você procura?</h1>
-    <p class="lead">Informe seu nome, o cargo desejado e onde mora. Depois do formulário, você vai concluir a configuração com o Claude Code ou o Codex.</p>
+    <p class="lead">Informe seu nome, o cargo que procura e onde mora.</p>
     <div class="grupo campos">
       <div>
         <label class="rotulo" for="nome">Seu nome</label>
@@ -156,12 +206,12 @@
       <div>
         <label class="rotulo" for="cargo">Cargo que você está buscando</label>
         <input type="text" id="cargo" maxlength="200" placeholder="Ex.: Senior Product Designer, Engenheira de Dados">
-        <span class="ajuda">Como aparece nos anúncios. É o que vai na busca do LinkedIn.</span>
+        <span class="ajuda">Use o nome que aparece nos anúncios.</span>
       </div>
       <div>
         <label class="rotulo" for="pais">País onde você mora</label>
         <select id="pais"></select>
-        <span class="ajuda">Os portais "nacionais" do sistema são do Brasil. Quem mora fora escolhe mercado internacional no próximo passo.</span>
+        <span class="ajuda">Mora fora do Brasil? Escolha Exterior no próximo passo.</span>
       </div>
     </div>
   </section>
@@ -171,9 +221,9 @@
     <h2>Onde você quer procurar vagas?</h2>
     <p class="lead">Escolha Brasil, exterior ou os dois. Essa escolha também orienta o idioma do seu currículo.</p>
     <div class="grupo opcoes" role="radiogroup" aria-label="Mercado">
-      <label class="opcao"><input type="radio" name="foco" value="nacional"><span class="t">🇧🇷 Brasil</span><span class="d">Só portais brasileiros. Currículo base em português.</span></label>
-      <label class="opcao"><input type="radio" name="foco" value="internacional"><span class="t">🌎 Exterior</span><span class="d">Busca em sites internacionais. Currículo base em inglês.</span></label>
-      <label class="opcao"><input type="radio" name="foco" value="ambos"><span class="t">🌐 Os dois</span><span class="d">Busca nos dois mercados. Escolha abaixo qual você quer priorizar.</span></label>
+      <label class="opcao"><input type="radio" name="foco" value="nacional"><span class="t">🇧🇷 Brasil</span><span class="d">Vagas no Brasil. Currículo em português.</span></label>
+      <label class="opcao"><input type="radio" name="foco" value="internacional"><span class="t">🌎 Exterior</span><span class="d">Vagas internacionais. Currículo em inglês.</span></label>
+      <label class="opcao"><input type="radio" name="foco" value="ambos"><span class="t">🌐 Os dois</span><span class="d">Vagas nos dois mercados. Escolha qual priorizar.</span></label>
     </div>
     <div class="grupo" id="prioridade-grupo" hidden>
       <label class="rotulo">Qual você prioriza?</label>
@@ -181,45 +231,50 @@
         <label class="opcao"><input type="radio" name="prioridade" value="nacional"><span class="t">🇧🇷 Brasil</span></label>
         <label class="opcao"><input type="radio" name="prioridade" value="internacional"><span class="t">🌎 Exterior</span></label>
       </div>
-      <span class="ajuda">A preferência ajuda a ordenar as vagas. O assistente prepara primeiro o currículo para o mercado escolhido.</span>
+      <span class="ajuda">O assistente prepara primeiro o currículo desse mercado.</span>
     </div>
-    <div class="aviso info">Informe seus valores em reais. A comparação com salários em outras moedas é aproximada. A busca internacional considera vagas que aceitam candidaturas da América Latina.</div>
+    <div class="aviso info">A busca internacional considera vagas abertas a candidatos da América Latina.</div>
   </section>
 
   <!-- 3 -->
   <section class="tela" data-passo="3">
-    <h2>Seu currículo e seu LinkedIn</h2>
-    <p class="lead">Adicione seu currículo mais recente. O assistente usará esse material para preparar uma versão que você poderá conferir.</p>
+    <h2>Adicione seus materiais</h2>
+    <p class="lead">Seu currículo é suficiente para continuar. Os outros arquivos são opcionais.</p>
     <div class="grupo">
-      <label class="rotulo">Seu currículo <span class="tag neutra" id="cv-estado">PDF</span></label>
+      <label class="rotulo">Seu currículo <span class="tag neutra" id="cv-estado">obrigatório</span></label>
       <label class="zona" data-tipo="curriculo">
-        <input type="file" accept=".pdf,application/pdf">
-        <strong>Arraste o PDF do currículo, ou clique pra escolher</strong>
-        <span>O mais atual que você tiver. Até 15 MB.</span>
+        <input type="file" aria-label="Seu currículo" accept=".pdf,.docx">
+        <strong>Arraste um PDF ou DOCX, ou escolha o arquivo</strong>
+        <span>A versão mais recente. Até 15 MB.</span>
       </label>
       <ul class="arquivos" id="lista-curriculo"></ul>
     </div>
     <div class="grupo">
-      <label class="rotulo">Seu LinkedIn <span class="tag neutra" id="li-estado">opcional</span></label>
+      <label class="rotulo">Seu perfil do LinkedIn <span class="tag neutra" id="li-estado">opcional</span></label>
       <label class="zona" data-tipo="linkedin">
-        <input type="file" accept=".pdf,application/pdf">
-        <strong>Arraste o PDF do perfil, ou clique pra escolher</strong>
-        <span>No seu perfil do LinkedIn: "Mais" → "Salvar como PDF". Traz o histórico completo de experiências.</span>
+        <input type="file" aria-label="Seu perfil do LinkedIn" accept=".pdf,.docx">
+        <strong>Arraste um PDF ou DOCX, ou escolha o arquivo</strong>
+        <span>No LinkedIn: Mais → Salvar como PDF.</span>
       </label>
       <ul class="arquivos" id="lista-linkedin"></ul>
     </div>
+    <div class="grupo">
+      <label class="rotulo">Material adicional <span class="tag neutra" id="ad-estado">opcional</span></label>
+      <label class="zona" data-tipo="adicional">
+        <input type="file" aria-label="Material adicional" accept=".pdf,.docx,.txt">
+        <strong>Arraste um PDF ou DOCX, ou escolha o arquivo</strong>
+        <span>Outro documento sobre sua experiência. Até 15 MB.</span>
+      </label>
+      <ul class="arquivos" id="lista-adicional"></ul>
+    </div>
+
   </section>
 
   <!-- 4 -->
   <section class="tela" data-passo="4">
-    <h2>Sua profissão e senioridade</h2>
-    <p class="lead">Conte sua área de atuação e escolha os níveis de vaga que você considera.</p>
+    <h2>Quais níveis você considera?</h2>
+    <p class="lead">Escolha os níveis de vaga que você aceita.</p>
     <div class="grupo campos">
-      <div>
-        <label class="rotulo" for="profissao">Sua área, em uma frase</label>
-        <input type="text" id="profissao" maxlength="200" placeholder="Ex.: engenharia de dados, com foco em pipelines e SQL">
-        <span class="ajuda">O assistente usará essa descrição para ajustar a busca à sua profissão.</span>
-      </div>
       <div>
         <label class="rotulo">Níveis que você aceita</label>
         <div class="opcoes linha" id="niveis">
@@ -237,16 +292,16 @@
   <section class="tela" data-passo="5">
     <h2>Salário e modelo de trabalho</h2>
     <p class="lead">Informe os valores mensais em reais e os modelos de trabalho que você aceita.</p>
-    <div class="grupo campos duas">
+    <div class="grupo campos">
       <div>
-        <label class="rotulo" for="piso">Menor salário mensal que você considera</label>
+        <label class="rotulo" for="piso">Menor salário mensal</label>
         <input type="number" id="piso" min="0" step="100" placeholder="8000">
-        <span class="ajuda">Abaixo disso a vaga é descartada, só quando o anúncio diz valor e período.</span>
+        <span class="ajuda">Vagas com salário informado abaixo desse valor ficam de fora.</span>
       </div>
       <div>
-        <label class="rotulo" for="referencia">O que você ganha hoje, por mês</label>
+        <label class="rotulo" for="referencia">Seu salário mensal atual</label>
         <input type="number" id="referencia" min="0" step="100" placeholder="12000">
-        <span class="ajuda">Esse valor ajuda a comparar a remuneração de vagas de níveis diferentes.</span>
+        <span class="ajuda">Referência para comparar as oportunidades.</span>
       </div>
     </div>
     <div class="grupo campos">
@@ -257,12 +312,12 @@
           <label class="opcao"><input type="checkbox" name="modelo" value="hibrido"><span class="t">🏢 Híbrido</span></label>
           <label class="opcao"><input type="checkbox" name="modelo" value="presencial"><span class="t">📍 Presencial</span></label>
         </div>
-        <span class="ajuda">Vagas remotas podem ter restrições de localização no anúncio. Para híbrido e presencial, informe sua cidade.</span>
+        <span class="ajuda">Para vagas híbridas ou presenciais, informe sua cidade.</span>
       </div>
       <div id="cidade-grupo" hidden>
         <label class="rotulo" for="cidade">Sua cidade</label>
         <input type="text" id="cidade" autocomplete="address-level2" placeholder="Como aparece nos anúncios, ex.: Curitiba">
-        <span class="ajuda">Vaga híbrida ou presencial que não cita esta cidade fica de fora.</span>
+        <span class="ajuda">Usada para buscar vagas híbridas ou presenciais.</span>
       </div>
     </div>
   </section>
@@ -270,43 +325,43 @@
   <!-- 6 -->
   <section class="tela" data-passo="6">
     <h2>Como quer acompanhar as vagas?</h2>
-    <p class="lead">Escolha onde acompanhar o estado das vagas, como tratar candidaturas e se quer pedir uma rodada recorrente ao assistente.</p>
+    <p class="lead">Escolha seu quadro e como quer usar o assistente.</p>
     <div class="grupo">
       <label class="rotulo">Onde acompanhar as vagas</label>
       <div class="opcoes" role="radiogroup" aria-label="Fonte de estado">
-        <label class="opcao"><input type="radio" name="fonte-estado" value="local" checked><span class="t">Quadro local</span><span class="d">Funciona neste computador, sem conexão extra.</span></label>
-        <label class="opcao"><input type="radio" name="fonte-estado" value="notion"><span class="t">Minha database no Notion</span><span class="d">O assistente consulta sua conexão Notion. A configuração da conta acontece na sua ferramenta.</span></label>
+        <label class="opcao"><input type="radio" name="fonte-estado" value="local" checked><span class="t"><span data-icone="panels-top-left"></span>Quadro local</span><span class="d">Funciona neste computador, sem conexão extra.</span></label>
+        <label class="opcao"><input type="radio" name="fonte-estado" value="notion"><span class="t"><span data-icone="notion"></span>Meu quadro no Notion</span><span class="d">O assistente cria o quadro na sua conta.</span></label>
       </div>
-      <div id="notion-grupo" class="campos" hidden style="margin-top:16px">
-        <label class="rotulo" for="database-id">ID da database do Notion</label>
-        <input type="text" id="database-id" autocomplete="off" placeholder="32 caracteres do link da database">
-        <span class="ajuda">Cole só o ID da database. Não cole token ou credencial aqui nem na conversa.</span>
-      </div>
+
     </div>
     <div class="grupo">
       <label class="rotulo">O que fazer com candidaturas</label>
       <div class="opcoes" role="radiogroup" aria-label="Modo de candidatura">
-        <label class="opcao"><input type="radio" name="modo-candidatura" value="mapear" checked><span class="t">Só mapear e avaliar</span><span class="d">O assistente não preenche nem envia candidaturas.</span></label>
-        <label class="opcao"><input type="radio" name="modo-candidatura" value="chrome_assistido"><span class="t">Configurar candidatura assistida no Chrome</span><span class="d">Depois do onboarding, você revisa perfil, respostas e autorizações com o assistente. Esta escolha sozinha não autoriza preenchimento ou envio.</span></label>
+        <label class="opcao"><input type="radio" name="modo-candidatura" value="mapear" checked><span class="t"><span data-icone="search"></span>Só mapear e avaliar</span><span class="d">O assistente não preenche nem envia candidaturas.</span></label>
+        <label class="opcao"><input type="radio" name="modo-candidatura" value="chrome_assistido"><span class="t"><span data-icone="send"></span>Candidaturas com o assistente</span><span class="d">Revise seu perfil e autorize as candidaturas com o assistente.</span></label>
       </div>
     </div>
     <div class="grupo">
       <label class="toggle">
-        <input type="checkbox" id="autonomia">
-        <span><span class="t">Pedir rodada recorrente a cada 4 horas</span><br><span class="d">O assistente criará a tarefa no agendador dele depois de concluir o onboarding. A Apify poderá rodar no máximo uma vez por dia. A tarefa depende do computador e das conexões disponíveis.</span></span>
+        <input type="checkbox" role="switch" id="autonomia"><span class="switch" aria-hidden="true"></span>
+        <span><span class="t">Buscar vagas a cada 4 horas</span><br><span class="d">O assistente agenda as buscas após a configuração.</span></span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" role="switch" id="atualizacao" checked><span class="switch" aria-hidden="true"></span>
+        <span><span class="t">Atualizar automaticamente <span class="tag neutra">recomendado</span></span><br><span class="d">Busca uma versão nova no GitHub antes de começar.</span></span>
       </label>
     </div>
-    <div class="aviso info">Sem tarefa recorrente, você pode iniciar a rodada manualmente quando quiser.</div>
+    <div class="aviso info">Você pode iniciar uma busca manual quando quiser.</div>
   </section>
 
   <!-- 7 -->
   <section class="tela" data-passo="7">
-    <h2>Incluir vagas do LinkedIn</h2>
-    <p class="lead">Esta conexão opcional usa a Apify, um serviço externo de coleta. Confira os custos na sua conta antes de usar. Você pode deixar o campo vazio e continuar.</p>
+    <h2>Vagas do LinkedIn pela Apify</h2>
+    <p class="lead">A Apify coleta vagas do LinkedIn e pode ter custos. Confira os valores na sua conta. Esta conexão é opcional.</p>
     <div class="grupo">
-      <p>1. Crie uma conta em <a href="https://apify.com" target="_blank" rel="noopener">apify.com</a>. Confira os créditos e os valores disponíveis na sua conta.</p>
-      <p>2. Abra a página do coletor de vagas do LinkedIn na Apify: <a href="https://console.apify.com/actors/hKByXkMQaC5Qt9UMN/input" target="_blank" rel="noopener">console.apify.com/actors/hKByXkMQaC5Qt9UMN/input</a>.</p>
-      <p>3. Clique em <strong>API</strong>, depois em <strong>API clients</strong>, e use o ícone de copiar ao lado de "API token". Não precisa criar token novo nem usar o código que aparece embaixo.</p>
+      <p>1. Entre ou crie sua conta em <a href="https://apify.com" target="_blank" rel="noopener">apify.com</a>.</p>
+      <p>2. Abra o coletor de vagas do LinkedIn: <a href="https://console.apify.com/actors/hKByXkMQaC5Qt9UMN/input" target="_blank" rel="noopener">console.apify.com/actors/hKByXkMQaC5Qt9UMN/input</a>.</p>
+      <p>3. Abra <strong>API → API clients</strong> e copie o campo <strong>API token</strong>.</p>
       <div class="prints">
         <figure><img src="img/apify/01-botao-api.webp" alt="Canto superior direito da página do coletor na Apify, com os botões Start, Save as a new task e API"><figcaption>O botão API, no canto superior direito.</figcaption></figure>
         <figure><img src="img/apify/02-menu-api-clients.webp" alt="Menu do botão API aberto, com a opção API clients em destaque"><figcaption>No menu, API clients.</figcaption></figure>
@@ -317,7 +372,7 @@
       <div>
         <label class="rotulo" for="token">Token da Apify <span class="tag" id="token-estado" hidden>presente</span></label>
         <input type="password" id="token" autocomplete="off" placeholder="apify_api_…">
-        <span class="ajuda" id="token-ajuda">A chave fica salva neste computador e é usada para acessar a Apify. Cole apenas aqui, nunca na conversa com a IA.</span>
+        <span class="ajuda" id="token-ajuda">Cole a chave apenas neste campo. Não envie na conversa.</span>
       </div>
     </div>
     <div class="aviso info">Sem essa conexão, a busca continua nos outros sites de vagas.</div>
@@ -325,21 +380,26 @@
 
   <!-- 8 -->
   <section class="tela" data-passo="8">
-    <h2>Tudo salvo neste computador</h2>
-    <p class="lead">Confira suas escolhas no resumo e clique em “Confirmar meu onboarding”. Suas respostas e seus arquivos foram salvos neste computador. O formulário não os envia a um servidor externo. Para concluir a configuração, falta preparar seu currículo e ajustar a busca com o assistente.</p>
+    <h2>Confira suas escolhas</h2>
+    <p class="lead">Revise o resumo antes de salvar e confirmar.</p>
     <table class="resumo" id="resumo"></table>
+  </section>
+  <section class="tela" data-passo="9">
+    <span class="sucesso-sinal" data-icone="check-circle"></span>
+    <h2>Configuração salva</h2>
+    <p class="lead">Baixe o arquivo ou copie as instruções e envie ao assistente. Ele vai preparar seu currículo e concluir a configuração.</p>
     <div class="grupo">
       <label class="rotulo" for="instrucao">Instrução para o assistente</label>
-      <p>Abra o Claude Code ou o Codex na pasta do projeto e cole isto:</p>
+      <p>Cole na conversa do projeto:</p>
       <textarea id="instrucao" readonly aria-label="Instrução para o assistente" style="min-height:140px;font-size:14px;line-height:20px"></textarea>
       <div class="acoes-inline" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <button class="btn primario pequeno" type="button" id="copiar">Copiar instrução</button>
-        <a class="btn secundario pequeno" id="baixar" download="onboarding-respostas.md" href="#">Baixar como arquivo</a>
+        <button class="btn primario pequeno" type="button" id="copiar">Copiar instruções</button>
+        <a class="btn secundario pequeno" id="baixar" download="onboarding-respostas.md" href="#">Baixar instruções</a>
         <span class="salvo" id="copiado"></span>
       </div>
-      <span class="ajuda">O arquivo é um resumo do que você respondeu, com a mesma instrução. Serve pra guardar ou colar em outra ferramenta.</span>
+      <span class="ajuda">O arquivo reúne suas escolhas e as instruções.</span>
     </div>
-    <div class="aviso ok">Quer mudar alguma resposta? Volte nos passos. Cada tela salva de novo.</div>
+
   </section>
 
   <div class="acoes"><div class="acoes-inner">
@@ -351,7 +411,7 @@
 
 <script>
 (() => {
-  const PASSOS = ['Quem é você', 'Mercado', 'Currículo e LinkedIn', 'Profissão', 'Salário', 'Quadro e autonomia', 'LinkedIn (opcional)', 'Resumo'];
+  const PASSOS = ['Quem é você', 'Mercado', 'Materiais', 'Senioridade', 'Salário', 'Quadro e autonomia', 'LinkedIn (opcional)', 'Resumo'];
   const PAISES = [
     ['Brasil', 'Brazil', '106057199'], ['Portugal', 'Portugal', '100364837'], ['Estados Unidos', 'United States', '103644278'],
     ['Reino Unido', 'United Kingdom', '101165590'], ['Canadá', 'Canada', '101174742'], ['Alemanha', 'Germany', '101282230'],
@@ -360,7 +420,7 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let atual = 1;
+  let atual = 0;
   let direcao = 1;
   let estado = {};
 
@@ -368,6 +428,9 @@
 
   // Ícones do Lucide (lucide.dev, ISC), inline pra página não depender de rede.
   const ICONES = {
+    search: '<circle cx="10" cy="10" r="7"/><path d="m16 16 5 5"/>',
+    'panels-top-left': '<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20M9 9v12"/>',
+    notion: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V7l10 10V7M6 7h3m6 0h3M6 17h3m6 0h3"/>',
     user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
     'file-text': '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
@@ -387,8 +450,9 @@
   const ICONE_PASSO = ['user', 'globe', 'file-text', 'briefcase', 'banknote', 'send', 'key-round', 'check-circle'];
   document.querySelectorAll('section.tela').forEach((sec) => {
     const h = sec.querySelector('h1, h2'); const n = Number(sec.dataset.passo);
-    if (h) h.insertAdjacentHTML('afterbegin', `<span class="ic-titulo">${icone(ICONE_PASSO[n - 1], 18)}</span>`);
+    if (h && n > 0 && n < 9) h.insertAdjacentHTML('afterbegin', `<span class="ic-titulo">${icone(ICONE_PASSO[n - 1] || 'check-circle', 18)}</span>`);
   });
+  $$('[data-icone]').forEach((el) => el.innerHTML = icone(el.dataset.icone, el.classList.contains('sucesso-sinal') ? 32 : 24));
   $('#voltar').insertAdjacentHTML('afterbegin', icone('arrow-left', 18));
   $$('.zona strong').forEach((el) => el.insertAdjacentHTML('afterbegin', `<span class="ic-zona">${icone('upload', 24)}</span>`));
   $('#copiar').insertAdjacentHTML('afterbegin', icone('copy', 16));
@@ -401,12 +465,17 @@
   PASSOS.forEach((n, i) => { const li = document.createElement('li'); li.innerHTML = `<span>${i + 1}. ${n}</span>`; ol.appendChild(li); });
 
   function pintarPassos() {
+    $('.acoes').classList.toggle('inicio', atual === 0);
+    $('.acoes').hidden = atual === 9;
     $$('#passos li').forEach((li, i) => { li.className = i + 1 < atual ? 'feito' : i + 1 === atual ? 'atual' : ''; });
+    $('#passos').hidden = atual === 0 || atual === 9;
+    $('#passo-rotulo').hidden = atual === 0 || atual === 9;
     $('#passo-rotulo').innerHTML = `Passo <b>${atual}</b> de ${PASSOS.length} · ${PASSOS[atual - 1]}`;
     $$('section.tela').forEach((s) => { const on = Number(s.dataset.passo) === atual; s.classList.toggle('ativa', on); s.classList.toggle('voltando', on && direcao < 0); });
-    $('#voltar').disabled = atual === 1;
-    $('#continuar').hidden = false;
-    $('#continuar').innerHTML = (atual === 7 ? 'Salvar e ver resumo' : atual === 8 ? 'Confirmar meu onboarding' : 'Continuar') + (atual < 8 ? icone('arrow-right', 18) : '');
+    $('#voltar').disabled = atual === 0;
+    $('#voltar').hidden = atual === 0 || atual === 9;
+    $('#continuar').hidden = atual === 9;
+    $('#continuar').innerHTML = (atual === 0 ? 'Começar configuração' : atual === 7 ? 'Ver resumo' : atual === 8 ? 'Salvar e confirmar' : 'Continuar') + (atual < 8 ? icone('arrow-right', 18) : '');
     $('#salvo-status').textContent = '';
     window.scrollTo({ top: 0 });
     if (atual === 8) montarResumo();
@@ -422,7 +491,6 @@
     if (p.mercado?.foco) { const r = document.querySelector(`input[name=foco][value=${p.mercado.foco}]`); if (r) r.checked = true; }
     if (p.mercado?.prioridade) { const r = document.querySelector(`input[name=prioridade][value=${p.mercado.prioridade}]`); if (r) r.checked = true; }
     atualizarPrioridade();
-    $('#profissao').value = p.profissao || '';
     if (Array.isArray(p.niveis_aceitos)) $$('input[name=nivel]').forEach((c) => { c.checked = p.niveis_aceitos.includes(c.value); });
     if (p.salario_confirmado) { $('#piso').value = p.salario?.minimo_mensal_brl ?? ''; $('#referencia').value = p.salario?.referencia_atual_brl ?? ''; }
     $$('input[name=modelo]').forEach((c) => { c.checked = c.value === 'remoto' ? p.exigir_remoto !== false || p.aceita_hibrido || p.aceita_presencial ? true : true : c.value === 'hibrido' ? p.aceita_hibrido === true : p.aceita_presencial === true; });
@@ -431,12 +499,11 @@
     const fonte = estado.fonteEstado?.fonte || 'local';
     const fonteRadio = document.querySelector(`input[name="fonte-estado"][value="${fonte}"]`);
     if (fonteRadio) fonteRadio.checked = true;
-    $('#database-id').value = estado.fonteEstado?.databaseId || '';
-    atualizarFonteEstado();
     const modo = estado.politica?.modoCandidatura || 'mapear';
     const modoRadio = document.querySelector(`input[name="modo-candidatura"][value="${modo}"]`);
     if (modoRadio) modoRadio.checked = true;
     $('#autonomia').checked = estado.politica?.ativa === true;
+    $('#atualizacao').checked = estado.politica?.atualizarAutomaticamente !== false;
     if (estado.env?.token) { $('#token-estado').hidden = false; $('#token').placeholder = 'Já salvo. Cole outro só se quiser trocar.'; }
     renderArquivos();
   }
@@ -451,11 +518,9 @@
     $('#cidade-grupo').hidden = !precisa;
   }
   $$('input[name=modelo]').forEach((c) => c.addEventListener('change', atualizarCidade));
-  function atualizarFonteEstado() { $('#notion-grupo').hidden = valor('fonte-estado') !== 'notion'; }
-  $$('input[name="fonte-estado"]').forEach((c) => c.addEventListener('change', atualizarFonteEstado));
-
   // ---------- arquivos: um PDF por tipo ----------
-  const pendentes = { curriculo: null, linkedin: null };
+  const TIPOS = ['curriculo', 'linkedin', 'adicional'];
+  const pendentes = { curriculo: null, linkedin: null, adicional: null };
   for (const zona of $$('.zona')) {
     const tipo = zona.dataset.tipo; const input = zona.querySelector('input');
     ['dragenter', 'dragover'].forEach((e) => zona.addEventListener(e, (ev) => { ev.preventDefault(); zona.classList.add('sobre'); }));
@@ -465,8 +530,8 @@
   }
   function escolherArquivo(tipo, f) {
     if (!f) return;
-    if (!/\.pdf$/i.test(f.name)) { avisoArquivo(tipo, `${f.name} não é PDF. Salve como PDF e tente de novo.`); return; }
-    if (f.size > 15 * 1024 * 1024) { avisoArquivo(tipo, `${f.name} passa de 15 MB. Comprima o PDF ou tire páginas.`); return; }
+    if (!(tipo === 'adicional' ? /\.(pdf|docx|txt)$/i : /\.(pdf|docx)$/i).test(f.name)) { avisoArquivo(tipo, tipo === 'adicional' ? 'Envie PDF, DOCX ou TXT.' : 'Envie PDF ou DOCX.'); return; }
+    if (f.size > 15 * 1024 * 1024) { avisoArquivo(tipo, `${f.name} passa de 15 MB. Envie uma versão menor.`); return; }
     avisoArquivo(tipo, '');
     pendentes[tipo] = f;
     renderArquivos();
@@ -480,7 +545,7 @@
   }
   function tamanho(b) { return b > 1024 * 1024 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`; }
   function renderArquivos() {
-    for (const tipo of ['curriculo', 'linkedin']) {
+    for (const tipo of TIPOS) {
       const ul = $(`#lista-${tipo}`); ul.innerHTML = '';
       const salvo = (estado.materiais || []).find((a) => a.tipo === tipo);
       const novo = pendentes[tipo];
@@ -494,9 +559,9 @@
         li.innerHTML = `<span class="tag ok">salvo</span><span class="n">${esc(salvo.nome)}</span><span class="s">${salvo.extraido ? 'texto extraído' : tamanho(salvo.tamanho)}</span>`;
         ul.appendChild(li);
       }
-      const tag = $(tipo === 'curriculo' ? '#cv-estado' : '#li-estado');
+      const tag = $({ curriculo: '#cv-estado', linkedin: '#li-estado', adicional: '#ad-estado' }[tipo]);
       if (salvo || novo) { tag.textContent = novo ? 'novo' : 'salvo'; tag.className = 'tag ok'; }
-      else { tag.textContent = tipo === 'curriculo' ? 'PDF' : 'opcional'; tag.className = 'tag neutra'; }
+      else { tag.textContent = tipo === 'curriculo' ? 'obrigatório' : 'opcional'; tag.className = 'tag neutra'; }
     }
   }
   const paraBase64 = (f) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
@@ -513,8 +578,8 @@
 
   async function coletarPasso() {
     if (atual === 1) {
-      const ok1 = marcar($('#nome'), !$('#nome').value.trim(), 'Precisa do seu nome.');
-      const ok2 = marcar($('#cargo'), !$('#cargo').value.trim(), 'Precisa do cargo, como aparece em anúncio.');
+      const ok1 = marcar($('#nome'), !$('#nome').value.trim(), 'Informe seu nome.');
+      const ok2 = marcar($('#cargo'), !$('#cargo').value.trim(), 'Informe o cargo que procura.');
       if (!ok1 || !ok2) return null;
       const op = sel.selectedOptions[0];
       return { nome: $('#nome').value.trim(), cargo_alvo: $('#cargo').value.trim(), pais: op.value === 'outro' ? 'outro' : op.value, geoId: op.dataset.geo };
@@ -522,38 +587,35 @@
     if (atual === 2) {
       const foco = valor('foco'); const prioridade = valor('prioridade');
       if (!foco) { $('#salvo-status').textContent = 'Escolha um mercado.'; return null; }
-      if (foco === 'ambos' && !prioridade) { $('#salvo-status').textContent = 'Diga qual você prioriza.'; return null; }
+      if (foco === 'ambos' && !prioridade) { $('#salvo-status').textContent = 'Escolha o mercado que quer priorizar.'; return null; }
       return { foco, prioridade: foco === 'ambos' ? prioridade : null };
     }
     if (atual === 3) {
       const temCv = pendentes.curriculo || (estado.materiais || []).some((a) => a.tipo === 'curriculo');
-      if (!temCv) { avisoArquivo('curriculo', 'O currículo em PDF é obrigatório: é dele que o agente monta a sua base.'); return null; }
+      if (!temCv) { avisoArquivo('curriculo', 'Envie seu currículo em PDF ou DOCX para continuar.'); return null; }
       const arquivos = [];
-      for (const tipo of ['curriculo', 'linkedin']) if (pendentes[tipo]) arquivos.push({ tipo, nome: pendentes[tipo].name, base64: await paraBase64(pendentes[tipo]) });
+      for (const tipo of TIPOS) if (pendentes[tipo]) arquivos.push({ tipo, nome: pendentes[tipo].name, base64: await paraBase64(pendentes[tipo]) });
       return { arquivos };
     }
     if (atual === 4) {
-      const ok = marcar($('#profissao'), !$('#profissao').value.trim(), 'Diga a sua área em uma frase.');
-      if (!ok) return null;
-      return { profissao: $('#profissao').value.trim(), niveis_aceitos: $$('input[name=nivel]:checked').map((c) => c.value) };
+      const niveis = $$('input[name=nivel]:checked').map((c) => c.value);
+      if (!niveis.length) { $('#salvo-status').textContent = 'Escolha ao menos um nível.'; return null; }
+      return { niveis_aceitos: niveis };
     }
     if (atual === 5) {
       const piso = Number($('#piso').value); const ref = Number($('#referencia').value);
-      const ok1 = marcar($('#piso'), !(piso > 0), 'Um número maior que zero.');
-      const ok2 = marcar($('#referencia'), !(ref > 0), 'Um número maior que zero.');
+      const ok1 = marcar($('#piso'), !(piso > 0), 'Informe um valor maior que zero.');
+      const ok2 = marcar($('#referencia'), !(ref > 0), 'Informe um valor maior que zero.');
       if (!ok1 || !ok2) return null;
       const modelos = $$('input[name=modelo]:checked').map((c) => c.value);
       if (!modelos.length) { $('#salvo-status').textContent = 'Marque ao menos um modelo de trabalho.'; return null; }
       const precisaCidade = modelos.some((m) => m !== 'remoto');
-      if (precisaCidade && !marcar($('#cidade'), !$('#cidade').value.trim(), 'Híbrido e presencial precisam da sua cidade.')) return null;
+      if (precisaCidade && !marcar($('#cidade'), !$('#cidade').value.trim(), 'Informe a cidade para buscar vagas híbridas ou presenciais.')) return null;
       return { minimo_mensal_brl: piso, referencia_atual_brl: ref, aceita_hibrido: modelos.includes('hibrido'), aceita_presencial: modelos.includes('presencial'), aceita_remoto: modelos.includes('remoto'), cidade: precisaCidade ? $('#cidade').value.trim() : '' };
     }
     if (atual === 6) {
       const fonteEstado = valor('fonte-estado');
-      const databaseId = $('#database-id').value.trim();
-      const idValido = /^[0-9a-f]{32}$/i.test(databaseId) || /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(databaseId);
-      if (fonteEstado === 'notion' && !marcar($('#database-id'), !idValido, 'Cole o ID da database, sem token.')) return null;
-      return { fonteEstado, databaseId, modoCandidatura: valor('modo-candidatura'), autonomia: $('#autonomia').checked };
+      return { fonteEstado, modoCandidatura: valor('modo-candidatura'), autonomia: $('#autonomia').checked, atualizarAutomaticamente: $('#atualizacao').checked };
     }
     if (atual === 7) return { token: $('#token').value.trim() || null };
     return {};
@@ -566,12 +628,12 @@
       const j = await r.json();
       if (!r.ok) throw new Error(j.erro || 'falhou');
       estado = j.estado;
-      if (atual === 3) { pendentes.curriculo = null; pendentes.linkedin = null; renderArquivos(); }
+      if (atual === 3) { TIPOS.forEach((tipo) => pendentes[tipo] = null); renderArquivos(); }
       if (atual === 7) { $('#token').value = ''; if (estado.env?.token) { $('#token-estado').hidden = false; $('#token').placeholder = 'Já salvo. Cole outro só se quiser trocar.'; } }
       const st = $('#salvo-status'); st.textContent = 'Salvo.'; st.style.animation = 'none'; void st.offsetWidth; st.style.animation = '';
       return true;
     } catch (e) {
-      $('#salvo-status').textContent = `Não foi possível salvar. Tente novamente. Detalhe: ${e.message}`;
+      $('#salvo-status').textContent = e instanceof TypeError ? 'A conexão local foi interrompida. Inicie o JobRelay com npm start e recarregue esta página.' : `Não foi possível salvar: ${e.message}`;
       return false;
     } finally { $('#continuar').disabled = false; }
   }
@@ -581,19 +643,21 @@
   // o passo seguinte com o que estava na tela antes de a pessoa olhar.
   let ocupado = false;
   $('#continuar').addEventListener('click', async (evento) => {
-    if (!evento.isTrusted || navigator.webdriver) { $('#salvo-status').textContent = 'Preencha e confirme pessoalmente. A IA deve aguardar.'; return; }
+    if (!evento.isTrusted || navigator.webdriver) { $('#salvo-status').textContent = 'Preencha este formulário pessoalmente.'; return; }
     if (ocupado) return;
+    if (atual === 0) { atual = 1; direcao = 1; pintarPassos(); return; }
     if (atual === 8) {
       ocupado = true; $('#continuar').disabled = true; $('#voltar').disabled = true;
-      $('#salvo-status').textContent = 'Confirmando seu onboarding…';
+      $('#salvo-status').textContent = 'Confirmando…';
       try {
         const resposta = await fetch('/api/confirmar', { method: 'POST', headers: { 'content-type': 'application/json', 'x-onboarding-sessao': document.querySelector('meta[name=onboarding-sessao]')?.content || '' }, body: JSON.stringify({ confirmadoPelaPessoa: true }) });
         const resultado = await resposta.json();
         if (!resposta.ok) throw new Error(resultado.erro || 'Tente novamente.');
-        $('#salvo-status').textContent = 'Onboarding confirmado. Copie a instrução e conclua a preparação do currículo com o assistente.';
-        $('#continuar').hidden = true;
-      } catch (erro) { $('#salvo-status').textContent = `Não foi possível confirmar. ${erro.message}`; }
-      finally { ocupado = false; $('#continuar').disabled = false; $('#voltar').disabled = atual === 1; }
+        estado = resultado.estado;
+        montarResumo();
+        atual = 9; direcao = 1; pintarPassos();
+      } catch (erro) { $('#salvo-status').textContent = erro instanceof TypeError ? 'A conexão local foi interrompida. Inicie o JobRelay com npm start e recarregue a página.' : `Não foi possível confirmar: ${erro.message}`; }
+      finally { ocupado = false; $('#continuar').disabled = false; $('#voltar').disabled = atual === 0; }
       return;
     }
     ocupado = true; $('#voltar').disabled = true;
@@ -602,32 +666,35 @@
       if (dados === null) return;
       if (await salvar(dados)) { direcao = 1; atual++; pintarPassos(); }
     } finally {
-      setTimeout(() => { ocupado = false; $('#voltar').disabled = atual === 1; }, 350);
+      setTimeout(() => { ocupado = false; $('#voltar').disabled = atual === 0; }, 350);
     }
   });
-  $('#voltar').addEventListener('click', () => { if (!ocupado && atual > 1) { direcao = -1; atual--; pintarPassos(); } });
+  $('#voltar').addEventListener('click', () => { if (!ocupado && atual > 0 && atual < 9) { direcao = -1; atual--; pintarPassos(); } });
 
+  let downloadUrl;
   function montarResumo() {
     const p = estado.perfil || {}; const b = estado.blocos || [];
     const linhas = [
       ['Cargo alvo', p.cargo_alvo || ''],
       ['Mercado', p.mercado?.foco ? `${p.mercado.foco}${p.mercado.prioridade ? `, prioriza ${p.mercado.prioridade}` : ''}` : ''],
-      ['Materiais', (estado.materiais || []).map((a) => a.tipo === 'curriculo' ? 'currículo' : 'LinkedIn').join(' e ') || 'nenhum'],
-      ['Área', p.profissao || ''],
+      ['Materiais', (estado.materiais || []).map((a) => ({ curriculo: 'currículo', linkedin: 'LinkedIn', adicional: 'adicional' }[a.tipo])).join(' e ') || 'nenhum'],
+      ['Níveis', (p.niveis_aceitos || []).join(', ')],
       ['Piso', p.salario?.minimo_mensal_brl ? `R$ ${p.salario.minimo_mensal_brl} por mês` : ''],
       ['Modelo', [p.aceita_remoto !== false ? 'remoto' : null, p.aceita_hibrido ? 'híbrido' : null, p.aceita_presencial ? 'presencial' : null].filter(Boolean).join(', ') + (p.cidade ? ` em ${p.cidade}` : '')],
-      ['Quadro', estado.fonteEstado?.fonte === 'notion' ? `Notion · database ${estado.fonteEstado.databaseId}` : 'local'],
-      ['Candidaturas', estado.politica?.modoCandidatura === 'chrome_assistido' ? 'configurar Chrome com o assistente; envio ainda não autorizado' : 'só mapear e avaliar'],
-      ['Rodada recorrente', estado.politica?.ativa ? 'solicitar tarefa a cada 4 horas; Apify no máximo 1 vez por dia' : 'desligada'],
-      ['Apify', estado.env?.token ? (estado.env.task ? 'token e Task salvos' : 'conexão salva') : 'sem token: LinkedIn fica de fora'],
-      ['Próximas tarefas', 'montar o currículo base · reescrever os termos de busca · marcar o perfil como configurado'],
+      ['Quadro', estado.fonteEstado?.fonte === 'notion' ? 'Notion, a criar com o assistente' : 'local'],
+      ['Candidaturas', estado.politica?.modoCandidatura === 'chrome_assistido' ? 'configurar com o assistente' : 'só mapear e avaliar'],
+      ['Rodada recorrente', estado.politica?.ativa ? 'a cada 4 horas' : 'desligada'],
+      ['Atualização automática', estado.politica?.atualizarAutomaticamente !== false ? 'ativada' : 'desativada'],
+      ['Apify', estado.env?.token ? (estado.env.task ? 'token e Task salvos' : 'conexão salva') : 'sem conexão Apify'],
+      ['Próximas tarefas', 'preparar currículo e ajustar a busca'],
     ];
     $('#resumo').innerHTML = linhas.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
 
     const instrucao = estado.instrucao || 'Recarregue a página para receber a instrução completa.';
     $('#instrucao').value = instrucao;
     const resumoMd = ['# Onboarding do JobRelay', '', `Salvo em ${new Date().toLocaleDateString('pt-BR')}.`, '', ...linhas.map(([k, v]) => `- **${k}:** ${v || '(vazio)'}`), '', '## Instrução para o assistente', '', '```', instrucao, '```', ''].join('\n');
-    $('#baixar').href = URL.createObjectURL(new Blob([resumoMd], { type: 'text/markdown;charset=utf-8' }));
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    $('#baixar').href = downloadUrl = URL.createObjectURL(new Blob([resumoMd], { type: 'text/markdown;charset=utf-8' }));
   }
   $('#copiar').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#instrucao').value); $('#copiado').textContent = 'Copiado.'; }
