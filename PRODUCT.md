@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Repositório público. O núcleo de coleta e o onboarding aceitam Node.js 20; o navegador assistido usa a dependência opcional agent-browser e exige Node.js 22. O pacote completo, incluindo a interface Astro, requer Node.js 22.23.4 ou mais recente. Python 3 lê os materiais e gera o currículo. O onboarding continua HTML autocontido, servido por Node. A interface do quadro em `interface/` usa Astro + React e componentes shadcn/Base UI do preset bIkfnxQ por pedido explícito de Carlos em 11 de Novembro. A versão HTML anterior permanece preservada até a integração. Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
+Repositório público. O núcleo de coleta e o onboarding aceitam Node.js 20; o navegador assistido usa a dependência opcional agent-browser e exige Node.js 22. O pacote completo, incluindo a interface Astro, requer Node.js 22.23.4 ou mais recente. Python 3 lê os materiais e gera o currículo. O onboarding continua HTML autocontido, servido por Node. A interface do quadro em `interface/` usa Astro + React e componentes shadcn/Base UI do preset bIkfnxQ por pedido explícito do autor em 11 de Novembro. A versão HTML anterior permanece preservada até a integração. Rodam em `localhost`, no navegador de quem usa, com internet disponível (fonte pode vir do Google Fonts, com fallback de sistema).
 
 ## Users
 
@@ -48,8 +48,8 @@ O formulário grava em arquivos do próprio repositório: `vagas/config/perfil.j
 
 ## Brand Commitments
 
-- **Light mode.** Direção do Carlos, 2026-09-14.
-- **Tema neutro do preset shadcn bIkfnxQ.** Direção de Carlos em 11 de Novembro de 2026: botões neutros, Montserrat preservada, sem instalar shadcn/Next. Substitui a direção anterior de botões azuis.
+- **Light mode.** Direção do autor, 2026-09-14.
+- **Tema neutro do preset shadcn bIkfnxQ.** Direção do autor em 11 de Novembro de 2026: botões neutros, Montserrat preservada, sem instalar shadcn/Next. Substitui a direção anterior de botões azuis.
 - Texto sem travessão. Mês, dia e período com inicial maiúscula.
 - Tom: direto, em português, sem jargão de recrutamento e sem promessa de emprego.
 
