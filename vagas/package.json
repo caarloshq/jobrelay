@@ -36,6 +36,10 @@
     "registrar:respostas": "node scripts/registrar-respostas.mjs",
     "atualizar": "node scripts/atualizar.mjs",
     "estado": "node scripts/estado.mjs",
-    "revisar:escrita": "node scripts/revisar-escrita.mjs"
+    "revisar:escrita": "node scripts/revisar-escrita.mjs",
+    "navegador": "node scripts/navegador.mjs"
+  },
+  "optionalDependencies": {
+    "agent-browser": "0.42.0"
   }
 }

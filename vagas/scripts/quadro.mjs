@@ -20,6 +20,22 @@ import { resolver as resolverSalario, formatar as formatarSalario } from '../src
 const PORTA = Number(process.env.QUADRO_PORTA || 4182);
 const DIR_REPO = join(RAIZ, '..');
 
+function metadados(v) {
+  const nivel = v.senioridade && v.senioridade !== 'sem_rotulo' ? v.senioridade : null;
+  return {
+    logo: v.logo || v.logoUrl || v.empresaLogo || null,
+    localizacao: v.localizacao || [v.cidade, v.estado, v.pais].filter(Boolean).join(', ') || null,
+    modelo: v.modelo || (v.remoto === true ? 'Remoto' : null),
+    senioridade: nivel ? ({senior:'Sênior',pleno:'Pleno',junior:'Júnior'}[nivel] || nivel) : null,
+  };
+}
+
+// Apenas projeta dados já existentes. Não deriva ações, datas de envio ou currículo.
+function detalhes(v, q = {}) {
+  const campos = ['pendencia', 'publicadaEm', 'prazo', 'aplicadaEm', 'resultado', 'curriculo', 'curriculoCaminho'];
+  return Object.fromEntries(campos.map(campo => [campo, q[campo] ?? v[campo] ?? null]));
+}
+
 /** As vagas como o quadro mostra: as do cache, hidratadas, mais as que so o quadro lembra. */
 function listar() {
   const dados = quadro.carregar();
@@ -30,7 +46,7 @@ function listar() {
     if (!q) continue; // so entra no quadro pela rodada (quadro.registrar)
     const sal = v.salario ?? resolverSalario(v);
     porId.set(v.idExterno, {
-      id: v.idExterno, status: q.status, titulo: v.titulo, empresa: v.empresa, link: v.link, fonte: v.fonte,
+      ...metadados(v), ...detalhes(v, q), id: v.idExterno, status: q.status, titulo: v.titulo, empresa: v.empresa, link: v.link, fonte: v.fonte,
       compatibilidade: v.compatibilidade, lida: v.lida === true, resumo: v.resumo || null, gaps: v.gaps || null,
       salario: formatarSalario(sal), idadeDias: idadeEmDias(v), janela: ROTULO[janela(v)] || null,
       historico: q.historico || [], noCache: true,
@@ -40,8 +56,8 @@ function listar() {
   for (const [id, q] of Object.entries(dados.vagas)) {
     if (porId.has(id)) continue;
     porId.set(id, {
-      id, status: q.status, titulo: q.titulo, empresa: q.empresa, link: q.url, fonte: q.fonte || null,
-      compatibilidade: q.compatibilidade ?? null, lida: null, resumo: null, gaps: null,
+      ...metadados(q), ...detalhes(q), id, status: q.status, titulo: q.titulo, empresa: q.empresa, link: q.url, fonte: q.fonte || null,
+      compatibilidade: q.compatibilidade ?? null, lida: null, resumo: q.resumo || null, gaps: q.gaps || null,
       salario: q.salarioTexto || '—', idadeDias: q.publicadaEm ? Math.round((Date.now() - new Date(q.publicadaEm)) / 86400000) : null, janela: null,
       historico: q.historico || [], noCache: false,
     });

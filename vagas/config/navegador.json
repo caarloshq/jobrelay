@@ -1,0 +1,7 @@
+{
+  "versao": 1,
+  "transportePadrao": "headless",
+  "agentBrowserVersion": "0.42.0",
+  "executavelChrome": null,
+  "portaAcessoHumano": 4849
+}

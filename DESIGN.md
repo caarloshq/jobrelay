@@ -93,7 +93,7 @@ components:
 
 ## Visual identity
 
-Modo **Operate**: a pessoa está numa tarefa, configurar o sistema uma vez. A interface some no que ela está fazendo. Sóbria, quase monocromática: os neutros fazem a hierarquia, e o azul aparece só onde há ação ou estado (botão primário, passo atual, foco, seleção). Nada de decoração, nada de ilustração, nada de card dentro de card.
+Modo **Operate**: a pessoa está numa tarefa, configurar o sistema uma vez. A interface some no que ela está fazendo. Sóbria, quase monocromática: os neutros fazem a hierarquia, e o azul aparece só onde há ação ou estado (botão primário, passo atual, foco, seleção). A introdução usa uma ilustração vetorial explicativa do percurso perfil, avaliação e preparação, autorizada por Carlos em 11 de Novembro de 2026. As etapas do formulário preservam o modo Operate, sem decoração ou card dentro de card.
 
 ## Color
 
@@ -130,10 +130,20 @@ Raio por elemento: 4 padrão, 8 controle, 16 card, pílula pra tag.
 
 ## Assets & constraints
 
-Sem logo, sem ilustração. Os únicos assets são os três prints da Apify em `docs/img/apify/`, exibidos no passo do token com legenda. Ícones são do **Lucide** (lucide.dev), embutidos como SVG inline com traço de 1,5px em `currentColor`. Um ícone de 18px por passo, no título, numa caixa de 28px sobre a superfície suave do acento; nos botões, 16 a 18px. **Emoji entra só em opção de escolha** (mercado, nível, remoto ou híbrido), um por opção, como rótulo e não como decoração. Decisão do Carlos, 2026-09-14.
+Sem logo. A introdução tem uma ilustração vetorial inline do fluxo; os assets externos são os três prints da Apify em `docs/img/apify/`, exibidos no passo do token com legenda. Ícones são do **Lucide** (lucide.dev), embutidos como SVG inline com traço de 1,5px em `currentColor`. Um ícone de 18px por passo, no título, numa caixa de 28px sobre a superfície suave do acento; nos botões, 16 a 18px. **Emoji entra só em opção de escolha** (mercado, nível, remoto ou híbrido), um por opção, como rótulo e não como decoração. Decisão do Carlos, 2026-09-14.
 
 ## Motion
 
 Modo Operate: movimento explica estado e dá feedback, nada de coreografia de carga. Um material só, deslizar e desvanecer com `cubic-bezier(0.16, 1, 0.3, 1)`: o passo entra pela direita ao avançar e pela esquerda ao voltar (280ms); a barra de progresso preenche o segmento (300ms); aviso, status "Salvo" e linha de arquivo sobem 6px ao aparecer (220ms); botão e opção afundam 2% ao clicar (120ms); a seta do botão primário anda 2px no hover; a marca de concluído do último passo cresce uma vez (500ms). `prefers-reduced-motion` desliga tudo.
 
 Texto sem travessão. Mês, dia e período com inicial maiúscula.
+
+
+## Refinamento do onboarding de 11 de Novembro de 2026
+
+Abertura ilustrada antes dos sete passos; resumo para conferência e sucesso separado após confirmação. Senioridades em duas colunas; salários em linhas individuais. Dois switches acessíveis com role switch para recorrência e atualização. Opções de quadro e candidaturas usam ícones inline; o símbolo do Notion é um N vetorial, sem recurso externo. Upload preserva foco de teclado. Componentes e tokens existentes foram mantidos.
+
+
+## Tema aprovado em 11 de Novembro de 2026
+
+A implementação local segue a spec [006](specs/pendentes/006-tema-quadro-onboarding-notion.md), que substitui o acento azul descrito acima por tema neutro do preset `bIkfnxQ` (`base-vega`). Tokens de origem no JSON junto à spec; aplicação em CSS nativo sem shadcn/Next. Montserrat preservada. Controles com raio `0.45rem`, cards com raio derivado `calc(0.45rem + 4px)`. Kanban tem colunas abertas e cards compactos inspirados no Todoist; detalhes em painel lateral inspirado no Midday. Não exibir resumo no card. Metadados ausentes não são inventados e logo indisponível usa iniciais. Notion conserva aparência nativa.

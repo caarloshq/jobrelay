@@ -75,3 +75,15 @@ test('espelho adulterado sem marca de completude não é lido', () => {
   writeFileSync(caminho, JSON.stringify(adulterado));
   assert.throws(() => arquivo.carregar(), /ESTADO_NOTION_AUSENTE/);
 });
+
+
+test('exemplo fictício do modelo não entra no estado operacional', () => {
+  const entrada = snapshot();
+  entrada.paginas[0].vagas.push({ paginaId: 'pagina-exemplo', idExterno: 'exemplo:vaga-001', status: 'Aplicar' });
+  const resultado = fonte.normalizarSnapshot(entrada, 'db-ficticia');
+  assert.equal(Object.hasOwn(resultado.vagas, 'exemplo:vaga-001'), false);
+  assert.equal(Object.keys(resultado.vagas).length, 2);
+  assert.equal(resultado.paginacao.completa, true);
+  entrada.paginas[1].vagas = [{ paginaId: 'outro-exemplo', idExterno: 'exemplo:vaga-001', status: 'Avaliar' }];
+  assert.throws(() => fonte.normalizarSnapshot(entrada, 'db-ficticia'), /duplicado/);
+});

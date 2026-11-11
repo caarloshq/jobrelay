@@ -7,7 +7,8 @@ import { verificarVersaoGit, formatarVersaoGit } from '../src/versao-git.js';
 //   npm run onboarding -- --abrir     # o formulario no navegador (localhost), que grava nos arquivos
 //   npm run onboarding -- --extrair   # PDF e ZIP em materiais-fonte/ viram texto
 //   npm run onboarding -- --concluir  # marca o perfil como configurado, se tudo fechou
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
+import { TIPOS_MATERIAIS, validarMaterial, textoDocx } from '../src/materiais-onboarding.js';
+import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync, mkdtempSync, renameSync, rmSync } from 'node:fs';
 import { join, basename, extname } from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -77,7 +78,7 @@ function extrairZip(arquivo, destino) {
 
 function extrair() {
   mkdirSync(DIR_MATERIAIS, { recursive: true });
-  const arquivos = readdirSync(DIR_MATERIAIS).filter((a) => /\.(pdf|zip)$/i.test(a));
+  const arquivos = readdirSync(DIR_MATERIAIS).filter((a) => /\.(pdf|docx|txt|zip)$/i.test(a));
   if (!arquivos.length) {
     console.log('\nNenhum PDF ou ZIP em Skills/adapt-resume/materiais-fonte/. Coloque o currículo e o LinkedIn lá e rode de novo.\n');
     return;
@@ -88,7 +89,11 @@ function extrair() {
     const nome = basename(a, extname(a));
     const ehZip = /\.zip$/i.test(a);
     const destino = join(DIR_MATERIAIS, `${nome}.extraido.${ehZip ? 'md' : 'txt'}`);
-    const resultado = ehZip ? extrairZip(origem, destino) : extrairPdf(origem, destino);
+    let resultado;
+    if (/\.(docx|txt)$/i.test(a)) {
+      try { const texto = /\.docx$/i.test(a) ? textoDocx(readFileSync(origem)) : readFileSync(origem, 'utf8'); writeFileSync(destino, texto); resultado = `ok, ${texto.length} caracteres`; }
+      catch (erro) { resultado = erro.message; }
+    } else resultado = ehZip ? extrairZip(origem, destino) : extrairPdf(origem, destino);
     console.log(`  ${a.padEnd(40)} ${resultado}`);
   }
   console.log('\nO agente lê os .extraido.* daqui. O original fica só para conferência.\n');
@@ -107,10 +112,10 @@ export function estado() {
   const DIGITAL_EXEMPLO = /NimbusTech|Loja R[aá]pida|exemplo@email\.com|example@email\.com|EXEMPLO|EXAMPLE/i;
   const ehExemplo = (b) => !b || DIGITAL_EXEMPLO.test(JSON.stringify(b));
   const materiais = existsSync(DIR_MATERIAIS)
-    ? readdirSync(DIR_MATERIAIS).filter((a) => /\.(pdf|zip|md|txt)$/i.test(a) && a !== 'README.md')
+    ? readdirSync(DIR_MATERIAIS).filter((a) => /\.(pdf|docx|zip|md|txt)$/i.test(a) && a !== 'README.md')
     : [];
   const extraidos = materiais.filter((a) => /\.extraido\.(txt|md)$/.test(a));
-  const brutos = materiais.filter((a) => /\.(pdf|zip)$/i.test(a));
+  const brutos = materiais.filter((a) => /\.(pdf|docx|txt|zip)$/i.test(a));
   const mercadoOk = validarMercado(perfil.mercado).ok;
   const idioma = idiomaDoCurriculo(perfil);
   const baseDoIdioma = idioma === 'en' ? baseEn : basePt;
@@ -192,9 +197,10 @@ function estadoParaTela() {
   const fonteEstado = fonteConfigurada();
   const politica = lerPolitica(DIR_DADOS);
   mkdirSync(DIR_MATERIAIS, { recursive: true });
-  const materiais = ['curriculo', 'linkedin'].filter((t) => existsSync(join(DIR_MATERIAIS, `${t}.pdf`)) && statSync(join(DIR_MATERIAIS, `${t}.pdf`)).size > 0).map((t) => ({
-    tipo: t, nome: `${t}.pdf`, tamanho: statSync(join(DIR_MATERIAIS, `${t}.pdf`)).size, extraido: existsSync(join(DIR_MATERIAIS, `${t}.extraido.txt`)),
-  }));
+  const candidatos = TIPOS_MATERIAIS.flatMap((tipo) => ['pdf', 'docx', 'txt'].map((ext) => ({ tipo, nome: `${tipo}.${ext}` })))
+    .filter((a) => existsSync(join(DIR_MATERIAIS, a.nome)) && statSync(join(DIR_MATERIAIS, a.nome)).size > 0)
+    .map((a) => ({ ...a, tamanho: statSync(join(DIR_MATERIAIS, a.nome)).size, extraido: existsSync(join(DIR_MATERIAIS, `${a.tipo}.extraido.txt`)) }));
+  const materiais = TIPOS_MATERIAIS.map((tipo) => candidatos.filter((a) => a.tipo === tipo).sort((a, b) => statSync(join(DIR_MATERIAIS, b.nome)).mtimeMs - statSync(join(DIR_MATERIAIS, a.nome)).mtimeMs)[0]).filter(Boolean);
   return {
     perfil: p,
     env: { token: Boolean(env.APIFY_TOKEN), task: env.APIFY_TASK || '' },
@@ -229,15 +235,15 @@ function validarPasso(passo, d = {}) {
   }
   if (passo === 3) {
     if (d.arquivos !== undefined && !Array.isArray(d.arquivos)) return 'arquivos precisa ser uma lista';
-    for (const a of d.arquivos || []) {
-      if (!a || typeof a.nome !== 'string' || typeof a.base64 !== 'string') return 'cada arquivo precisa de nome e conteúdo';
-      if (!['curriculo', 'linkedin'].includes(a.tipo)) return 'tipo de arquivo precisa ser curriculo ou linkedin';
-      if (!/\.pdf$/i.test(a.nome)) return `${a.nome} não é PDF`;
-      if (a.base64.length > 20 * 1024 * 1024) return `${a.nome} passa de 15 MB`;
-    }
+    if ((d.arquivos || []).length > 3 || new Set((d.arquivos || []).map((a) => a?.tipo)).size !== (d.arquivos || []).length) return 'Envie um arquivo por campo.';
+    try {
+      for (const a of d.arquivos || []) validarMaterial(a);
+      const temCurriculo = (d.arquivos || []).some((a) => a.tipo === 'curriculo') ||
+        ['pdf', 'docx'].some((ext) => existsSync(join(DIR_MATERIAIS, `curriculo.${ext}`)));
+      if (!temCurriculo) return 'Envie seu currículo em PDF ou DOCX para continuar.';
+    } catch (erro) { return erro.message; }
   }
   if (passo === 4) {
-    if (!texto(d.profissao)) return 'Diga a sua área em uma frase.';
     if (!Array.isArray(d.niveis_aceitos) || !d.niveis_aceitos.length) return 'Marque ao menos um nível.';
     if (d.niveis_aceitos.some((n) => !NIVEIS.includes(n))) return 'Nível desconhecido.';
   }
@@ -265,6 +271,7 @@ function salvarPasso(passo, d = {}) {
   if (passo === 1) {
     p.nome = texto(d.nome);
     p.cargo_alvo = texto(d.cargo_alvo);
+    p.profissao = p.cargo_alvo;
     p.pais = texto(d.pais, 80);
     atualizarPerfilInstalacao([
       { caminho: ['identidade', 'nome_completo'], valor: p.nome },
@@ -279,16 +286,40 @@ function salvarPasso(passo, d = {}) {
     p.mercado = { ...p.mercado, foco: d.foco, prioridade: d.foco === 'ambos' ? d.prioridade || null : null };
   } else if (passo === 3) {
     mkdirSync(DIR_MATERIAIS, { recursive: true });
-    for (const a of d.arquivos || []) {
-      // Nome fixo por tipo: curriculo.pdf e linkedin.pdf. O nome original nao
-      // importa para o agente, e nome fixo e o que deixa o estado ser lido.
-      const bytes = Buffer.from(a.base64 || '', 'base64');
-      if (!bytes.length || !bytes.subarray(0, 5).equals(Buffer.from('%PDF-'))) continue;
-      writeFileSync(join(DIR_MATERIAIS, `${a.tipo}.pdf`), bytes);
+    const materiais = (d.arquivos || []).map(validarMaterial);
+    if (materiais.length) {
+      const preparo = mkdtempSync(join(DIR_MATERIAIS, '.envio-'));
+      try {
+        // Confere todas as extrações antes de substituir qualquer material ativo.
+        for (const a of materiais) {
+          const bruto = join(preparo, `${a.tipo}${a.extensao}`);
+          const extraido = join(preparo, `${a.tipo}.extraido.txt`);
+          writeFileSync(bruto, a.bytes);
+          if (a.texto !== null) writeFileSync(extraido, a.texto);
+          else {
+            const resultado = extrairPdf(bruto, extraido);
+            if (!resultado.startsWith('ok,')) throw new Error(`Não foi possível ler o PDF de ${a.tipo}. Exporte-o novamente ou envie DOCX. ${resultado}`);
+          }
+        }
+        // Versões anteriores ficam preservadas fora da pasta de extração ativa.
+        const historico = join(DIR_MATERIAIS, '.historico', `${Date.now()}-${randomUUID()}`);
+        for (const a of materiais) {
+          for (const sufixo of ['.pdf', '.docx', '.txt', '.extraido.txt']) {
+            const antigo = join(DIR_MATERIAIS, `${a.tipo}${sufixo}`);
+            if (existsSync(antigo)) {
+              mkdirSync(historico, { recursive: true });
+              renameSync(antigo, join(historico, basename(antigo)));
+            }
+          }
+          for (const sufixo of [a.extensao, '.extraido.txt']) {
+            const nome = `${a.tipo}${sufixo}`;
+            renameSync(join(preparo, nome), join(DIR_MATERIAIS, nome));
+          }
+        }
+      } finally { rmSync(preparo, { recursive: true, force: true }); }
     }
-    if ((d.arquivos || []).length) extrair();
   } else if (passo === 4) {
-    p.profissao = texto(d.profissao);
+    p.profissao = p.cargo_alvo;
     // Board so de UX: fica ligado so para quem e de design. Inferido do que a
     // pessoa escreveu, em vez de mais uma pergunta na tela.
     p.eh_design = /\b(design|designer|ux|ui|user experience|product design)\b/i.test(`${p.profissao} ${p.cargo_alvo || ''}`);
@@ -339,12 +370,15 @@ function abrir() {
       if (!existsSync(alvo)) { res.writeHead(404); res.end(); return; }
       res.writeHead(200, { 'content-type': TIPOS[extname(alvo)] || 'application/octet-stream' }); res.end(readFileSync(alvo)); return;
     }
-    if (req.method === 'GET' && url.pathname === '/api/estado') return json(200, estadoParaTela());
+    if (req.method === 'GET' && url.pathname === '/api/estado') {
+      try { return json(200, estadoParaTela()); }
+      catch (erro) { console.error(erro); return json(500, { erro: 'Não foi possível carregar os dados locais. Confira o terminal e recarregue a página.' }); }
+    }
     if (req.method === 'POST' && ['/api/salvar', '/api/confirmar'].includes(url.pathname)) {
       const origens = [`http://localhost:${PORTA}`, `http://127.0.0.1:${PORTA}`];
       if (!origens.includes(req.headers.origin) || req.headers['x-onboarding-sessao'] !== token) return json(403, { erro: 'Abra e preencha o formulário HTML local pessoalmente.' });
       let corpo = '';
-      req.on('data', (c) => { corpo += c; if (corpo.length > 60 * 1024 * 1024) req.destroy(); });
+      req.on('data', (c) => { corpo += c; if (corpo.length > 64 * 1024 * 1024) req.destroy(); });
       req.on('end', () => {
         try {
           const payload = JSON.parse(corpo);

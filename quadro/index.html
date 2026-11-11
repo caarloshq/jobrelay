@@ -8,91 +8,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #FAFAFA; --surface: #FFFFFF; --surface-2: #F3F5FB;
-    --border: #E5E5E5; --border-strong: #C7C7C7;
-    --text: #0D0D0D; --text-2: #464646; --text-3: #707070;
-    --accent: #1E3FD1; --accent-hover: #1633AB; --accent-soft: #CAD6FF; --accent-deep: #000766;
-    --ok: #0E7A4A; --ok-soft: #DCF3E7; --warn: #8A5A00; --warn-soft: #FFF1CC; --error: #B3261E; --error-soft: #FBE3E1;
-    --r: 4px; --r-control: 8px; --r-card: 16px;
-    --font: Montserrat, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --mono: ui-monospace, "SF Mono", Menlo, monospace;
-    --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  * { box-sizing: border-box; }
-  html { color-scheme: light; scrollbar-gutter: stable; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font); -webkit-font-smoothing: antialiased; }
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+:root{--bg:#fafafa;--surface:#fff;--surface-2:#f5f5f5;--text:#171717;--text-2:#525252;--text-3:#737373;--border:#e5e5e5;--border-strong:#d4d4d4;--accent:#262626;--accent-soft:#f5f5f5;--accent-deep:#262626;--ok:#176344;--ok-soft:#edf7f0;--error:#b3261e;--error-soft:#fbe3e1;--fit-high:#176344;--fit-high-bg:#edf7f0;--fit-mid:#875900;--fit-mid-bg:#fff5dc;--fit-low:#525252;--fit-low-bg:#ededed;--r-control:.45rem;--r-card:calc(.45rem + 4px);--font:Montserrat,system-ui,sans-serif;--mono:ui-monospace,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:400 14px/1.5 var(--font)}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}[hidden]{display:none!important}.top{background:var(--surface);border-bottom:1px solid var(--border)}.top-inner{display:flex;gap:16px;align-items:center;padding:24px 32px;flex-wrap:wrap}.top h1{font-size:20px;letter-spacing:-.03em;margin:0;font-weight:600}.sub{font-size:12px;color:var(--text-3)}.espaco{flex:1}.busca{height:36px;width:240px;border:1px solid var(--border);border-radius:var(--r-control);padding:0 12px;background:var(--surface)}.vistas{display:flex;gap:4px;padding:4px;background:var(--surface-2);border-radius:var(--r-control)}.vistas button{border:0;background:transparent;padding:4px 12px;color:var(--text-3);border-radius:4px}.vistas button[aria-pressed=true]{background:white;color:var(--text)}main{padding:32px}.colunas{display:grid;grid-template-columns:repeat(5,minmax(312px,1fr));gap:20px;overflow:auto;min-height:72vh;padding:0 4px 24px}.coluna{padding:0 4px;border-radius:var(--r-card)}.coluna.sobre{background:var(--surface-2);outline:1px dashed var(--text-3)}.coluna h2{font-size:12px;font-weight:500;margin:0 0 20px;display:flex;align-items:center;gap:8px}.coluna h2:before{content:'';width:8px;height:8px;border:1px solid var(--text-3);border-radius:50%}.coluna h2 span{color:var(--text-3);font-size:12px;margin-left:auto}.cards{display:grid;gap:12px}.card{background:white;border:1px solid var(--border);border-radius:var(--r-card);padding:20px;cursor:pointer;transition:border-color .15s}.card:hover{border-color:#a3a3a3}.card[aria-pressed=true]{border-color:var(--text)}.card.arrastando{opacity:.5}.job-heading{display:flex;gap:12px;align-items:flex-start}.logo{width:36px;height:36px;flex:none;border-radius:8px;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;object-fit:contain}.job-title{min-width:0}.t{font-size:14px;line-height:1.5;font-weight:600;display:block;overflow-wrap:anywhere}.e{display:block;font-size:12px;color:var(--text-3);margin-top:4px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:var(--surface-2);padding:4px 8px;font-size:12px;color:var(--text-2)}.card-footer{border-top:1px solid var(--border);margin-top:20px;padding-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-3)}.nota{font-size:12px;font-weight:500;color:var(--text)}.vazio{padding:24px 12px;border:1px dashed var(--border);border-radius:var(--r-card);color:var(--text-3);font-size:12px;text-align:center}.aviso{padding:12px 16px;margin-bottom:20px;background:var(--surface-2);border-radius:var(--r-control)}.aviso.erro{background:var(--error-soft);color:var(--error)}.aviso.ok{background:var(--ok-soft);color:var(--ok)}.tabela-wrap{overflow:auto}table{width:100%;border-collapse:collapse;background:white}th,td{text-align:left;padding:16px;border-bottom:1px solid var(--border);font-size:12px}th{font-weight:500;color:var(--text-3)}select,.btn{min-height:36px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r-control);background:white;color:var(--text);text-decoration:none}.ic{vertical-align:middle}.veil{position:fixed;inset:0;background:#17171724;z-index:10}.drawer{position:fixed;right:0;top:0;bottom:0;width:min(460px,100vw);z-index:11;background:white;border-left:1px solid var(--border);overflow:auto;padding:24px 28px;animation:slide .18s ease-out}.drawerbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;color:var(--text-3);font-size:12px}.close{background:transparent;border:0;width:36px;height:36px;font-size:24px}.drawer h2{font-size:24px;letter-spacing:-.03em;line-height:1.35;margin:20px 0 8px}.drawer .company-detail{display:flex;align-items:center;gap:12px;color:var(--text-2)}.drawer section{margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}.drawer h3{font-size:14px;font-weight:600;margin:0 0 12px}.drawer p{font-size:14px;line-height:1.8;color:var(--text-2);white-space:pre-line;margin:0}.drawer dl{display:grid;grid-template-columns:100px 1fr;gap:16px;font-size:12px;margin:0}.drawer dt{color:var(--text-3)}.drawer dd{margin:0;overflow-wrap:anywhere}.fitbox{background:var(--surface-2);padding:20px;border-radius:var(--r-card);margin-top:24px}.fitbox p{font-size:12px}.fitbox .fitvalue{font-size:24px;font-weight:600;letter-spacing:-.03em;margin-bottom:8px}.historico{list-style:none;padding:0;color:var(--text-3);font-size:12px}.historico li{margin:12px 0}.drawer-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}.drawer select{max-width:55%}.drawer .btn{background:var(--accent);color:white;font-size:12px}a{color:var(--text)}@keyframes slide{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}@media(max-width:720px){.top-inner{padding:20px;gap:12px}.sub{width:100%;order:3}.busca{min-width:0;flex:1}.top h1{width:100%}.espaco{display:none}main{padding:24px 16px}.colunas{grid-template-columns:repeat(5,312px)}.drawer{padding:20px}.drawer h2{font-size:20px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-  header.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
-  .top-inner { display: flex; align-items: center; gap: 16px; padding: 12px 24px; flex-wrap: wrap; }
-  .top-inner h1 { font: 600 24px/32px var(--font); letter-spacing: -0.01em; margin: 0; }
-  .top-inner .sub { font: 400 14px/20px var(--font); color: var(--text-3); }
-  .top-inner .espaco { flex: 1; }
-  .vistas { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--r-control); overflow: hidden; }
-  .vistas button { height: 36px; padding: 0 14px; border: 0; background: var(--surface); color: var(--text-2); font: 500 14px/20px var(--font); cursor: pointer; transition: background .15s, color .15s; }
-  .vistas button[aria-pressed=true] { background: var(--accent); color: #fff; }
-  .vistas button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
-  input.busca { height: 36px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--r-control); background: var(--surface); font: 400 14px/20px var(--font); min-width: 220px; }
-  input.busca:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
-
-  main { padding: 16px 24px 40px; }
-  .aviso { border-radius: var(--r-control); padding: 12px 16px; font: 400 14px/20px var(--font); margin: 0 0 16px; animation: subir .22s var(--ease) both; }
-  .aviso.info { background: var(--surface-2); color: var(--text-2); }
-  .aviso.erro { background: var(--error-soft); color: var(--error); }
-  .aviso.ok { background: var(--ok-soft); color: var(--ok); }
-
-  /* kanban */
-  .colunas { display: grid; grid-template-columns: repeat(5, minmax(240px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
-  .coluna { background: var(--surface-2); border-radius: var(--r-card); padding: 8px; min-height: 200px; transition: background .15s, box-shadow .15s; }
-  .coluna.sobre { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); }
-  .coluna h2 { font: 500 14px/20px var(--font); color: var(--text-2); margin: 4px 8px 8px; display: flex; justify-content: space-between; }
-  .coluna h2 span { color: var(--text-3); font-weight: 400; }
-  .cards { display: grid; gap: 8px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-control); padding: 12px; cursor: grab; transition: border-color .15s, box-shadow .15s, transform .12s; animation: subir .22s var(--ease) both; }
-  .card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(13, 13, 13, .06); }
-  .card:active { cursor: grabbing; }
-  .card.arrastando { opacity: .5; transform: scale(.98); }
-  .card:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
-  .card .t { font-weight: 500; line-height: 20px; display: block; }
-  .card .e { font: 400 14px/20px var(--font); color: var(--text-2); display: block; margin-top: 2px; }
-  .card .m { display: flex; align-items: center; gap: 8px; margin-top: 8px; font: 400 14px/20px var(--font); color: var(--text-3); flex-wrap: wrap; }
-  .nota { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 9999px; font: 500 14px/20px var(--font); background: var(--accent-soft); color: var(--accent-deep); }
-  .nota.alta { background: var(--ok-soft); color: var(--ok); }
-  .nota.nao-lida { background: var(--surface-2); color: var(--text-3); }
-  .card details { margin-top: 8px; }
-  .card summary { font: 500 14px/20px var(--font); color: var(--accent); cursor: pointer; list-style: none; }
-  .card summary::-webkit-details-marker { display: none; }
-  .card .detalhe { font: 400 14px/20px var(--font); color: var(--text-2); margin-top: 8px; }
-  .card .detalhe p { margin: 0 0 8px; }
-  .card .detalhe a { color: var(--accent); }
-  .card .mover { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .card .mover button, .btn { height: 32px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--r-control); background: var(--surface); color: var(--text); font: 500 14px/20px var(--font); cursor: pointer; transition: border-color .15s, background .15s, transform .12s; }
-  .card .mover button:hover, .btn:hover { border-color: var(--text-3); }
-  .card .mover button:active, .btn:active { transform: scale(.98); }
-  .historico { margin: 8px 0 0; padding: 0; list-style: none; font: 400 14px/20px var(--mono); color: var(--text-3); }
-  .vazio { padding: 24px 8px; text-align: center; font: 400 14px/20px var(--font); color: var(--text-3); }
-
-  /* tabela */
-  .tabela-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); overflow: hidden; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); font: 400 14px/20px var(--font); vertical-align: top; }
-  th { font-weight: 500; color: var(--text-3); background: var(--surface-2); white-space: nowrap; }
-  td.t { font-weight: 500; color: var(--text); }
-  td a { color: var(--accent); }
-  select.status { height: 32px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: var(--r-control); background: var(--surface); font: 400 14px/20px var(--font); }
-  select.status:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
-  tr.animada { animation: subir .22s var(--ease) both; }
-
-  @keyframes subir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  .ic { vertical-align: middle; flex: none; }
-  [hidden] { display: none !important; }
-  @media (max-width: 720px) { .colunas { grid-template-columns: repeat(5, 84vw); } }
+/* Cards have the same geometry even with long or absent metadata. */
+.card{height:248px;display:flex;flex-direction:column;overflow:hidden}.card .job-title{flex:1}.card .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}.card .e{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .chips{height:76px;overflow:hidden;align-content:start;flex:none;margin-top:16px}.card-footer{margin-top:auto;padding-top:12px;min-height:36px}.card-footer>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}.chip{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chip .ic{flex:none}.nota{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;white-space:nowrap;background:var(--fit-low-bg);color:var(--fit-low)}.nota:before{content:'';width:6px;height:6px;background:currentColor;border-radius:50%}.nota.alta{color:var(--fit-high);background:var(--fit-high-bg)}.nota.media{color:var(--fit-mid);background:var(--fit-mid-bg)}.fitbox.alta{--fit:var(--fit-high);background:var(--fit-high-bg)}.fitbox.media{--fit:var(--fit-mid);background:var(--fit-mid-bg)}.fitbox.baixa,.fitbox.parcial{--fit:var(--fit-low)}.fit-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.fit-heading h3{margin:0;display:flex;align-items:center;gap:8px}.fitbox .fitvalue{color:var(--fit);margin:0;font-size:20px;white-space:nowrap}.fitbar{height:6px;border-radius:999px;background:#ffffffb3;overflow:hidden;margin:0 0 12px}.fitbar span{display:block;height:100%;background:var(--fit);border-radius:inherit}.drawer h3{display:flex;align-items:center;gap:8px}.drawer h3 .ic{color:var(--text-3)}.historico{position:relative;margin:20px 0 0}.historico li{position:relative;margin:0;padding:0 0 24px 32px}.historico li:before{content:'';position:absolute;left:9px;top:20px;bottom:0;width:1px;background:var(--border)}.historico li:last-child:before{display:none}.timeline-icon{position:absolute;left:0;top:0;width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:white;color:var(--text-2)}.event-title{display:block;color:var(--text);font-size:12px;font-weight:500;margin:0 0 4px}.event-meta{display:block;color:var(--text-3);font-size:12px;line-height:1.7}.historico li:last-child{padding-bottom:0}.table-job{display:flex;align-items:center;gap:12px;min-width:280px}.table-job .job-title{min-width:0}.table-job .t{font-size:14px;max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.table-job .e{margin:4px 0 0}.table-open{border:0;padding:0;text-align:left;background:none;font:inherit;color:inherit;cursor:pointer}.tabela-wrap{border:1px solid var(--border);border-radius:var(--r-card)}table{min-width:1160px}th,td{vertical-align:middle;padding:16px 20px}.table-location{display:flex;align-items:center;gap:8px;white-space:nowrap}.table-label{display:flex;align-items:center;gap:8px}.close{width:44px;height:44px}.vistas button,.busca,select,.btn{min-height:44px}.drawer-status{font-size:12px;color:var(--error);margin-top:12px}.chips .ic{width:14px;height:14px}.drawer .chips{margin-top:16px}.drawer .chip{white-space:normal}.card:hover .t,.table-open:hover .t{text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
   <header class="top"><div class="top-inner">
-    <h1>Quadro</h1>
+    <h1>JobRelay <span style="font-weight:400;color:var(--text-3)">/ Quadro</span></h1>
     <span class="sub" id="sub">carregando…</span>
     <span class="espaco"></span>
     <input class="busca" id="busca" type="search" placeholder="Buscar vaga ou empresa" aria-label="Buscar vaga ou empresa">
@@ -106,6 +31,8 @@
     <section id="quadro" class="colunas" aria-label="Vagas por fase"></section>
     <section id="tabela" class="tabela-wrap" hidden></section>
   </main>
+  <div id="veil" class="veil" hidden></div>
+  <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="detail-title" hidden></aside>
 
 <script>
 (() => {
@@ -113,12 +40,23 @@
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ICONES = {
     link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    spark: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/>',
+    summary: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
+    check: '<path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
+    money: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/>',
+    level: '<path d="M5 20v-5M12 20V9M19 20V3"/>',
+    arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
+    board: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/>',
+    table: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
     clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   };
   const icone = (n, t = 14) => `<svg class="ic" width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
   let dados = { vagas: [], status: [], contagem: {} };
   let vista = 'quadro';
   let filtro = '';
+  let selecionada = null; let retorno = null;
 
   function aviso(tipo, msg) {
     const el = document.createElement('div'); el.className = `aviso ${tipo}`; el.textContent = msg;
@@ -128,7 +66,7 @@
 
   async function carregar() {
     try {
-      const r = await fetch('/api/vagas'); dados = await r.json(); render();
+      const r = await fetch('/api/vagas'); if(!r.ok) throw new Error('Falha ao carregar'); dados = await r.json(); render();
     } catch {
       aviso('erro', 'O servidor local não respondeu. No terminal, dentro de vagas/, rode: npm run quadro. Depois recarregue.');
     }
@@ -150,33 +88,43 @@
   }
 
   const visiveis = () => dados.vagas.filter((v) => !filtro || `${v.titulo} ${v.empresa}`.toLowerCase().includes(filtro));
-  const notaHtml = (v) => v.compatibilidade == null ? '' : `<span class="nota ${v.lida === false ? 'nao-lida' : v.compatibilidade >= 75 ? 'alta' : ''}" title="${v.lida === false ? 'Ainda não lida: nota pela metade' : 'Índice de prioridade'}">${v.lida === false ? '~' : ''}${v.compatibilidade}%</span>`;
+  const faixa = v => v.compatibilidade == null || v.lida === false ? 'parcial' : v.compatibilidade >= 75 ? 'alta' : v.compatibilidade >= 55 ? 'media' : 'baixa';
+  const notaHtml = (v) => v.compatibilidade == null ? '<span class="nota">Sem avaliação</span>' : `<span class="nota ${faixa(v)}" title="${v.lida === false ? 'Avaliação parcial: leitura pendente' : 'Compatibilidade com o perfil'}">${v.lida === false ? '~' : ''}${esc(v.compatibilidade)}%${v.lida === false ? ' · parcial' : ''}</span>`;
   const idade = (v) => v.idadeDias == null ? '' : v.idadeDias === 0 ? 'hoje' : `${v.idadeDias}d`;
   const dataCurta = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 
-  function cardHtml(v) {
-    const outros = dados.status.filter((s) => s !== v.status);
-    return `<article class="card" draggable="true" tabindex="0" data-id="${esc(v.id)}" aria-label="${esc(v.titulo)} na ${esc(v.empresa || '')}">
-      <span class="t">${esc(v.titulo)}</span>
-      <span class="e">${esc(v.empresa || 'empresa não informada')}</span>
-      <div class="m">${notaHtml(v)}${v.salario && v.salario !== '—' ? `<span>${esc(v.salario)}</span>` : ''}${idade(v) ? `<span>${icone('clock')} ${idade(v)}</span>` : ''}${v.fonte ? `<span>${esc(v.fonte)}</span>` : ''}${v.noCache ? '' : '<span title="Não está mais na coleta; ficou o retrato">arquivada</span>'}</div>
-      <details><summary>Detalhes</summary><div class="detalhe">
-        ${v.resumo ? `<p>${esc(v.resumo)}</p>` : '<p>Ainda sem leitura: peça ao agente pra ler as pendentes.</p>'}
-        ${v.gaps ? `<p><strong>Gaps:</strong> ${esc(v.gaps)}</p>` : ''}
-        ${v.link ? `<p><a href="${esc(v.link)}" target="_blank" rel="noopener">${icone('link')} Abrir o anúncio</a></p>` : ''}
-        <div class="mover">${outros.map((s) => `<button type="button" data-mover="${esc(s)}">${esc(s)}</button>`).join('')}</div>
-        <ul class="historico">${(v.historico || []).slice(-5).map((h) => `<li>${dataCurta(h.em)} · ${esc(h.de || 'entrou')} → ${esc(h.para)}</li>`).join('')}</ul>
-      </div></details>
-    </article>`;
+  const safeUrl = (url) => { try { const u = new URL(url); return ['https:', 'http:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } };
+  const logoHtml = (v) => { const url = /^data:image\/svg\+xml;base64,[A-Za-z0-9+/=]+$/.test(v.logo || '') ? v.logo : safeUrl(v.logo); const initials = String(v.empresa || '?').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(); return url ? `<img class="logo" src="${esc(url)}" alt="Logo de ${esc(v.empresa)}" referrerpolicy="no-referrer">` : `<span class="logo" aria-label="${esc(v.empresa || 'Empresa')}, sem logo disponível">${esc(initials)}</span>`; };
+  const local = (v) => [v.modelo, v.localizacao].filter(Boolean).join(' · ');
+  const chips = (v) => `<div class="chips">${[[v.salario && v.salario !== '—' ? v.salario : null,'money'],[local(v),'globe'],[v.senioridade,'level']].filter(([t])=>t).map(([t,i])=>`<span class="chip" title="${esc(t)}">${icone(i)}${esc(t)}</span>`).join('')}</div>`;
+  const autor = (por) => ({pessoa:'Você',agente:'Assistente',rodada:'Coleta de vagas',notion:'Sincronização do Notion'}[por] || por || 'Autor não registrado');
+  function timeline(v) {
+    if(!v.historico?.length) return '<li><span class="timeline-icon">'+icone('clock',12)+'</span><span class="event-meta">Nenhuma alteração registrada.</span></li>';
+    return [...v.historico].reverse().map(h=>{const date=new Date(h.em);const valid=!Number.isNaN(date.getTime());const em=valid?new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'}).format(date):'Data não registrada';return `<li><span class="timeline-icon">${icone(h.de?'arrow':'check',12)}</span><span class="event-title">${h.de?`${esc(h.de)} → ${esc(h.para)}`:`Vaga adicionada em ${esc(h.para)}`}</span><time class="event-meta" ${valid?`datetime="${esc(h.em)}"`:''}>${esc(em)}</time><span class="event-meta">Por ${esc(autor(h.por))}</span></li>`}).join('');
   }
+  function cardHtml(v) {
+    return `<article class="card" role="button" aria-pressed="${selecionada===v.id}" aria-haspopup="dialog" draggable="true" tabindex="0" data-id="${esc(v.id)}" aria-label="Detalhes de ${esc(v.titulo)} na ${esc(v.empresa || '')}"><div class="job-heading">${logoHtml(v)}<div class="job-title"><span class="t" title="${esc(v.titulo)}">${esc(v.titulo)}</span><span class="e">${esc(v.empresa || 'Empresa não informada')}</span></div></div>${chips(v)}<div class="card-footer"><span>${idade(v) || esc(v.fonte || '')}</span>${notaHtml(v)}</div></article>`;
+  }
+  function fecharDetalhe() { $('#drawer').hidden=true;$('#veil').hidden=true;selecionada=null; document.body.style.overflow='';const target = document.querySelector(`[data-id="${CSS.escape(retorno || '')}"]`);(target?.querySelector('[data-detail]') || target)?.focus(); }
+  function abrirDetalhe(id, foco=true) {
+    const v=dados.vagas.find(v=>v.id===id);if(!v)return;selecionada=id;retorno=id;
+    $('#drawer').innerHTML=`<div class="drawerbar"><span>Detalhes da vaga</span><button class="close" aria-label="Fechar detalhes">×</button></div><div class="company-detail">${logoHtml(v)}<span>${esc(v.empresa || 'Empresa não informada')}</span></div><h2 id="detail-title">${esc(v.titulo)}</h2>${chips(v)}<div class="drawer-actions"><select id="detail-status" aria-label="Fase da candidatura">${[...new Set([...dados.status,v.status])].map(s=>`<option ${s===v.status?'selected':''}>${esc(s)}</option>`).join('')}</select>${safeUrl(v.link)?`<a class="btn" href="${esc(safeUrl(v.link))}" target="_blank" rel="noopener">Abrir anúncio ↗</a>`:''}</div><div class="fitbox ${faixa(v)}"><div class="fit-heading"><h3>${icone('spark',16)} Compatibilidade</h3><div class="fitvalue">${v.compatibilidade==null?'Sem avaliação':`${v.lida===false?'~':''}${esc(v.compatibilidade)}%`}</div></div>${v.compatibilidade==null?'':`<div class="fitbar" aria-hidden="true"><span style="width:${Math.max(0,Math.min(100,Number(v.compatibilidade)||0))}%"></span></div>`}<p>${v.lida===false?'Avaliação parcial: a leitura da vaga está pendente.':'Compatibilidade com o perfil. Este índice organiza a prioridade; não é uma previsão de contratação.'}</p></div><section><h3>${icone('summary',16)} Resumo da oportunidade</h3><p>${esc(v.resumo || 'O resumo ainda não está disponível.')}</p></section>${v.gaps?`<section><h3>${icone('check',16)} Pontos a conferir</h3><p>${esc(v.gaps)}</p></section>`:''}<section><h3>${icone('info',16)} Informações</h3><dl><dt>Fonte</dt><dd>${esc(v.fonte || 'Não informada')}</dd><dt>Localização</dt><dd>${esc(local(v)||'Não informada')}</dd><dt>Senioridade</dt><dd>${esc(v.senioridade||'Não informada')}</dd></dl></section><section><h3>${icone('clock',16)} Histórico</h3><ul class="historico">${timeline(v)}</ul></section>`;
+    $('#drawer').hidden=false;$('#veil').hidden=false;document.body.style.overflow='hidden';$('#drawer .close').onclick=fecharDetalhe;$('#detail-status').onchange=e=>mover(id,e.target.value);if(foco)$('#drawer .close').focus();
+    $('#drawer').querySelectorAll('img.logo').forEach(img=>img.addEventListener('error',()=>{const span=document.createElement('span');span.className='logo';span.textContent=String(v.empresa||'?').slice(0,2);img.replaceWith(span)}));
+  }
+  $('#veil').onclick=fecharDetalhe;
+  document.addEventListener('keydown',e=>{if($('#drawer').hidden)return;if(e.key==='Escape'){e.preventDefault();fecharDetalhe()}if(e.key==='Tab'){const els=[...$('#drawer').querySelectorAll('button,a,select')];const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
 
   function renderQuadro() {
     const lista = visiveis();
     $('#quadro').innerHTML = dados.status.map((s) => {
       const cards = lista.filter((v) => v.status === s || (s === 'Já apliquei' && v.status === 'Aplicado por IA'));
-      return `<div class="coluna" data-status="${esc(s)}"><h2>${esc(s)} <span>${cards.length}</span></h2><div class="cards">${cards.length ? cards.map(cardHtml).join('') : '<div class="vazio">nada aqui</div>'}</div></div>`;
+      return `<div class="coluna" data-status="${esc(s)}"><h2>${esc(s)} <span>${cards.length}</span></h2><div class="cards">${cards.length ? cards.map(cardHtml).join('') : `<div class="vazio">${filtro?'Nenhum resultado':'Nenhuma vaga nesta fase'}</div>`}</div></div>`;
     }).join('');
     for (const card of document.querySelectorAll('.card')) {
+      card.addEventListener('click',()=>abrirDetalhe(card.dataset.id));
+      card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();abrirDetalhe(card.dataset.id)}});
+      card.querySelectorAll('img.logo').forEach(img=>img.addEventListener('error',()=>{const span=document.createElement('span');span.className='logo';span.textContent=card.querySelector('.e').textContent.slice(0,2);img.replaceWith(span)}));
       card.addEventListener('dragstart', (ev) => { ev.dataTransfer.setData('text/plain', card.dataset.id); card.classList.add('arrastando'); });
       card.addEventListener('dragend', () => card.classList.remove('arrastando'));
       card.querySelectorAll('[data-mover]').forEach((b) => b.addEventListener('click', () => mover(card.dataset.id, b.dataset.mover)));
@@ -190,22 +138,22 @@
 
   function renderTabela() {
     const lista = visiveis();
-    $('#tabela').innerHTML = `<table><thead><tr><th>Nota</th><th>Vaga</th><th>Empresa</th><th>Salário</th><th>Idade</th><th>Fonte</th><th>Fase</th><th></th></tr></thead><tbody>
-      ${lista.map((v) => `<tr class="animada" data-id="${esc(v.id)}"><td>${notaHtml(v)}</td><td class="t">${esc(v.titulo)}</td><td>${esc(v.empresa || '')}</td><td>${esc(v.salario || '')}</td><td>${idade(v)}</td><td>${esc(v.fonte || '')}</td>
-        <td><select class="status" aria-label="Fase de ${esc(v.titulo)}">${[...dados.status, ...(dados.status.includes(v.status) ? [] : [v.status])].map((s) => `<option ${s === v.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></td>
-        <td>${v.link ? `<a href="${esc(v.link)}" target="_blank" rel="noopener">${icone('link')} anúncio</a>` : ''}</td></tr>`).join('')}
-    </tbody></table>`;
-    document.querySelectorAll('select.status').forEach((sel) => sel.addEventListener('change', () => mover(sel.closest('tr').dataset.id, sel.value)));
+    $('#tabela').innerHTML = `<table><thead><tr><th>Oportunidade</th><th>Salário</th><th>Localização</th><th>Senioridade</th><th>Compatibilidade</th><th>Fase</th><th>Fonte</th></tr></thead><tbody>${lista.length ? lista.map(v=>`<tr data-id="${esc(v.id)}"><td><button class="table-open table-job" data-detail="${esc(v.id)}" aria-haspopup="dialog" aria-label="Detalhes de ${esc(v.titulo)}">${logoHtml(v)}<span class="job-title"><span class="t" title="${esc(v.titulo)}">${esc(v.titulo)}</span><span class="e">${esc(v.empresa||'Empresa não informada')}</span></span></button></td><td>${esc(v.salario||'Não informado')}</td><td><span class="table-location">${icone('globe')}${esc(local(v)||'Não informada')}</span></td><td>${v.senioridade?`<span class="chip">${icone('level')}${esc(v.senioridade)}</span>`:'Não informada'}</td><td>${notaHtml(v)}</td><td><select class="status" aria-label="Fase de ${esc(v.titulo)}">${[...new Set([...dados.status,v.status])].map(st=>`<option ${st===v.status?'selected':''}>${esc(st)}</option>`).join('')}</select></td><td>${esc(v.fonte||'Não informada')}</td></tr>`).join(''):'<tr><td colspan="7">Nenhuma vaga encontrada.</td></tr>'}</tbody></table>`;
+    document.querySelectorAll('select.status').forEach(sel=>sel.addEventListener('change',()=>mover(sel.closest('tr').dataset.id,sel.value)));
+    document.querySelectorAll('[data-detail]').forEach(btn=>btn.onclick=()=>abrirDetalhe(btn.dataset.detail));
+    $('#tabela').querySelectorAll('img.logo').forEach(img=>img.addEventListener('error',()=>{const span=document.createElement('span');span.className='logo';span.textContent=img.alt.replace('Logo de ','').slice(0,2);img.replaceWith(span)}));
   }
 
   function render() {
     const total = dados.vagas.length; const ativas = dados.vagas.filter((v) => ['Avaliar', 'Aplicar'].includes(v.status)).length;
-    $('#sub').textContent = total ? `${total} vagas · ${ativas} pra decidir${dados.cargoAlvo ? ` · ${dados.cargoAlvo}` : ''}` : 'nenhuma vaga ainda: rode npm run rodada';
+    $('#sub').textContent = total ? `${total} vagas · ${ativas} pra decidir${dados.cargoAlvo ? ` · ${dados.cargoAlvo}` : ''}` : 'Nenhuma vaga ainda';
     $('#quadro').hidden = vista !== 'quadro'; $('#tabela').hidden = vista !== 'tabela';
     $('#v-quadro').setAttribute('aria-pressed', vista === 'quadro'); $('#v-tabela').setAttribute('aria-pressed', vista === 'tabela');
     if (vista === 'quadro') renderQuadro(); else renderTabela();
+    if(selecionada) abrirDetalhe(selecionada,false);
   }
 
+  $('#v-quadro').innerHTML=icone('board')+' Quadro';$('#v-tabela').innerHTML=icone('table')+' Tabela';
   $('#v-quadro').addEventListener('click', () => { vista = 'quadro'; render(); });
   $('#v-tabela').addEventListener('click', () => { vista = 'tabela'; render(); });
   $('#busca').addEventListener('input', () => { filtro = $('#busca').value.trim().toLowerCase(); render(); });

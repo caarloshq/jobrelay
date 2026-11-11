@@ -13,7 +13,7 @@ fs.mkdirSync(base, { recursive: true });
 test('padrão desliga autonomia e candidatura, com intervalo e cota fixos', t => {
   const dados = fs.mkdtempSync(path.join(base, 'fixture-'));
   t.after(() => fs.rmSync(dados, { recursive: true, force: true }));
-  assert.deepEqual(lerPolitica(dados), { ativa: false, intervaloHoras: 4, apifyMaximoPorDia: 1, modoCandidatura: 'mapear' });
+  assert.deepEqual(lerPolitica(dados), { ativa: false, atualizarAutomaticamente: true, intervaloHoras: 4, apifyMaximoPorDia: 1, modoCandidatura: 'mapear' });
   const escolhas = normalizarEscolhas({ fonteEstado: 'local', modoCandidatura: 'mapear', autonomia: false });
   salvarPolitica(dados, escolhas.politica);
   assert.deepEqual(lerPolitica(dados), escolhas.politica);
@@ -41,4 +41,20 @@ test('script embutido do formulário tem sintaxe válida', () => {
   const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script);
   assert.doesNotThrow(() => new vm.Script(script));
+});
+
+
+test('Notion sem ID fica para criação assistida e atualização pode ser desligada', () => {
+  const escolha = normalizarEscolhas({ fonteEstado: 'notion', modoCandidatura: 'mapear', autonomia: false, atualizarAutomaticamente: false });
+  assert.equal(escolha.databaseId, '');
+  assert.equal(escolha.politica.atualizarAutomaticamente, false);
+  const prompt = instrucaoOnboarding(escolha);
+  assert.match(prompt, /criar um quadro no Notion/);
+  assert.match(prompt, /página Puxa Vagas/);
+  assert.match(prompt, /bundle local não depende de acesso ao Notion dele/);
+  assert.match(prompt, /19 campos, quatro grupos, cinco visualizações/);
+  assert.match(prompt, /ajustes manuais/);
+  assert.match(prompt, /excluindo o exemplo do ciclo operacional/);
+  assert.match(prompt, /Não consulte nem instale releases automaticamente/);
+  assert.doesNotMatch(prompt, /database ID undefined/);
 });

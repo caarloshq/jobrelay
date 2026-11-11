@@ -60,6 +60,7 @@ function retrato(v) {
     compatibilidade: v.compatibilidade ?? null,
     salarioTexto: v.salarioTexto || null,
     publicadaEm: v.publicadaEm || null,
+    ...Object.fromEntries(['logo','logoUrl','empresaLogo','localizacao','cidade','estado','pais','modelo','remoto','senioridade'].filter(k => v[k] != null).map(k => [k,v[k]])),
   };
 }
 

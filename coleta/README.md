@@ -12,6 +12,8 @@ Quem escolhe Notion usa `cd ../vagas && npm run estado -- --fonte notion --datab
 
 **Nunca edite o `quadro.json` à mão nem apague uma vaga dele.** Pra mover por código, `quadro.mover(id, status, { por: 'agente' })`: fica no histórico.
 
+Ao usar Notion, preencher `Salário` conforme a [regra do subsistema](../vagas/AGENTS.md#regras-invioláveis), inclusive quando o anúncio não informa remuneração.
+
 ## 2. Coletar
 
 ```bash

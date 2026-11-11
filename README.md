@@ -19,7 +19,7 @@ Abra o **Claude Code ou o Codex** e cole:
 Instale https://github.com/caarloshq/jobrelay em uma pasta própria, sem sobrescrever meus projetos. Leia AGENTS.md e me acompanhe na configuração: meu currículo, as vagas que procuro e onde quero acompanhar as oportunidades. Pergunte se quero só buscar vagas ou também autorizar candidaturas. Crie uma tarefa para checar atualizações a cada três dias, seguindo ATUALIZAR.md, e confirme a próxima execução. Se não houver agendador disponível, me avise. Use meus dados sem inventar informações, não peça senhas ou chaves de acesso no chat e me avise antes de usar serviços pagos.
 ```
 
-Você deve preencher pessoalmente o onboarding HTML e confirmar o resumo. Essa etapa é obrigatória, inclusive em instalações existentes sem registro humano; o assistente não pode fazê-la nem contorná-la por você. O assistente orienta a instalação e a preparação posterior do currículo. Tenha seu currículo em PDF. Você escolhe as conexões e confere os materiais antes de usá-los.
+Você deve preencher pessoalmente o onboarding HTML e confirmar o resumo. Essa etapa é obrigatória, inclusive em instalações existentes sem registro humano; o assistente não pode fazê-la nem contorná-la por você. O assistente orienta a instalação e a preparação posterior do currículo. Tenha seu currículo em PDF ou DOCX. Você escolhe as conexões e confere os materiais antes de usá-los.
 
 Prefere baixar a pasta? [Baixe o ZIP](https://github.com/caarloshq/jobrelay/releases/latest/download/jobrelay.zip), extraia e abra a pasta no assistente. Peça para seguir o `AGENTS.md`. O download corresponde à [última release publicada](https://github.com/caarloshq/jobrelay/releases/latest).
 
@@ -35,7 +35,7 @@ No Claude Code, use os atalhos abaixo. No Codex, selecione a skill de mesmo nome
 
 ## Quer que ele se candidate por você?
 
-Para candidaturas no navegador, instale e conecte a extensão do seu assistente: [Claude no Chrome](https://code.claude.com/docs/en/chrome) ou [conexão de navegador para o Codex](https://learn.chatgpt.com/docs/chrome-extension). Essa conexão é opcional para quem só quer buscar vagas, organizar o quadro e adaptar currículos.
+Para candidaturas no navegador, use o [navegador isolado do JobRelay](docs/navegador.md). Ele permite que você faça login na mesma sessão usada pelo assistente, por um painel local. Esse acesso é opcional para quem só quer buscar vagas, organizar o quadro e adaptar currículos.
 
 Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador. Faça o login diretamente no site. O assistente guia a conexão e pede as autorizações necessárias para candidatar. Serviços externos podem ter custos; ele deve avisar antes de usá-los.
 
