@@ -62,3 +62,12 @@ Cards compactados para 176 px, com padding de 16 px e metadados sem altura reser
 A pessoa usuária apontou o vão entre tags e compatibilidade e a ausência de Remoto nos títulos Work From Home. Rodapé passou de margin-top:auto para8px fixos; cards uniformes de148px com padding12px e metadados em linha com quebra. No protótipo de20 vagas, medição final confirmou148px em todos,8px entre tags e rodapé, sem sobreposição de cabeçalho/metadados/compatibilidade e sem corte do rodapé.
 
 locationLabel usa modelo explícito primeiro e, se ausente, mostra Remoto quando o próprio título diz Remote, Remoto/Remota ou Work From Home. Não infere país; evita repetir Remoto se já estiver no campo Local e modelo. Seis testes passaram, lint/build/detector sem achados. Revisão independente confirmou a lógica e apontou conferir limites de espaço; os20 casos reais foram medidos no navegador. Não há prova para combinações sintéticas com todos os campos em duas linhas fora deste protótipo. Print: revisoes/tema-2026-11-11/cards-sem-vao-remoto.png.
+
+
+### Ordem final dos detalhes e critérios da release
+
+Confiança permanece no topo. O painel segue Sobre a vaga, Resumo, Próxima ação, Gaps, Candidatura e Datas. Gaps têm subtítulos em negrito e indicadores ✅/🚫 para confirmação ou pendência explícita; referências e frases futuras não geram confirmação. A apresentação preserva o texto e não decide descarte de vagas.
+
+Atualização automática fica ativa por padrão, respeitando desligamento explícito. O registro humano do onboarding é obrigatório antes da operação, inclusive nas instalações existentes sem recibo. Esses são critérios obrigatórios da próxima release.
+
+Reconferência independente aprovada no delta. Candidato isolado: 15 testes da interface passaram, tipos sem erros/avisos/hints, lint e build passaram. Conferência visual confirmou a ordem dos blocos e Gaps com negrito e ícones. O login real headless e a barra do modelo Notion continuam nos limites já documentados. A auditoria de status do Notion foi transferida a outro chat e não integra estes commits.
