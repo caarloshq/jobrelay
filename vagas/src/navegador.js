@@ -2,12 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { executarProtegido, argumentosSemLancamento, transporteAtual, processosDaInstalacao, adquirirTravaComando, exigirSemAtualizacao } from './navegador-controle.js';
 import { exigirOnboardingHumano } from './onboarding-humano.js';
 
 const PORTAIS_LOGIN = Object.freeze({ linkedin: 'https://www.linkedin.com/login', gupy: 'https://login.gupy.io/candidate' });
 export const VERSAO_AGENT_BROWSER = '0.42.0';
 const ESCRITA = new Set(['click', 'dblclick', 'fill', 'type', 'press', 'select', 'check', 'uncheck', 'upload', 'keyboard', 'keydown', 'keyup', 'drag', 'mouse']);
-const SEM_ARGS = new Set(['close', 'back', 'forward', 'reload', 'campos', 'diagnostico', 'console', 'errors']);
+const SEM_ARGS = new Set(['close', 'back', 'forward', 'reload', 'campos', 'diagnostico', 'reconciliar', 'reconectar', 'console', 'errors']);
 const FLAGS = {
   snapshot: new Set(['-i', '--interactive', '-u', '--urls', '-c', '--compact', '-d', '--depth', '-s', '--selector', '--delta', '--full']),
   screenshot: new Set(['--full', '--annotate']),
@@ -173,9 +174,11 @@ export function prepararComando(args, { raiz, ambiente = process.env, executar =
       return arquivo;
     })];
   }
-  return { comando: process.execPath, args: [cli, '--config', dirs.confiavel, '--session', 'jobrelay', '--profile', dirs.perfil,
+  const prefixo = [cli, '--config', dirs.confiavel, '--session', 'jobrelay', '--profile', dirs.perfil,
     '--executable-path', chrome.caminho, '--no-auto-connect', '--no-auto-dialog', '--idle-timeout', '0', '--json',
-    '--download-path', path.join(dirs.runtime, 'downloads'), ...args], opcoes: { cwd: raiz, env, shell: false, stdio: 'inherit' } };
+    '--download-path', path.join(dirs.runtime, 'downloads')];
+  return { controle: { runtime: dirs.runtime, perfil: dirs.perfil, confiavel: dirs.confiavel, inicioComando: prefixo.length },
+    comando: process.execPath, args: [...prefixo, ...args], opcoes: { cwd: raiz, env, shell: false, stdio: 'inherit' } };
 }
 
 
@@ -210,14 +213,19 @@ export async function executarNavegador(args, opcoes = {}) {
   if (!Array.isArray(args) || args.some(a => typeof a !== 'string')) erro('Informe comando e argumentos de texto.');
   const { raiz, iniciar = spawn, conferirOnboarding = exigirOnboardingHumano } = opcoes;
   if (typeof raiz !== 'string' || !path.isAbsolute(raiz)) erro('Informe a raiz absoluta de vagas/.');
+  exigirSemAtualizacao(path.join(raiz, 'data', 'navegador'));
   // Verifica requisitos e cria exclusivamente os diretórios da própria instalação.
   const base = prepararComando(['diagnostico'], opcoes);
   const dirs = diretoriosPrivados(raiz);
   const trava = path.join(dirs.runtime, '.comando.lock');
+  const acessoInicial = estadoHumano(raiz);
+  if (acessoInicial.atual?.ativo && !['diagnostico', 'retomar'].includes(args[0])) erro('ACESSO_HUMANO_ATIVO: aguarde a pessoa; não leia, preencha, feche ou navegue na sessão durante o login.');
+  const recuperar = ['reconciliar', 'reconectar'].includes(args[0]) || (args[0] === 'retomar' && args.length === 2 && args[1] === '--confirmado-pela-pessoa');
   let fd;
-  try { fd = fs.openSync(trava, 'wx', 0o600); }
-  catch (e) { if (e.code === 'EEXIST') erro('NAVEGADOR_OCUPADO: aguarde o comando atual.'); throw e; }
+  try { fd = adquirirTravaComando(dirs.runtime, recuperar, opcoes.controleDeps?.pidVivo).fd; }
+  catch (e) { if (/CONTROLE_OCUPADO/.test(e.message)) erro('NAVEGADOR_OCUPADO: aguarde o comando atual.'); throw e; }
   try {
+    exigirSemAtualizacao(dirs.runtime);
     const acesso = estadoHumano(raiz);
     if (args[0] === 'diagnostico') {
       if (args.length !== 1) erro('diagnostico não recebe argumentos.');
@@ -229,7 +237,9 @@ export async function executarNavegador(args, opcoes = {}) {
       if (!acesso.atual?.ativo) erro('Não há acesso humano pendente.');
       const plano = prepararComando(['snapshot', '-i'], opcoes);
       // Falha na retomada conserva a posse humana.
-      const resultado = await executarPlano(plano, iniciar);
+      plano.controle.retomadaHumana = true;
+      await executarProtegido(plano, ['reconciliar'], { ...opcoes.controleDeps, iniciar });
+      const resultado = await executarProtegido(plano, ['snapshot', '-i'], { ...opcoes.controleDeps, iniciar });
       if (resultado.codigo !== 0) return resultado;
       gravarAcesso(acesso.arquivo, { ...acesso.atual, ativo: false, retomadoEm: new Date().toISOString() });
       return { ...resultado, estado: 'retomado', autenticacao: 'Não comprovada por este comando; confira a página.', instrucao: 'A pessoa terminou o acesso. Confira a sessão e o portal antes de continuar; isso não autoriza candidatura.' };
@@ -240,24 +250,33 @@ export async function executarNavegador(args, opcoes = {}) {
       const portal = args[1];
       // Não altera a aba de rascunho nem troca o modo do navegador.
       const novaAba = prepararComando(['tab', 'new', PORTAIS_LOGIN[portal]], opcoes);
-      const aberta = await executarPlano(novaAba, iniciar);
+      const aberta = await executarProtegido(novaAba, ['tab', 'new', PORTAIS_LOGIN[portal]], { ...opcoes.controleDeps, iniciar });
       if (aberta.codigo !== 0) return aberta;
-      const estado = { ativo: true, portal, iniciadoEm: new Date().toISOString(), sessao: 'jobrelay' };
+      const efetivo = transporteAtual(novaAba);
+      const sessao = efetivo.controle.sessao || 'jobrelay';
+      const processos = opcoes.controleDeps?.processos || processosDaInstalacao;
+      const pids = processos(efetivo);
+      const estado = { ativo: true, portal, iniciadoEm: new Date().toISOString(), sessao };
       gravarAcesso(acesso.arquivo, estado);
       const cfg = configuracao(raiz);
-      const dashboard = prepararComando(['open', 'about:blank'], opcoes);
+      const dashboard = transporteAtual(prepararComando(['open', 'about:blank'], opcoes));
       // O comando oficial só inicia o painel; não navega na aba atual.
-      dashboard.args = dashboard.args.slice(0, dashboard.args.length - 2).concat(['dashboard', 'start', '--port', String(cfg.portaAcessoHumano)]);
+      dashboard.args = argumentosSemLancamento(dashboard.args.slice(0, dashboard.controle.inicioComando)).concat(['dashboard', 'start', '--port', String(cfg.portaAcessoHumano)]);
+      const antesPainel = processos(dashboard);
+      if (!pids.chromePid || !pids.daemonPid || antesPainel.chromePid !== pids.chromePid || antesPainel.daemonPid !== pids.daemonPid) erro('CONTROLE_PID_ALTERADO: acesso humano preservado; não reinicie a sessão.');
+      exigirSemAtualizacao(dirs.runtime);
       const iniciado = await executarPlano(dashboard, iniciar);
+      const depoisPainel = processos(dashboard);
+      if (depoisPainel.chromePid !== pids.chromePid || depoisPainel.daemonPid !== pids.daemonPid) erro('CONTROLE_PID_ALTERADO: acesso humano preservado; não reinicie a sessão.');
       if (iniciado.codigo !== 0) return { ...iniciado, estado: 'aguardando_pessoa', instrucao: 'O acesso humano continua reservado. Confira a porta do dashboard; não reinicie nem feche a sessão para contornar o erro.' };
       return {
         codigo: 0, estado: 'aguardando_pessoa', portal,
         urlAcessoHumano: 'http://localhost:' + cfg.portaAcessoHumano,
-        instrucao: 'Abra o painel local, selecione a sessão jobrelay e faça o login diretamente na página. Use entrar com LinkedIn somente se o portal oferecer essa opção. Não envie senha ou código no chat. O assistente deve aguardar seu aviso de término, sem observar o login.',
+        instrucao: `Abra o painel local, selecione a sessão ${sessao} e faça o login diretamente na página. Use entrar com LinkedIn somente se o portal oferecer essa opção. Não envie senha ou código no chat. O assistente deve aguardar seu aviso de término, sem observar o login.`,
       };
     }
     const plano = prepararComando(args, opcoes);
-    return await executarPlano(plano, iniciar);
+    return await executarProtegido(plano, args, { ...opcoes.controleDeps, iniciar });
   } finally {
     fs.closeSync(fd);
     fs.unlinkSync(trava);

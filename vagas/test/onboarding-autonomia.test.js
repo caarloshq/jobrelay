@@ -13,7 +13,7 @@ fs.mkdirSync(base, { recursive: true });
 test('padrão desliga autonomia e candidatura, com intervalo e cota fixos', t => {
   const dados = fs.mkdtempSync(path.join(base, 'fixture-'));
   t.after(() => fs.rmSync(dados, { recursive: true, force: true }));
-  assert.deepEqual(lerPolitica(dados), { ativa: false, atualizarAutomaticamente: true, intervaloHoras: 4, apifyMaximoPorDia: 1, modoCandidatura: 'mapear' });
+  assert.deepEqual(lerPolitica(dados), { ativa: false, atualizarAutomaticamente: true, frentes: ['coleta', 'aplicacao'], intervaloHoras: 4, apifyMaximoPorDia: 1, modoCandidatura: 'mapear' });
   const escolhas = normalizarEscolhas({ fonteEstado: 'local', modoCandidatura: 'mapear', autonomia: false });
   salvarPolitica(dados, escolhas.politica);
   assert.deepEqual(lerPolitica(dados), escolhas.politica);
@@ -57,4 +57,17 @@ test('Notion sem ID fica para criação assistida e atualização pode ser desli
   assert.match(prompt, /excluindo o exemplo do ciclo operacional/);
   assert.match(prompt, /Não consulte nem instale releases automaticamente/);
   assert.doesNotMatch(prompt, /database ID undefined/);
+});
+
+
+test('frentes e captura são preferências separadas, sem autorizar envio', () => {
+  for (const frentes of [['coleta'], ['aplicacao'], ['coleta','aplicacao']]) {
+    for (const feed of [false,true]) {
+      const entrada={fonteEstado:'local',modoCandidatura:'mapear',autonomia:false,frentes,linkedinFeed:feed};
+      if(feed && !frentes.includes('coleta')) {assert.throws(()=>normalizarEscolhas(entrada), /exige a frente/);continue;}
+      const escolha=normalizarEscolhas(entrada);assert.deepEqual(escolha.politica.frentes,frentes);assert.equal(escolha.linkedinFeed,feed);
+      assert.match(instrucaoOnboarding(escolha),/não autoriza envio irrestrito/);
+      assert.match(instrucaoOnboarding(escolha),/confirmação da versão antes de baixar/);
+    }
+  }
 });

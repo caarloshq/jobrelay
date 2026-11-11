@@ -335,6 +335,15 @@
 
     </div>
     <div class="grupo">
+      <label class="rotulo">O que quer fazer nas rodadas</label>
+      <div class="opcoes" role="radiogroup" aria-label="Frentes da rodada">
+        <label class="opcao"><input type="radio" name="frentes" value="coleta"><span class="t">Buscar vagas</span><span class="d">Encontra e organiza oportunidades no quadro.</span></label>
+        <label class="opcao"><input type="radio" name="frentes" value="aplicacao"><span class="t">Trabalhar na fila existente</span><span class="d">Prepara candidaturas sem iniciar uma nova busca.</span></label>
+        <label class="opcao"><input type="radio" name="frentes" value="ambas" checked><span class="t">Buscar, depois trabalhar na fila</span><span class="d">Primeiro salva e confere a busca, depois prepara as candidaturas.</span></label>
+      </div>
+      <label class="toggle"><input type="checkbox" id="linkedin-feed" role="switch"><span class="switch" aria-hidden="true"></span><span><span class="t">Testar captura do LinkedIn (beta)</span><br><span class="d">Busca usando seus cargos: 15 min em Vagas, 12 em Postagens e 3 no Feed, após as outras fontes. O Feed depende da sua conta e pode trazer outros assuntos. Teste opcional. Exige login no LinkedIn pelo painel do navegador autorizado antes de começar.</span></span></label>
+    </div>
+    <div class="grupo">
       <label class="rotulo">O que fazer com candidaturas</label>
       <div class="opcoes" role="radiogroup" aria-label="Modo de candidatura">
         <label class="opcao"><input type="radio" name="modo-candidatura" value="mapear" checked><span class="t"><span data-icone="search"></span>Só mapear e avaliar</span><span class="d">O assistente não preenche nem envia candidaturas.</span></label>
@@ -348,7 +357,7 @@
       </label>
       <label class="toggle">
         <input type="checkbox" role="switch" id="atualizacao" checked><span class="switch" aria-hidden="true"></span>
-        <span><span class="t">Atualizar automaticamente <span class="tag neutra">recomendado</span></span><br><span class="d">Busca uma versão nova no GitHub antes de começar.</span></span>
+        <span><span class="t">Verificar atualizações ao iniciar <span class="tag neutra">recomendado</span></span><br><span class="d">Consulta o GitHub e pede sua confirmação antes de baixar e instalar.</span></span>
       </label>
     </div>
     <div class="aviso info">Você pode iniciar uma busca manual quando quiser.</div>
@@ -504,6 +513,9 @@
     if (modoRadio) modoRadio.checked = true;
     $('#autonomia').checked = estado.politica?.ativa === true;
     $('#atualizacao').checked = estado.politica?.atualizarAutomaticamente !== false;
+    const fs = estado.politica?.frentes || ['coleta', 'aplicacao'];
+    document.querySelectorAll('[name=frentes]').forEach(el => el.checked = el.value === (fs.length === 2 ? 'ambas' : fs[0]));
+    $('#linkedin-feed').checked = estado.linkedinFeed === true;
     if (estado.env?.token) { $('#token-estado').hidden = false; $('#token').placeholder = 'Já salvo. Cole outro só se quiser trocar.'; }
     renderArquivos();
   }
@@ -615,7 +627,9 @@
     }
     if (atual === 6) {
       const fonteEstado = valor('fonte-estado');
-      return { fonteEstado, modoCandidatura: valor('modo-candidatura'), autonomia: $('#autonomia').checked, atualizarAutomaticamente: $('#atualizacao').checked };
+      const frentes = valor('frentes') === 'ambas' ? ['coleta', 'aplicacao'] : [valor('frentes')];
+      if ($('#linkedin-feed').checked && !frentes.includes('coleta')) { marcar($('#linkedin-feed'), true, 'Selecione uma rodada com busca para incluir o LinkedIn.'); return null; }
+      return { frentes, linkedinFeed: $('#linkedin-feed').checked, fonteEstado, modoCandidatura: valor('modo-candidatura'), autonomia: $('#autonomia').checked, atualizarAutomaticamente: $('#atualizacao').checked };
     }
     if (atual === 7) return { token: $('#token').value.trim() || null };
     return {};
@@ -684,7 +698,9 @@
       ['Quadro', estado.fonteEstado?.fonte === 'notion' ? 'Notion, a criar com o assistente' : 'local'],
       ['Candidaturas', estado.politica?.modoCandidatura === 'chrome_assistido' ? 'configurar com o assistente' : 'só mapear e avaliar'],
       ['Rodada recorrente', estado.politica?.ativa ? 'a cada 4 horas' : 'desligada'],
-      ['Atualização automática', estado.politica?.atualizarAutomaticamente !== false ? 'ativada' : 'desativada'],
+      ['Frentes', valor('frentes') === 'ambas' ? 'Busca, depois fila' : valor('frentes') === 'coleta' ? 'Buscar vagas' : 'Fila existente'],
+      ['Captura do LinkedIn (beta)', $('#linkedin-feed').checked ? 'Sim, após as outras fontes' : 'Não'],
+      ['Checar atualização (pede confirmação)', estado.politica?.atualizarAutomaticamente !== false ? 'ativada' : 'desativada'],
       ['Apify', estado.env?.token ? (estado.env.task ? 'token e Task salvos' : 'conexão salva') : 'sem conexão Apify'],
       ['Próximas tarefas', 'preparar currículo e ajustar a busca'],
     ];

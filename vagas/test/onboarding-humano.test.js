@@ -44,16 +44,17 @@ test('entrada bloqueia antes de atualizar e importa configuração somente após
   const dir = pasta();
   for (const sub of ['vagas/scripts', 'vagas/src', 'vagas/data']) mkdirSync(join(dir, sub), { recursive: true });
   writeFileSync(join(dir, 'package.json'), '{"type":"module"}');
-  for (const arq of ['scripts/executar.mjs', 'src/onboarding-humano.js']) {
+  for (const arq of ['scripts/executar.mjs', 'src/onboarding-humano.js', 'src/regras-projeto-leitura.js']) {
     writeFileSync(join(dir, 'vagas', arq), readFileSync(new URL('../' + arq, import.meta.url)));
   }
   writeFileSync(join(dir, 'vagas/src/onboarding-autonomia.js'), 'export const lerPolitica = () => ({ atualizarAutomaticamente: true });');
   writeFileSync(join(dir, 'vagas/src/config.js'), "export const perfil = { versao: 1 }; export const DIR_DADOS = " + JSON.stringify(join(dir, 'vagas/data')) + ';');
   writeFileSync(join(dir, 'vagas/src/atualizacao.js'), `import { writeFileSync } from 'node:fs';
+    export function podeIniciarOperacao(r) { return r.status === 'atualizado'; }
     export async function atualizarAutomaticamente() {
       writeFileSync(new URL('./config.js', import.meta.url), 'export const perfil = { versao: 2 };');
       writeFileSync(new URL('./onboarding-humano.js', import.meta.url), 'export const VERSAO = 2;');
-      return { status: 'simulada' };
+      return { status: 'atualizado' };
     }`);
   writeFileSync(join(dir, 'vagas/src/coletar.js'), "import { perfil } from './config.js'; import { VERSAO } from './onboarding-humano.js'; console.log('CONFIG_APOS_UPDATE=' + perfil.versao + ';GUARD_APOS_UPDATE=' + VERSAO);");
   const rodar = () => spawnSync(process.execPath, [join(dir, 'vagas/scripts/executar.mjs'), 'rodada'], { encoding: 'utf8', env: { PATH: process.env.PATH || '' } });

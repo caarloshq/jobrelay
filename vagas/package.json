@@ -1,6 +1,6 @@
 {
   "name": "jobrelay",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "description": "JobRelay: busca de vagas, currículos e candidaturas com seu assistente de IA.",
@@ -37,7 +37,11 @@
     "atualizar": "node scripts/atualizar.mjs",
     "estado": "node scripts/estado.mjs",
     "revisar:escrita": "node scripts/revisar-escrita.mjs",
-    "navegador": "node scripts/navegador.mjs"
+    "navegador": "node scripts/navegador.mjs",
+    "regras": "node scripts/regras-projeto.mjs",
+    "rodada:lote": "node scripts/rodada-lote.mjs",
+    "coordenar:frentes": "node scripts/coordenar-frentes.mjs",
+    "linkedin:feed": "node scripts/linkedin-feed.mjs"
   },
   "optionalDependencies": {
     "agent-browser": "0.42.0"

@@ -12,7 +12,7 @@ try {
   }
   const resultado = await executarNavegador(args, { raiz });
   if ('codigo' in resultado) process.exitCode = resultado.codigo;
-  if (resultado.estado || !('codigo' in resultado)) process.stdout.write(`${JSON.stringify(resultado, null, 2)}\n`);
+  if (resultado.estado || resultado.controle || !('codigo' in resultado)) process.stdout.write(`${JSON.stringify(resultado, null, 2)}\n`);
 } catch (erro) {
   process.stderr.write(`Navegador do JobRelay: ${erro instanceof SyntaxError ? 'JSON de entrada inválido.' : erro.message}\n`);
   process.exitCode = 1;

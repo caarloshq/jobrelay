@@ -17,6 +17,20 @@ export function extrair(url) {
   const host = u.hostname.replace(/^www\./, '');
   const partes = u.pathname.split('/').filter(Boolean);
 
+  // Um post/share/activity identifica a publicacao, nao a requisicao.
+  if ((host === 'linkedin.com' || host.endsWith('.linkedin.com'))
+    && partes[0] === 'jobs' && partes[1] === 'view' && partes.length === 3) {
+    const jobId = partes[2].match(/^\d+$/)?.[0] || partes[2].match(/-(\d{8,})$/)?.[1];
+    if (jobId) return { fonte: 'LinkedIn', idExterno: `linkedin:${jobId}`, empresa: null };
+  }
+
+  // A API oficial usa o mesmo id no campo posting.id e no caminho publico.
+  if (host === 'jobs.smartrecruiters.com' && partes.length >= 2) {
+    const posting = partes[1].match(/^(\d{8,})(?:-|$)/)?.[1]
+      || partes[1].match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:-|$)/i)?.[1];
+    if (posting) return { fonte: 'SmartRecruiters', idExterno: `smartrecruiters:${posting}`, empresa: partes[0] };
+  }
+
   if (host.endsWith('.gupy.io')) {
     const sub = host.replace('.gupy.io', '');
     if (partes[0] === 'jobs' && /^\d+$/.test(partes[1] || '')) {

@@ -1,5 +1,15 @@
 # Contexto atual do JobRelay
 
+## Candidata 1.5.0 preparada, sem publicação
+
+A sequência vigente está em [FLUXO-DA-RODADA](vagas/FLUXO-DA-RODADA.md): consultar regras, confirmar atualização, concluir e conferir a coleta antes de aplicar, revisar cada rascunho antes do envio, reunir perguntas após esgotar o trabalho independente e oferecer melhorias somente ao final da aplicação, com aceite. Coleta isolada não oferece melhorias.
+
+A captura assistida do LinkedIn é beta, desligada por padrão e usa os cargos/profissão da instalação. Exige login humano no painel e conferência da sessão para Vagas, Postagens e Feed. A consulta também precisa ser conferida na interface antes de contar tempo em Vagas/Postagens. O ensaio anônimo de três profissões encontrou Jobs genéricos e Postagens bloqueada; não aprovou correspondência dos filtros nem fluxo autenticado.
+
+O atualizador público pede confirmação específica e contempla Git e ZIP, com preservação de dados/regras, bloqueio durante operação/navegador ativo e interrupção diante de integridade ou migração incerta. O navegador permanece experimental. O onboarding humano continua obrigatório; nenhum teste automatizado autoriza simular sua confirmação em uma instalação real.
+
+As [notas para quem usa](docs/releases/v1.5.0.md) estão preparadas. Esta continuidade autoriza implementação, revisão, correções e commits locais. Não cria tag, release ou push. O registro abaixo descreve preparações anteriores e não substitui esta sequência.
+
 ## Candidata 1.4.0 preparada para revisão
 
 A revisão para lançamento corrigiu a origem das mudanças de status no quadro operacional e o caminho de atualização desde a release estável v1.3.0, preservando as proteções de dados. Metadados e nota estão preparados para 1.4.0. Os commits de correção ficam separados da preparação da versão, sem reescrever histórico publicado. Evidências, testes e limites estão na [spec 007](specs/pendentes/007-release-1.4.0.md); a nota curta fica em [docs/releases/v1.4.0.md](docs/releases/v1.4.0.md).

@@ -81,6 +81,32 @@ Os testes offline exercitam o planejamento de comandos com uma CLI simulada, iso
 
 A sessão não expira por inatividade. Isso não garante restaurar rascunhos depois de crash ou reinício. Preserve checkpoints de URL, aba, etapa e próxima ação, sem registrar credenciais.
 
+## Confira o checkpoint antes de recuperar a sessão
+
+A atualização e o navegador não operam ao mesmo tempo. A presença de `vagas/data/operacao/.atualizacao.lock` bloqueia o comando antes da pré-checagem, novamente após adquirir a trava e antes de sondar ou agir. O atualizador também deve recusar os registros de posse e atividade do navegador. Preserve a sessão e aguarde uma fronteira segura.
+
+Cada comando mantém uma trava de controlador e grava checkpoints antes e depois da ação em `vagas/data/navegador/controle/`. O registro conserva PIDs do Chrome e do daemon, identidade das abas, URL saneada e etapa. Valores de campos, credenciais, query strings, fragmentos e endpoints de depuração não entram nos registros. O diagnóstico registra somente classes fixas de falha e duração da etapa.
+
+Com navegador existente, o comando remove opções de lançamento antes de agir. Troca de PID, alvo ou URL, falha de transporte ou checkpoint incompleto suspende a operação. O comando não repete o clique nem reinicia o navegador como recuperação. Preserve o rascunho e confira o estado antes de escolher:
+
+```sh
+npm run navegador -- reconciliar
+```
+
+`reconciliar` inventaria a sessão atual e registra o checkpoint sem executar novamente a ação anterior. A ausência do navegador não autoriza abrir outro para substituir a sessão perdida. Uma trava só pode ser recuperada por comando explícito quando seu PID está comprovadamente morto; um controlador vivo continua bloqueando a chamada.
+
+Se o daemon deixou de responder e o mesmo Chrome continua comprovadamente presente, a recuperação de transporte é separada:
+
+```sh
+npm run navegador -- reconectar
+```
+
+`reconectar` exige checkpoint anterior, Chrome e listener local comprovados e o mesmo inventário de abas por identidade e URL. Cria um namespace de transporte separado, anexado ao Chrome existente, sem fechar ou enviar comandos ao daemon proprietário. Preserva os metadados anteriores e não repete a ação interrompida. Falha conserva o bloqueio. Um transporte anexado recusa `close` para preservar o navegador proprietário.
+
+Durante acesso humano, os dois comandos são recusados antes de consultar o navegador. A única passagem de volta continua sendo `retomar --confirmado-pela-pessoa`, depois do aviso da pessoa. Ela reconcilia a sessão, observa a página e só então libera a posse; qualquer falha conserva o acesso humano reservado. O painel usa o transporte atual, inclusive após reconexão, sem reabrir o perfil.
+
+Os testes dessa versão são offline: simulam processos, CDP e subprocessos. Eles comprovam ações únicas, checkpoints, suspensão, reconciliação, reconexão e posse humana, sem usar uma conta real ou afirmar restauração de rascunhos após crash. A descoberta de processos e a reconexão usam `ps` e `lsof`; se a máquina não oferece essas ferramentas ou não comprova o listener local, a recuperação é recusada, sem fallback silencioso.
+
 ## Fontes do transporte
 
 Conferidas em 11 de Novembro de 2026: o pacote npm **0.42.0** inclui os comandos de dashboard e a referência de stream interativo. As fontes oficiais da mesma tag mostram o [painel em loopback](https://github.com/vercel-labs/agent-browser/blob/v0.42.0/cli/src/native/stream/dashboard.rs), o [stream em 127.0.0.1](https://github.com/vercel-labs/agent-browser/blob/v0.42.0/cli/src/native/stream/mod.rs) e os [eventos de teclado e mouse do painel](https://github.com/vercel-labs/agent-browser/blob/v0.42.0/packages/dashboard/src/components/viewport.tsx). Consulte também a [documentação de streaming](https://agent-browser.dev/streaming), o [dashboard](https://agent-browser.dev/dashboard) e a [referência de comandos](https://agent-browser.dev/commands). O [guia oficial da Gupy](https://www.gupy.io/blog-do-emprego/curriculo-gupy) aponta o acesso de candidatos em `login.gupy.io/candidate`; os métodos de login devem ser conferidos na tela atual.

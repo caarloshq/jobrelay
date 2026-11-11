@@ -17,7 +17,7 @@ import { concluido, exigirOnboardingHumano, criarSessaoFormulario } from '../src
 import { RAIZ, perfil, palavras } from '../src/config.js';
 import { DIR_DADOS } from '../src/config.js';
 import { configuracao as fonteConfigurada, selecionar as selecionarFonte } from '../src/fonte-estado.js';
-import { instrucaoOnboarding, lerPolitica, normalizarEscolhas, salvarPolitica } from '../src/onboarding-autonomia.js';
+import { instrucaoOnboarding, lerPolitica, normalizarEscolhas, salvarPolitica, lerLinkedinFeed, salvarLinkedinFeed } from '../src/onboarding-autonomia.js';
 import { lerFontesInstalacao, atualizarPerfilInstalacao } from '../src/fontes-instalacao.js';
 
 console.log(formatarVersaoGit(await verificarVersaoGit({ cwd: RAIZ })));
@@ -207,7 +207,8 @@ function estadoParaTela() {
     candidatura: { autorizado: cand.autorizado === true },
     fonteEstado,
     politica,
-    instrucao: instrucaoOnboarding({ fonteEstado: fonteEstado.fonte, databaseId: fonteEstado.databaseId, politica }),
+    linkedinFeed: lerLinkedinFeed(join(RAIZ, 'config')).habilitado === true,
+    instrucao: instrucaoOnboarding({ fonteEstado: fonteEstado.fonte, databaseId: fonteEstado.databaseId, politica, linkedinFeed: lerLinkedinFeed(join(RAIZ, 'config')).habilitado === true }),
     materiais,
     blocos: estado().blocos,
   };
@@ -344,6 +345,7 @@ function salvarPasso(passo, d = {}) {
     const escolhas = normalizarEscolhas(d);
     selecionarFonte(escolhas.fonteEstado, escolhas.databaseId);
     salvarPolitica(DIR_DADOS, escolhas.politica);
+    salvarLinkedinFeed(join(RAIZ, 'config'), DIR_DADOS, escolhas.linkedinFeed);
     // Escolher Chrome não é autorização para preencher ou enviar. A revisão
     // individual do perfil e das respostas acontece depois, com o assistente.
   } else if (passo === 7) {

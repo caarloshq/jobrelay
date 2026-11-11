@@ -1,6 +1,6 @@
-# Um revisor independente confere cada resposta antes do preenchimento
+# O Revisor de candidatura confere o rascunho antes do envio
 
-O maestro mantém a responsabilidade pela candidatura e usa a posição de revisão existente para um agente cuja única tarefa é revisar o texto. Preparador escreve; revisor lê e aprova ou devolve achados; aplicador confere o campo efetivo e a autorização. Não crie um agente por critério. O Node valida os registros e não inicia agentes sozinho.
+O maestro mantém a responsabilidade pela candidatura e usa a posição de revisão existente para um agente cuja única tarefa é revisar o texto. O Aplicador escreve e preenche os campos independentes com fatos e autorizações vigentes; ao concluir o rascunho, fixa o pacote com valores observados, fontes, anexo e alvo. O Revisor confere e devolve aceite ou correções antes do envio. Enquanto o Revisor confere A, o Aplicador pode preparar B. O aceite de A não vale para B. Não crie um agente por critério. O Node valida os registros e não inicia agentes sozinho.
 
 O revisor lê `aplicacao/RESPOSTAS.md`, `aplicacao/PERFIL.md`, as fontes factuais de cada campo e `Skills/review-escrita/SKILL.md`. Leia a fonte de voz aprovada da instalação, quando existir. Sem essa fonte, use a linguagem direta e neutra da skill de escrita; nesse caso a mesma skill ocupa os papéis `voz` e `escrita`. Não importe exemplos ou orientações pessoais do mantenedor.
 
@@ -13,3 +13,5 @@ Na operação, entregue `tipo: candidatura` com `pacoteRespostas` e as fontes fi
 Rode `npm run validar:respostas -- --candidatura caminho.json` antes do próximo uso. Formulário sem respostas não exige parecer fictício. Aprovação editorial não concede consentimento, não resolve pendência pessoal, não autoriza envio e não libera controle do navegador. Opt-in, autorização da pessoa, estado do quadro, preflight e prova da plataforma continuam obrigatórios.
 
 Veja [aplicação](../aplicacao/README.md) e [operação multiagente](../vagas/OPERACAO-MULTIAGENTE.md).
+
+O Revisor de candidatura não é o Agente de melhorias: este só é oferecido após a aplicação, depende de aceite próprio e executa correções enxutas verificadas. O Aplicador usa adapt-resume para o currículo; o Revisor confere arquivo extraível e a importação no portal, sem prometer nota de ATS.

@@ -1,5 +1,6 @@
 // Orquestrador da rodada. Node puro, zero LLM: se o Claude falhar depois,
 // o dado do dia ja esta coletado.
+import { entradaFeed } from './linkedin-feed-entrada.js';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import * as apify from './fontes/apify.js';
@@ -338,6 +339,8 @@ function imprimir(r, aprovadas) {
   for (const [k, v] of Object.entries(r.motivosDeDescarte).slice(0, 8)) console.log(`  ${String(v).padStart(4)}  ${k}`);
 
   console.log(`\nFeito em ${r.duracaoSegundos}s. Detalhe em data/rodada-${r.dia}.json\n`);
+  const capturaFinal = entradaFeed();
+  console.log(JSON.stringify({ etapaAssistidaFinal: capturaFinal, iniciarSomenteAposBuscasComplementares: true }));
 }
 
 main().catch((e) => {

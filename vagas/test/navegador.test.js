@@ -20,8 +20,9 @@ function fixture(t, { modo = 'chrome_assistido', codigos = [] } = {}) {
   fs.writeFileSync(path.join(raiz, 'data/politica-autonomia.json'), JSON.stringify({ modoCandidatura: modo }));
   const chamadas = [];
   const executar = (bin, args) => ({ status: 0, stdout: bin === process.execPath ? 'agent-browser 0.42.0' : 'Chrome for Testing 157.0.0.0', stderr: '' });
-  const iniciar = (bin, args, opts) => { chamadas.push({ bin, args, opts }); const filho = new EventEmitter(); queueMicrotask(() => filho.emit('exit', codigos.shift() ?? 0, null)); return filho; };
-  return { raiz, chamadas, opcoes: { raiz, executar, iniciar, conferirOnboarding() {} }, acesso: path.join(raiz, 'data/navegador/acesso-humano.json') };
+  const iniciar = (bin, args, opts) => { chamadas.push({ bin, args, opts }); const filho = new EventEmitter(); filho.stdout = new EventEmitter(); filho.stderr = new EventEmitter(); queueMicrotask(() => { const code = codigos.shift() ?? 0; filho.emit('exit', code, null); filho.emit('close', code, null); }); return filho; };
+  const controleDeps = { processos: () => ({ chromePid: 200, daemonPid: 100 }), executar: () => ({ status: 0, stdout: JSON.stringify({ success: true, data: { url: 'ws://127.0.0.1:9000/devtools/browser/fixture' } }) }), targets: async () => [{ type: 'page', targetId: 'aba-fixture', url: 'https://portal.test/vaga' }] };
+  return { raiz, chamadas, opcoes: { raiz, executar, iniciar, controleDeps, conferirOnboarding() {} }, acesso: path.join(raiz, 'data/navegador/acesso-humano.json') };
 }
 
 testBrowser('diagnóstico confirma versão e perfil sem abrir browser nem gerar registro humano', async t => {
@@ -39,7 +40,7 @@ testBrowser('login mantém perfil/sessão, abre aba nova e entrega dashboard loo
   assert.deepEqual(f.chamadas[0].args.slice(-3), ['tab', 'new', 'https://www.linkedin.com/login']);
   assert.deepEqual(f.chamadas[1].args.slice(-4), ['dashboard', 'start', '--port', '4849']);
   for (const c of f.chamadas) {
-    assert.ok(c.args.includes('--profile')); assert.ok(c.args.includes('--no-auto-connect'));
+    assert.ok(!c.args.includes('--profile')); assert.ok(!c.args.includes('--no-auto-connect'));
     assert.equal(c.args[c.args.indexOf('--session') + 1], 'jobrelay');
     assert.equal(c.opts.shell, false);
     assert.equal(c.args.includes('--headed'), false);
@@ -52,7 +53,7 @@ testBrowser('handoff bloqueia todas as leituras e ações do agente, inclusive f
   const f = fixture(t); await executarNavegador(['login', 'gupy'], f.opcoes);
   assert.deepEqual(f.chamadas[0].args.slice(-3), ['tab', 'new', 'https://login.gupy.io/candidate']);
   const total = f.chamadas.length;
-  for (const args of [['snapshot', '-i'], ['open', 'https://example.org'], ['close'], ['fill', '#senha', 'nao-usado'], ['login', 'linkedin']]) {
+  for (const args of [['snapshot', '-i'], ['open', 'https://example.org'], ['close'], ['fill', '#senha', 'nao-usado'], ['login', 'linkedin'], ['reconciliar'], ['reconectar']]) {
     await assert.rejects(executarNavegador(args, f.opcoes), /ACESSO_HUMANO_ATIVO/);
   }
   assert.equal(f.chamadas.length, total);
@@ -109,10 +110,11 @@ testBrowser('lock impede comando simultâneo e não é tomado por timeout', asyn
 });
 
 testBrowser('posse de comando dura até o subprocesso terminar', async t => {
-  const f = fixture(t); const filho = new EventEmitter();
+  const f = fixture(t); const filho = new EventEmitter(); filho.stdout = new EventEmitter(); filho.stderr = new EventEmitter();
   const primeiro = executarNavegador(['open', 'https://example.org'], { ...f.opcoes, iniciar: () => filho });
   await assert.rejects(executarNavegador(['snapshot', '-i'], f.opcoes), /NAVEGADOR_OCUPADO/);
-  filho.emit('exit', 0, null); assert.equal((await primeiro).codigo, 0);
+  await new Promise(resolve => setImmediate(resolve));
+  filho.emit('close', 0, null); assert.equal((await primeiro).codigo, 0);
   const segundo = await executarNavegador(['snapshot', '-i'], f.opcoes);
   assert.equal(segundo.codigo, 0);
 });
@@ -135,4 +137,53 @@ testBrowser('configuração local é opcional: usa padrões e não cria ou subst
   fs.writeFileSync(file, '{invalido');
   assert.throws(() => prepararComando(['diagnostico'], f.opcoes), SyntaxError);
   assert.equal(fs.readFileSync(file, 'utf8'), '{invalido');
+});
+
+
+testBrowser('falha de reconciliação da retomada conserva posse humana sem snapshot ou replay', async t => {
+  const f = fixture(t); await executarNavegador(['login', 'linkedin'], f.opcoes);
+  const antes = f.chamadas.length;
+  f.opcoes.controleDeps.executar = () => ({ status: 1, stderr: 'sentinela-nao-logar' });
+  await assert.rejects(executarNavegador(['retomar', '--confirmado-pela-pessoa'], f.opcoes), /CONTROLE_CDP_INDISPONIVEL/);
+  assert.equal(f.chamadas.length, antes);
+  assert.equal(JSON.parse(fs.readFileSync(f.acesso)).ativo, true);
+});
+
+
+testBrowser('recuperação explícita não toma trava viva e só remove órfã comprovada', async t => {
+  const f = fixture(t); prepararComando(['diagnostico'], f.opcoes);
+  const lock = path.join(f.raiz, 'data/navegador/.comando.lock');
+  fs.writeFileSync(lock, '987654321');
+  f.opcoes.controleDeps.pidVivo = () => true;
+  await assert.rejects(executarNavegador(['reconciliar'], f.opcoes), /NAVEGADOR_OCUPADO/);
+  assert.equal(fs.readFileSync(lock, 'utf8'), '987654321');
+  f.opcoes.controleDeps.pidVivo = () => false;
+  await assert.rejects(executarNavegador(['snapshot'], f.opcoes), /NAVEGADOR_OCUPADO/);
+  const resultado = await executarNavegador(['reconciliar'], f.opcoes);
+  assert.equal(resultado.controle, 'reconciliado'); assert.equal(f.chamadas.length, 0);
+  assert.equal(fs.existsSync(lock), false);
+});
+
+
+testBrowser('atualização bloqueia browser antes da pré-checagem e preserva posse humana', async t => {
+  const f = fixture(t); prepararComando(['diagnostico'], f.opcoes);
+  fs.writeFileSync(f.acesso, JSON.stringify({ ativo: true }));
+  fs.mkdirSync(path.join(f.raiz, 'data/operacao'), { recursive: true });
+  fs.mkdirSync(path.join(f.raiz, 'data/operacao/.atualizacao.lock'));
+  for (const cmd of [['diagnostico'], ['snapshot'], ['retomar', '--confirmado-pela-pessoa'], ['reconciliar'], ['reconectar'], ['close']]) {
+    await assert.rejects(executarNavegador(cmd, { ...f.opcoes, executar: () => { throw new Error('pré-checagem não deve executar'); } }), /CONTROLE_ATUALIZACAO_ATIVA/);
+  }
+  assert.equal(JSON.parse(fs.readFileSync(f.acesso)).ativo, true);
+  assert.equal(f.chamadas.length, 0);
+});
+
+testBrowser('lock de atualização criado durante pré-checagem impede iniciar ação', async t => {
+  const f = fixture(t); let criou = false;
+  const executar = (...args) => {
+    if (!criou) { fs.mkdirSync(path.join(f.raiz, 'data/operacao'), { recursive: true }); fs.mkdirSync(path.join(f.raiz, 'data/operacao/.atualizacao.lock')); criou = true; }
+    return f.opcoes.executar(...args);
+  };
+  await assert.rejects(executarNavegador(['open', 'https://example.test'], { ...f.opcoes, executar }), /CONTROLE_ATUALIZACAO_ATIVA/);
+  assert.equal(f.chamadas.length, 0);
+  assert.equal(fs.existsSync(path.join(f.raiz, 'data/navegador/.comando.lock')), false);
 });

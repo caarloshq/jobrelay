@@ -9,6 +9,11 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
 
 export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
+  'src/linkedin-consultas.js', 'test/linkedin-consultas.test.js',
+  'src/rodada-lote.js', 'scripts/rodada-lote.mjs', 'test/rodada-lote.test.js',
+  'src/regras-projeto.js', 'src/regras-projeto-leitura.js', 'scripts/regras-projeto.mjs', 'test/regras-projeto.test.js',
+  'src/coordenacao-frentes.js', 'scripts/coordenar-frentes.mjs', 'test/coordenacao-frentes.test.js',
+  'src/linkedin-feed.js', 'src/linkedin-feed-sessao.js', 'src/linkedin-feed-config.js', 'src/linkedin-feed-entrada.js', 'scripts/linkedin-feed.mjs',
   'src/fontes-respostas.js', 'test/fontes-respostas.test.js',
   'src/registro-md.js', 'scripts/registrar-respostas.mjs', 'test/registro-md.test.js',
   'src/cota-apify.js', 'test/cota-apify.test.js',

@@ -2,7 +2,7 @@
 
 Você vai informar o que procura e adicionar seu currículo em um formulário no navegador. Depois, o Claude Code ou o Codex ajuda a preparar seu currículo base e concluir a configuração.
 
-Tenha seu currículo em PDF ou DOCX e acesso a um desses assistentes. A conexão com o LinkedIn é opcional e pode ficar para depois. Se preferir que o assistente faça a instalação e acompanhe a configuração desde o começo, use o [guia de instalação com agente](docs/instalar-com-agente.md).
+Tenha seu currículo em PDF ou DOCX e acesso a um desses assistentes. A captura assistida do LinkedIn é beta e opcional; se escolher testá-la, será obrigatório entrar no LinkedIn pelo painel do navegador antes de começar. Se preferir que o assistente faça a instalação e acompanhe a configuração desde o começo, use o [guia de instalação com agente](docs/instalar-com-agente.md).
 
 ## Abra o formulário
 
@@ -52,7 +52,11 @@ As **fontes de respostas** têm uma escolha separada do quadro de vagas. O assis
 
 A rodada recorrente começa **desligada**. Se você a escolher, a tela de sucesso entregará as instruções ao assistente que crie uma tarefa no agendador nativo a cada 4 horas. A Apify deve executar no máximo uma vez por dia, mesmo que haja mais rodadas. O formulário grava a política local em `vagas/data/politica-autonomia.json`, mas não cria a tarefa. Ela depende de o computador e as conexões estarem disponíveis.
 
-A **atualização automática**, recomendada, tem um switch próprio. Quando ativada, as entradas de coleta consultam a release estável do GitHub antes de começar e só atualizam quando as proteções permitirem. Desligada, não consultam nem instalam releases nesse fluxo. A checagem agendada de releases é uma escolha separada.
+A opção **Verificar atualizações ao iniciar**, recomendada, tem um switch próprio. Quando ativada, consulta a versão estável antes de começar e pede sua confirmação antes de baixar e instalar, respeitando as proteções. Desligada, não consultam nem instalam releases nesse fluxo. A checagem agendada de releases é uma escolha separada.
+
+Você pode escolher buscar vagas, trabalhar na fila existente ou fazer os dois em sequência. Com as duas frentes, o assistente conclui a busca, salva e confere seu quadro antes de iniciar candidaturas.
+
+A opção **Testar captura do LinkedIn (beta)** vem desligada. As consultas usam seus cargos e sua profissão. O percurso leva 15 minutos em Vagas, 12 em Postagens e 3 no Feed, contando atividade observada. O login no LinkedIn é obrigatório para os três métodos: entre diretamente no painel local e avise quando terminar. O assistente confere a sessão e o filtro antes de iniciar. Sem login, a captura aguarda e as demais fontes continuam. O Feed depende da sua conta e não oferece filtro por cargo.
 
 ## 7. Inclua vagas do LinkedIn pela Apify, se quiser
 
