@@ -51,8 +51,7 @@ if (apify.modo(apifyOpcoes) !== 'desligado') {
 }
 const FONTES = fontesAtivas(TODAS, perfil);
 if (perfil._configurado !== true) {
-  console.log('\nAVISO: o perfil ainda nao foi configurado. A rodada roda com os valores de exemplo.');
-  console.log('       Abra o Claude Code ou o Codex nesta pasta e siga o ONBOARDING.md, ou rode: npm run onboarding\n');
+  throw new Error('PERFIL_NAO_CONFIGURADO: conclua o onboarding humano no HTML e a preparação do currículo com o assistente.');
 }
 const forcar = process.argv.includes('--forcar');
 // O DuckDuckGo NAO esta morto: ele rate-limita. Entrega nas 2-3 primeiras

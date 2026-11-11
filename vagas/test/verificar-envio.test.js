@@ -1,3 +1,4 @@
+import { criarSessaoFormulario } from '../src/onboarding-humano.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { avaliarPrecondicoes } from '../src/verificar-envio.js';
@@ -61,6 +62,10 @@ test('snapshot Notion rejeita status desconhecido antes de alterar o espelho', (
 test('verificarEnvio lê o espelho Notion sem abrir o quadro local', () => {
   const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
   const dir = mkdtempSync(join(raiz, 'data', 'teste-verificar-'));
+  // Passagem sintética apenas na fixture; não configura a instalação real.
+  const formulario = criarSessaoFormulario(dir);
+  for (let passo = 1; passo <= 7; passo++) formulario.registrarPasso(passo);
+  formulario.confirmar(true);
   try {
     writeFileSync(join(dir, 'fonte-estado.json'), JSON.stringify({ fonte: 'notion', databaseId: 'db-ficticia' }));
     writeFileSync(join(dir, 'notion.json'), JSON.stringify({ versao: 1, fonte: 'notion', databaseId: 'db-ficticia',

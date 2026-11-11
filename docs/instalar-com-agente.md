@@ -16,7 +16,7 @@ A instalação verifica o ambiente e abre o formulário no navegador. Se aparece
 
 ## Conclua a configuração com o assistente
 
-O formulário local abre com `cd vagas && npm start`. Ele grava respostas e arquivos nesta instalação. Na tela final, copie a instrução específica das escolhas feitas e envie ao assistente. Se escolher Notion, informe o ID da database no formulário e conecte o Notion na ferramenta do assistente. A escolha do Chrome apenas pede a configuração posterior de candidaturas assistidas; ela não autoriza o envio de formulários.
+Você deve ler, preencher e confirmar o formulário pessoalmente. A IA deve aguardar e não pode automatizar nem simular essa etapa. A exigência também vale para instalações existentes sem registro humano. O formulário local abre com `cd vagas && npm start`. Ele grava respostas e arquivos nesta instalação. Na tela final, copie a instrução específica das escolhas feitas e envie ao assistente. Se escolher Notion, informe o ID da database no formulário e conecte o Notion na ferramenta do assistente. A escolha do Chrome apenas pede a configuração posterior de candidaturas assistidas; ela não autoriza o envio de formulários.
 
 Se ativar a autonomia, a instrução final pede ao **agendador nativo do assistente** uma tarefa a cada 4 horas, usando `vagas/RODADA-DIARIA.md` como fonte do processo e limitando a Apify a uma execução por dia. O Node não cria agendamento. A tarefa depende da disponibilidade do computador, do assistente e das conexões. Confirme que ela foi criada e confira o próximo horário mostrado pelo assistente.
 

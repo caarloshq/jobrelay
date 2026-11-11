@@ -1,3 +1,4 @@
+import { exigirOnboardingHumano } from './onboarding-humano.js';
 // Entradas com rede ou múltiplas gravações adquirem posse antes do primeiro
 // efeito. Não há takeover por tempo; outro run ativo exige reconciliação.
 import { DIR_DADOS } from './config.js';
@@ -7,6 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { hoje } from './util.js';
 
 export function entrarEscritor(nome) {
+  exigirOnboardingHumano(DIR_DADOS);
   const dia = hoje();
   const diaBackup = new Date().toISOString().slice(0, 10);
   const entradas = {

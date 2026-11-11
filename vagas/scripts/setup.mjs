@@ -4,6 +4,7 @@ import { verificarVersaoGit, formatarVersaoGit } from '../src/versao-git.js';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { concluido } from '../src/onboarding-humano.js';
 import { RAIZ, DIR_DADOS, perfil } from '../src/config.js';
 
 console.log(formatarVersaoGit(await verificarVersaoGit({ cwd: RAIZ })));
@@ -50,7 +51,8 @@ try {
 
 // Primeiro uso: o perfil ainda e o de exemplo, entao o formulario de onboarding
 // abre sozinho no navegador. Quem ja configurou nao ve isto.
-if (perfil._configurado !== true && !process.argv.includes('--sem-navegador')) {
+if (!concluido(DIR_DADOS)) console.log('Onboarding humano obrigatório. --sem-navegador só evita abrir a aba; não dispensa o HTML. Rode npm start.');
+if ((perfil._configurado !== true || !concluido(DIR_DADOS)) && !process.argv.includes('--sem-navegador')) {
   console.log('\nPerfil ainda nao configurado: abrindo o formulario de onboarding no navegador...\n');
   execFileSync(process.execPath, [join(RAIZ, 'scripts', 'onboarding.mjs'), '--abrir'], { stdio: 'inherit' });
 }

@@ -1,3 +1,4 @@
+import { exigirOnboardingHumano } from './onboarding-humano.js';
 // Verificação local antes de qualquer interação de candidatura. O retorno não
 // arbitra navegador nem substitui a conferência do anúncio e do formulário.
 import { DIR_DADOS } from './config.js';
@@ -30,6 +31,7 @@ export function avaliarPrecondicoes({ vaga, card, autorizado, transmissao, fonte
 }
 
 export function verificarEnvio(idExterno, { agora = new Date() } = {}) {
+  exigirOnboardingHumano(DIR_DADOS);
   if (typeof idExterno !== 'string' || !idExterno.trim()) throw new Error('ID_OBRIGATORIO');
   const id = idExterno.trim();
   const { perfil } = lerFontesInstalacao();

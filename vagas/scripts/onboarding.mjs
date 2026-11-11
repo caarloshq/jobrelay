@@ -11,6 +11,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSy
 import { join, basename, extname } from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
+import { concluido, exigirOnboardingHumano, criarSessaoFormulario } from '../src/onboarding-humano.js';
 import { RAIZ, perfil, palavras } from '../src/config.js';
 import { DIR_DADOS } from '../src/config.js';
 import { configuracao as fonteConfigurada, selecionar as selecionarFonte } from '../src/fonte-estado.js';
@@ -123,7 +125,7 @@ export function estado() {
     { n: 7, nome: 'Apify (LinkedIn)', ok: Boolean(process.env.APIFY_TOKEN), detalhe: process.env.APIFY_TOKEN ? (process.env.APIFY_TASK ? 'token presente; busca pela sua Task' : 'token presente; busca de config/linkedin.json') : 'sem token: a fonte LinkedIn fica de fora até você colar APIFY_TOKEN no vagas/.env' },
   ];
   const proximo = blocos.find((b) => !b.ok && b.n !== 7) || (blocos[6].ok ? null : blocos[6]);
-  return { configurado: perfil._configurado === true, blocos, proximo, idioma, brutos, extraidos };
+  return { humano: concluido(DIR_DADOS), configurado: perfil._configurado === true && concluido(DIR_DADOS), blocos, proximo, idioma, brutos, extraidos };
 }
 
 function imprimir() {
@@ -133,14 +135,17 @@ function imprimir() {
   for (const b of e.blocos) {
     console.log(`[${b.ok ? '  ok  ' : ' falta'}] ${String(b.n)}. ${b.nome.padEnd(30)} ${b.detalhe}`);
   }
+  if (!e.humano) console.log('Onboarding humano obrigatório: rode npm start e preencha o HTML pessoalmente, mesmo se já tiver configurado antes.');
   console.log('');
-  if (e.proximo) console.log(`Próximo bloco: ${e.proximo.n}. ${e.proximo.nome}`);
+  if (!e.humano) console.log('Próxima etapa: abra npm start e confirme seu onboarding no HTML.');
+  else if (e.proximo) console.log(`Próximo bloco: ${e.proximo.n}. ${e.proximo.nome}`);
   else if (!e.configurado) console.log('Tudo respondido. Feche com: npm run onboarding -- --concluir');
   else console.log('Onboarding concluído. Rode: npm run doctor && npm run rodada');
   console.log('');
 }
 
 function concluir() {
+  exigirOnboardingHumano(DIR_DADOS);
   const e = estado();
   const faltando = e.blocos.filter((b) => !b.ok && b.n !== 7);
   if (faltando.length) {
@@ -320,12 +325,14 @@ function salvarPasso(passo, d = {}) {
 }
 
 function abrir() {
+  const sessao = criarSessaoFormulario(DIR_DADOS);
+  const token = randomUUID();
   const TIPOS = { '.html': 'text/html; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml' };
   const servidor = createServer((req, res) => {
     const url = new URL(req.url, `http://127.0.0.1:${PORTA}`);
     const json = (code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
     if (req.method === 'GET' && url.pathname === '/') {
-      res.writeHead(200, { 'content-type': TIPOS['.html'] }); res.end(readFileSync(join(DIR_REPO, 'onboarding', 'index.html'))); return;
+      res.writeHead(200, { 'content-type': TIPOS['.html'] }); res.end(readFileSync(join(DIR_REPO, 'onboarding', 'index.html'), 'utf8').replace('</head>', `<meta name="onboarding-sessao" content="${token}"></head>`)); return;
     }
     if (req.method === 'GET' && url.pathname.startsWith('/img/')) {
       const alvo = join(DIR_REPO, 'docs', url.pathname.replace(/\.\./g, ''));
@@ -333,11 +340,23 @@ function abrir() {
       res.writeHead(200, { 'content-type': TIPOS[extname(alvo)] || 'application/octet-stream' }); res.end(readFileSync(alvo)); return;
     }
     if (req.method === 'GET' && url.pathname === '/api/estado') return json(200, estadoParaTela());
-    if (req.method === 'POST' && url.pathname === '/api/salvar') {
+    if (req.method === 'POST' && ['/api/salvar', '/api/confirmar'].includes(url.pathname)) {
+      const origens = [`http://localhost:${PORTA}`, `http://127.0.0.1:${PORTA}`];
+      if (!origens.includes(req.headers.origin) || req.headers['x-onboarding-sessao'] !== token) return json(403, { erro: 'Abra e preencha o formulário HTML local pessoalmente.' });
       let corpo = '';
       req.on('data', (c) => { corpo += c; if (corpo.length > 60 * 1024 * 1024) req.destroy(); });
       req.on('end', () => {
-        try { const { passo, dados } = JSON.parse(corpo); salvarPasso(Number(passo), dados); json(200, { ok: true, estado: estadoParaTela() }); }
+        try {
+          const payload = JSON.parse(corpo);
+          if (url.pathname === '/api/confirmar') sessao.confirmar(payload.confirmadoPelaPessoa);
+          else {
+            const passo = Number(payload.passo);
+            sessao.validarPasso(passo);
+            salvarPasso(passo, payload.dados);
+            sessao.registrarPasso(passo);
+          }
+          json(200, { ok: true, estado: estadoParaTela() });
+        }
         catch (e) { json(e.validacao ? 422 : 400, { erro: String(e.message || e) }); }
       });
       return;

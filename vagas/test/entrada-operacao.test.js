@@ -1,3 +1,4 @@
+import { criarSessaoFormulario } from '../src/onboarding-humano.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, rmSync } from 'node:fs';
@@ -11,6 +12,10 @@ const raiz = join(vagas, 'data', 'testes-entrada');
 test('coleta recebe concessão exata para cache, quadro, backup e rodada', t => {
   mkdirSync(raiz, { recursive: true });
   const dados = mkdtempSync(join(raiz, 'coleta-'));
+  // Passagem sintética apenas na fixture; não configura a instalação real.
+  const formulario = criarSessaoFormulario(dados);
+  for (let passo = 1; passo <= 7; passo++) formulario.registrarPasso(passo);
+  formulario.confirmar(true);
   t.after(() => rmSync(dados, { recursive: true, force: true }));
   const codigo = `
     import { entrarEscritor } from './src/entrada-operacao.js';
