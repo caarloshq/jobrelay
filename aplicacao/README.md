@@ -83,6 +83,9 @@ ativo se ainda houver trabalho autorizado ou decisão necessária pendente.
 3. Gerar ou revalidar o currículo pela skill `adapt-resume`, com a descrição da
    vaga e as regras atuais. Nome e idioma de um PDF antigo não comprovam sua
    adequação. Não usar versão que falhe na revisão atual.
+   O currículo só sai com **nota de ATS de 80% ou mais** contra o anúncio salvo em
+   `vaga.txt` (`verificar_resume.py --vaga`). O método para subir a nota está na skill,
+   seção Como subir a nota de ATS; dúvida sobre um fato vai para o bloco de perguntas.
 4. Preparar as respostas com fontes e registrar o texto exato localmente conforme
    `RESPOSTAS.md`. Pergunta sobre a empresa pode ser pesquisada e rascunhada para
    você conferir; não inventar opinião pessoal. Reunir dúvidas necessárias.

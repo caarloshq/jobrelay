@@ -88,7 +88,26 @@ python3 verificar_resume.py base_resume_pt.pdf base_content_pt.json
    python3 verificar_resume.py "<saída.pdf>" builds/<empresa>/content.json
    ```
    Ele checa páginas ≤ 2, texto extraível por ATS, zero travessão, os números de `numeros_travados`, e se alguma data é mais larga que a coluna. Exit 1 se falhar. **Cole a saída** ao entregar.
+
+   **Nota de ATS: gate obrigatório em todo currículo de vaga.** Salvar o anúncio em `builds/<empresa>/vaga.txt` e rodar:
+   ```
+   python3 verificar_resume.py "<saída.pdf>" builds/<empresa>/content.json --vaga builds/<empresa>/vaga.txt
+   ```
+   O verificador mede a nota (porcentagem dos termos do anúncio presentes no PDF), sem contar benefícios, apresentação da empresa e aviso legal. Reprova abaixo de 80% (a faixa que os scanners de mercado recomendam vai de 75% a 90%) ou quando sobra termo ausente sem justificativa. Termo que não é fato vai para `decisoes.json`, campo `ausentesJustificados` (`{"termo": "motivo"}`), e continua contando contra a nota. Termo que o medidor pegou mas não é requisito vai para `naoRequisito` (lista) e sai da conta. Anúncio sem termo medido reprova. Para subir a nota, seguir [Como subir a nota de ATS](#como-subir-a-nota-de-ats).
 7. **Nomear e salvar**: `<Seu Nome> - <Seu Cargo> - <Empresa>.pdf` dentro de `Curriculo/`. Apresentar antes de considerar pronto.
+
+## Como subir a nota de ATS
+
+A função desta skill é levar o currículo base à maior nota de ATS honesta para a vaga. Não inventa experiência: adapta palavra, ordem e ênfase.
+
+1. **Listar os termos do anúncio** a partir da lista AUSENTE do verificador, olhando requisitos, responsabilidades e diferenciais.
+2. **Separar fato de não fato.** Termo confirmado na base entra; o resto vai para `ausentesJustificados` e para os gaps da vaga. Expressão de `nunca_citar` nunca entra, mesmo pedida pela vaga.
+3. **Usar a palavra exata do anúncio** quando ela descreve o mesmo fato da base ("times multidisciplinares" no lugar de "produto e engenharia"). Sigla e forma longa juntas quando o anúncio usa uma delas.
+4. **Pôr o termo onde se lê primeiro:** título, resumo, competências e ferramentas. Bullets mudam só de redação, nunca de fato.
+5. **Respeitar o teto de 2 páginas:** cada termo novo pede um corte de algo que a vaga não pede.
+6. **Dúvida sobre um fato vira pergunta**, no bloco de perguntas da rodada, nunca suposição.
+
+Acima de 95% tende a parecer texto entupido de palavra-chave. Os portais não publicam a régua de cada um; a palavra exata do anúncio é o que vale em todos.
 
 ## Mapa de tema → o que costuma acionar
 
