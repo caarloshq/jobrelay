@@ -93,7 +93,7 @@ if (!problemas) console.log('  nenhum. ok');
 // Fontes de candidatura versionáveis precisam permanecer modelos neutros no
 // repositório público. O histórico literal começa vazio e não pode ser publicado.
 const MODELOS_NEUTROS = {
-  'aplicacao/RESPOSTAS.md': '7840caa0fabb81f0ee8b9e5e08e39836c7c92c9d6f567980bdd33644e1dafc4b',
+  'aplicacao/RESPOSTAS.md': 'af0c0336d51f53a9759f6f58d1c6f83c3e6d3b08f0c72a56d027e3ba09d8a573',
   'aplicacao/PERFIL.md': 'af2ba3c0f4b02ad219b8f2377daab2c005ddd0d9c99d0405151cf7be49d110f2',
   'vagas/data/perguntas.json': '3b35f5b85d841fc195b01e9bb2ee0d1605a5dd2df9d154e7423ea67b02abe874',
   'vagas/config/perfil-candidatura.json': 'b62c0c3108e464611ec19a66ef784466ff15b02bdc453a1560bd38fc818a6dbc',
