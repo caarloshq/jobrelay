@@ -92,6 +92,19 @@ test('pendências vêm primeiro em ambas as fontes sem alterar ordem do banco', 
   assert.deepEqual(lerFontes(fontes), origem);
 });
 
+test('Arsenal de entrevista fecha RESPOSTAS.md e texto livre nele não altera o banco', () => {
+  const origem = exemplo();
+  const fontes = renderizarFontes(origem);
+  assert.ok(fontes.respostas.indexOf('## Respostas disponíveis') < fontes.respostas.indexOf('# Arsenal de entrevista'));
+  assert.ok(!fontes.perfil.includes('# Arsenal de entrevista'));
+  const editado = fontes.respostas + '\n## 1. Fale sobre você\n\n> Resposta em fala, escrita a partir das palavras da pessoa.\n';
+  assert.deepEqual(lerFontes({ ...fontes, respostas: editado }), origem);
+  const anterior = renderizarFontes(origem, { arsenal: false });
+  assert.ok(!anterior.respostas.includes('# Arsenal de entrevista'));
+  assert.equal(anterior.perfil, fontes.perfil);
+  assert.deepEqual(lerFontes(anterior), origem);
+});
+
 test('JSON embutido recusa chave repetida inclusive em metadados aninhados', () => {
   const fontes = renderizarFontes(exemplo());
   const respostas = fontes.respostas.replace('"fonte": "exemplo#origem",', '"fonte": "exemplo#origem",\n    "fonte": "fonte-falsa",');

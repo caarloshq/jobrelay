@@ -44,3 +44,20 @@
 
 
 ## Respostas disponíveis
+
+
+# Arsenal de entrevista
+
+Base de respostas de entrevista e de perguntas abertas de candidatura: trajetória, projetos, forma de trabalhar e motivação. Junto com o currículo, é daqui que saem as respostas abertas das candidaturas. Pergunta aberta sem resposta é registrada no banco e aparece em Respostas pendentes, no topo deste arquivo. Quando você responde, a resposta é gravada nesse registro pelo fluxo normal, e a versão em fala entra no fim desta seção, depois da última pergunta numerada (a primeira vai logo após Regras de uso). Dados objetivos, como pretensão, data de início e respostas de sim ou não, ficam no Perfil.
+
+Formato de cada pergunta:
+
+- Título `## N. <pergunta>`, com a pergunta como um entrevistador faria.
+- Resposta em fala, em primeira pessoa, num bloco de citação (`> `). Parágrafos curtos.
+- Escrita a partir das suas palavras e passada pela revisão de escrita (Skills/review-escrita) antes de ser usada.
+- Se já existe uma pergunta equivalente, completar a resposta dela em vez de criar outra.
+- Não use blocos de código com etiqueta `jobrelay` nesta seção: eles são reservados aos dados do arquivo.
+
+## Regras de uso
+
+Restrições factuais que valem para todas as respostas, como números que podem ou não ser citados.
