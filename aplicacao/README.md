@@ -327,6 +327,8 @@ que falta em cada uma para você fechar.**
 
 O maestro/aplicador salva no histórico literal somente perguntas e valores efetivamente preenchidos, inclusive em candidaturas em rascunho. Perguntas profissionais pendentes ficam na primeira seção de [RESPOSTAS.md](RESPOSTAS.md); campos objetivos pendentes ficam na primeira seção de [PERFIL.md](PERFIL.md), junto de fonte, escopo e estado. Não crie um terceiro arquivo editável de pendências. O revisor aponta lacunas antes da liberação; falha de registro bloqueia somente a candidatura afetada. A comparação com o formulário é responsabilidade do agente e não é automatizada pelo validador.
 
+Pergunta aberta (trajetória, projeto, forma de trabalhar, motivação) é respondida com o currículo e o [Arsenal de entrevista](RESPOSTAS.md#arsenal-de-entrevista). Antes de perguntar, procure no Arsenal uma resposta equivalente; se existir e o escopo servir, use. Sem resposta, registre a pergunta no banco como dissertativa, com resposta vazia: ela aparece em Respostas pendentes, no topo do arquivo. Quando a pessoa responder no terminal, grave a resposta nesse registro pelo fluxo normal, que a leva para Respostas disponíveis depois da aprovação, e copie a versão em fala para o fim do Arsenal, depois da última pergunta numerada (a primeira vai logo após Regras de uso), no formato descrito na seção. A versão em fala é escrita a partir das palavras dela e revisada com [review-escrita](../Skills/review-escrita/SKILL.md). Não apague nem edite à mão os blocos `jobrelay`. Dados objetivos continuam no Perfil.
+
 ---
 
 ## Protocolo de respostas
