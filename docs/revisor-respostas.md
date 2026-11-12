@@ -14,4 +14,4 @@ Rode `npm run validar:respostas -- --candidatura caminho.json` antes do próximo
 
 Veja [aplicação](../aplicacao/README.md) e [operação multiagente](../vagas/OPERACAO-MULTIAGENTE.md).
 
-O Revisor de candidatura não é o Agente de melhorias: este só é oferecido após a aplicação, depende de aceite próprio e executa correções enxutas verificadas. O Aplicador usa adapt-resume para o currículo; o Revisor confere arquivo extraível e a importação no portal, sem prometer nota de ATS.
+O Revisor de candidatura não é o Agente de melhorias: este só é oferecido após a aplicação, depende de aceite próprio e executa correções enxutas verificadas. O Aplicador usa adapt-resume para o currículo; o Revisor confere arquivo extraível e a importação no portal. Ele também revisa a qualidade do currículo antes do envio: nota de ATS de 80% ou mais na saída do verificador com `--vaga`, termos com a palavra exata do anúncio, nenhum fato fora da base ou do perfil, resumo que responde ao desafio da vaga e leitura clara para um recrutador. Reprovado em qualquer ponto, o currículo volta ao Aplicador com a lista do que refazer, e só segue depois de nova revisão.

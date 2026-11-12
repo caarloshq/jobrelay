@@ -5,8 +5,17 @@ Confere um curriculo gerado contra as regras invioláveis da skill.
 Uso:
     python3 verificar_resume.py "<arquivo.pdf>" [content.json] [--vaga <arquivo.txt>]
 
-Com `--vaga`, tambem reporta a COBERTURA: quais termos do anuncio aparecem no
-curriculo, quais aparecem so como sinonimo, e quais faltam.
+Com `--vaga`, mede a COBERTURA (a nota de ATS que da para medir aqui): quais
+termos do anuncio aparecem no curriculo, quais so como sinonimo, e quais faltam.
+Beneficios, "sobre a empresa" e aviso legal saem da conta, porque nao sao
+requisito. Desde 2026-11-11 a cobertura e gate: todo termo ausente precisa
+entrar no curriculo (se for fato da base ou do Perfil) ou ficar justificado em
+`decisoes.json`, campo `ausentesJustificados` ({"termo": "motivo"}, continua
+contando na nota), e a nota precisa ficar em NOTA_MINIMA ou acima. Termo que o
+medidor pegou mas nao e requisito vai para `naoRequisito` (lista) e sai da conta.
+Anuncio sem nenhum termo medido reprova. Uso:
+    python3 verificar_resume.py <pdf> <content.json> --vaga vaga.txt [--decisoes decisoes.json]
+Sem --decisoes, o script procura decisoes.json na pasta do content.json.
 
 Existe porque "ficou bom" nao e criterio. Cada regra aqui nasceu de um defeito
 real; o que a checagem nao cobre, alguem descobre depois de enviar.
@@ -51,6 +60,98 @@ apoiar apoio ajudar ajuda manter mantendo participar participacao
 ensure ensuring create creating build building help helping support
 """.split())
 
+# Nota minima de cobertura (porcentagem de termos do anuncio presentes no PDF).
+# Padrao do produto desde 2026-11-11: todo curriculo gerado sai com nota alta.
+NOTA_MINIMA = 80
+
+# Trechos do anuncio que nao sao requisito: entram na conta e derrubam a nota
+# sem motivo ("periodo previsto" dos beneficios, o nome do cliente, o aviso de
+# igualdade). Cada marcador abre um trecho ignorado ate o proximo marcador de
+# requisito. Comparacao em texto normalizado (sem acento, minusculo).
+MARCA_REQUISITO = [
+    "sobre a vaga", "sobre o cargo", "sobre a posicao", "descricao da vaga", "requisitos",
+    "responsabilidades", "o que voce vai", "o que voce precisa", "o que esperamos", "o que buscamos",
+    "qualificacoes", "no dia a dia", "seu desafio", "seus desafios", "atividades", "diferenciais",
+    "desejavel", "desejaveis", "necessarias", "vivencias", "habilidades", "conhecimentos",
+    "competencias", "sobre voce", "ingredientes", "about the role", "the role", "requirements",
+    "responsibilities", "qualifications", "what you ll", "what you will", "what we re looking for",
+    "what you bring", "what we expect", "nice to have", "you have", "you will", "must have",
+    "about you", "skills", "your impact", "key responsibilities",
+]
+MARCA_IGNORAR = [
+    "beneficios", "adicionais e programas", "o que oferecemos", "oferecemos", "sobre a empresa",
+    "sobre nos", "quem somos", "sobre a", "sobre o", "se interessou", "modelo de trabalho",
+    "regime de trabalho", "about us", "about the company", "who we are", "benefits", "perks",
+    "what we offer", "compensation", "equal opportunity", "we are an equal", "eeo",
+    "privacy notice", "aviso de privacidade", "diversidade e inclusao", "our values", "nossos valores",
+]
+# Com quebras de linha, cabecalho e uma linha curta que comeca pela marca. Sem
+# quebras (anuncio colado numa linha so), cabecalho e a marca seguida de
+# dois-pontos em ate 40 letras. Palavra solta no meio de frase ("os beneficios
+# do nosso produto") nunca abre nem fecha trecho.
+LIMITE_CABECALHO = 60
+# Se o corte deixar menos que isto do anuncio, ele errou: mede o texto inteiro.
+FRACAO_MINIMA = 0.30
+
+
+def _sem_acento(t):
+    t = unicodedata.normalize("NFD", str(t).lower())
+    return "".join(c for c in t if unicodedata.category(c) != "Mn")
+
+
+def _marca(texto, lista):
+    for m in lista:
+        if re.match(re.escape(m) + r"(?![a-z0-9])", texto):
+            return m
+    return None
+
+
+def _com_quebras(texto):
+    """Texto normalizado em que pontuacao vira " | ": um bigrama nunca junta o
+    fim de um item de lista com o comeco do proximo ("systems wireframes")."""
+    t = re.sub(r"[,.;:()|!?\n\r\t]+", " | ", texto)
+    t = re.sub(r"[^a-z0-9| ]+", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def so_requisitos(texto_vaga):
+    """Devolve o anuncio sem beneficios, apresentacao da empresa e aviso legal."""
+    bruto = _sem_acento(texto_vaga)
+    inteiro = _com_quebras(bruto)
+    linhas = [re.sub(r"[^a-z0-9:,.;()|]+", " ", l).strip() for l in bruto.splitlines() if l.strip()]
+    guardadas = []
+    if len(linhas) >= 3:
+        guardar = True
+        for l in linhas:
+            cabecalho = len(l) <= LIMITE_CABECALHO
+            if cabecalho and _marca(l, MARCA_REQUISITO):
+                guardar = True
+            elif cabecalho and _marca(l, MARCA_IGNORAR):
+                guardar = False
+                continue
+            if guardar:
+                guardadas.append(l)
+    else:
+        texto = re.sub(r"[^a-z0-9:,.;()|]+", " ", bruto)
+        marcas = []
+        for lista, requisito in ((MARCA_REQUISITO, True), (MARCA_IGNORAR, False)):
+            for m in lista:
+                padrao = r"(?<![a-z0-9])" + re.escape(m) + r"(?![a-z0-9])[a-z ]{0,40}:"
+                for x in re.finditer(padrao, texto):
+                    if not any(x.start() == pos for pos, _ in marcas):
+                        marcas.append((x.start(), requisito))
+        marcas.sort()
+        guardar, inicio = True, 0
+        for pos, requisito in marcas:
+            if guardar:
+                guardadas.append(texto[inicio:pos])
+            guardar, inicio = requisito, pos
+        if guardar:
+            guardadas.append(texto[inicio:])
+    saida = _com_quebras(" | ".join(guardadas))
+    return saida if len(saida) >= FRACAO_MINIMA * len(inteiro) else inteiro
+
+
 SINONIMOS_ARQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sinonimos.json")
 
 
@@ -76,7 +177,7 @@ def bigramas(palavras_originais):
     """
     saida = []
     for a, b in zip(palavras_originais, palavras_originais[1:]):
-        if a in PARADA or b in PARADA or len(a) < 3 or len(b) < 3:
+        if a in PARADA or b in PARADA or len(a) < 3 or len(b) < 3 or any(c.isdigit() for c in a + b):
             continue
         saida.append(f"{a} {b}")
     return saida
@@ -95,7 +196,13 @@ def termos_que_importam(texto_vaga, dados=None):
     isso nao aparece no PDF, e falha de enfase e conserta reordenando. Frequencia
     pura trazia "atuar", "garantindo" e "areas", que nao dizem nada.
     """
-    vaga = normalizar(texto_vaga)
+    alvos = _termos(so_requisitos(texto_vaga), dados)
+    if not alvos:
+        alvos = _termos(_com_quebras(_sem_acento(texto_vaga)), dados)
+    return sorted(alvos)
+
+
+def _termos(vaga, dados):
     palavras = vaga.split()
     alvos = set()
 
@@ -119,7 +226,7 @@ def termos_que_importam(texto_vaga, dados=None):
         if n >= 2 and len(alvos) < 30:
             alvos.add(frase)
 
-    return sorted(alvos)
+    return alvos
 
 
 def carregar_sinonimos():
@@ -195,12 +302,47 @@ def restricoes_candidatura(texto, dados=None):
     return falhas
 
 
+def _decisoes(decisoes_arq, conteudo):
+    caminho = decisoes_arq or (os.path.join(os.path.dirname(os.path.abspath(conteudo)), "decisoes.json") if conteudo else None)
+    if not caminho or not os.path.exists(caminho):
+        return {}
+    try:
+        with open(caminho, encoding="utf-8") as f:
+            j = json.load(f)
+    except ValueError:
+        return {}
+    return j if isinstance(j, dict) else {}
+
+
+def justificativas(decisoes_arq, conteudo):
+    """Termos ausentes que nao sao fato, com motivo: `ausentesJustificados`.
+    Continuam contando na nota: a vaga pede e o curriculo nao tem."""
+    j = _decisoes(decisoes_arq, conteudo).get("ausentesJustificados") or {}
+    if not isinstance(j, dict):
+        return {}
+    return {normalizar(k).strip(): v for k, v in j.items() if str(v).strip()}
+
+
+def nao_requisitos(decisoes_arq, conteudo):
+    """Termos que o medidor pegou mas nao sao requisito da vaga (`naoRequisito`,
+    lista): ruido de cabecalho ou de texto institucional. Saem da conta."""
+    j = _decisoes(decisoes_arq, conteudo).get("naoRequisito") or []
+    if isinstance(j, dict):
+        j = list(j)
+    return {normalizar(x).strip() for x in j if isinstance(x, str) and x.strip()}
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
 
     pdf = sys.argv[1]
+    decisoes_arq = None
+    if "--decisoes" in sys.argv:
+        i = sys.argv.index("--decisoes")
+        decisoes_arq = sys.argv[i + 1] if i + 1 < len(sys.argv) else None
+        del sys.argv[i:i + 2]
     vaga_arq = None
     if "--vaga" in sys.argv:
         i = sys.argv.index("--vaga")
@@ -246,16 +388,30 @@ def main():
     if vaga_arq:
         with open(vaga_arq, encoding="utf-8") as f:
             cobertos, sinonimos, ausentes = cobertura(f.read(), texto, dados)
+        ruido = nao_requisitos(decisoes_arq, conteudo)
+        cobertos = [c for c in cobertos if c not in ruido]
+        sinonimos = [s for s in sinonimos if s[0] not in ruido]
+        ausentes = [a for a in ausentes if a not in ruido]
         total = len(cobertos) + len(sinonimos) + len(ausentes)
-        print(f"\nCobertura do anuncio  {len(cobertos) + len(sinonimos)}/{total} termos")
+        nota = round(100 * (len(cobertos) + len(sinonimos)) / total) if total else 0
+        print(f"\nNota de ATS (cobertura do anuncio)  {nota}%  ({len(cobertos) + len(sinonimos)}/{total} termos)")
         if cobertos:
             print("  coberto      " + ", ".join(cobertos))
         if sinonimos:
             print("  so sinonimo  " + ", ".join(f"{t} (via {e})" for t, e in sinonimos))
+        justificados = justificativas(decisoes_arq, conteudo)
+        sem_motivo = [a for a in ausentes if a not in justificados]
         if ausentes:
             print("  AUSENTE      " + ", ".join(ausentes))
-            print("\n  Ausente NAO reprova. Se e algo que voce faz, reordene o que ja existe")
-            print("  para deixar visivel. Se nao e, vira linha em Gaps — nunca texto novo.")
+        if sem_motivo:
+            falhas.append("termo do anuncio fora do curriculo, sem justificativa: " + ", ".join(sem_motivo)
+                          + ". Se e fato da base ou do Perfil, colocar com a palavra do anuncio; se nao e, "
+                          "registrar em decisoes.json > ausentesJustificados e nos Gaps")
+        if not total:
+            falhas.append("anuncio sem termo medido: conferir se vaga.txt tem a descricao inteira da vaga")
+        elif nota < NOTA_MINIMA:
+            falhas.append(f"nota de ATS {nota}%, abaixo do minimo de {NOTA_MINIMA}%: usar a palavra exata "
+                          "do anuncio para tudo que e fato; se o que falta nao e fato, a vaga nao encaixa")
         print()
 
     print(f"{pdf}: {len(r.pages)} pagina(s)")
