@@ -1,6 +1,6 @@
 {
   "name": "jobrelay",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "private": true,
   "type": "module",
   "description": "JobRelay: busca de vagas, currículos e candidaturas com seu assistente de IA.",

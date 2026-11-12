@@ -17,7 +17,7 @@
     ["onboarding", "cadastro", "ativacao"],
     ["dashboard", "dashboards", "painel", "paineis"],
     ["accessibility", "acessibilidade", "wcag"],
-    ["journey", "jornada", "jornadas", "user journey", "mapa de jornada"],
+    ["journey", "jornada", "jornadas", "user journey", "mapa de jornada", "journeys", "user journeys", "jornadas do usuario"],
     ["metrics", "metricas", "indicadores", "kpi", "kpis"],
     ["conversion", "conversao", "taxa de conversao"],
     ["end to end", "ponta a ponta", "ciclo completo", "full cycle"],
