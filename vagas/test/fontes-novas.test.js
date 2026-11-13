@@ -13,7 +13,11 @@ test('Lever direto preserva listas, descrição, localidades e fatos desconhecid
   const v = PROVEDORES.lever.normalizar({ id: '123', text: 'Product Owner', description: '<p>Produto</p>', lists: [{text:'Requisitos',content:'<li>Backlog</li>'}], additionalPlain:'Benefícios', categories: { location:'Remote',allLocations:['Brazil','Remote'] }, hostedUrl:'https://jobs.lever.co/example/123' }, 'example');
   assert.match(v.descricao, /Produto Requisitos Backlog Benefícios/);
   assert.equal(v.local, 'Remote; Brazil');
-  assert.equal(v.remoto,null); assert.equal(v.publicadaEm,null); assert.equal(v.salarioBruto,null);
+  assert.equal(v.remoto,true); assert.equal(v.modelo,'remoto');
+  assert.ok(v.modalidadeEvidencias.some(e=>e.origem==='Lever'&&e.campo==='localizacao'&&e.valor==='Remote; Brazil'));
+  const desconhecida=PROVEDORES.lever.normalizar({text:'Product Owner',categories:{location:'Brazil'}},'example');
+  assert.equal(desconhecida.modelo,null);assert.equal(desconhecida.remoto,null);
+  assert.equal(v.publicadaEm,null); assert.equal(v.salarioBruto,null);
 });
 test('Greenhouse continua disponível junto de Lever', () => {
   assert.ok(PROVEDORES.greenhouse.url('example').includes('boards-api.greenhouse.io'));

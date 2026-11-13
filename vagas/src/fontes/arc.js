@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Arc — arc.dev/remote-jobs. Fonte PEQUENA e BOA, e a ordem dos adjetivos importa.
 //
 // ARMADILHA JA PAGA, medida em 2026-08-25: a pagina anuncia 9.193 vagas e mistura
@@ -130,7 +131,7 @@ export function paraIso(v) {
 export function paraVaga(j, empresa) {
   const link = urlPublica(j.urlString, j.randomKey);
   const paises = Array.isArray(j.requiredCountries) ? j.requiredCountries : [];
-  return {
+  return evidenciaModalidade({
     idExterno: `arc:${j.randomKey}`,
     fonte: NOME,
     camada: 'API',
@@ -154,18 +155,22 @@ export function paraVaga(j, empresa) {
     statusFonte: j.closed === true ? 'closed' : j.aasmState || j.state || null,
     encerrada: !estaAberta(j),
     validada: true,
-  };
+  }, {padraoRemoto:true});
 }
 
 export async function coletar() {
   const c = novoContador(NOME);
   const candidatas = new Map();
 
-  for (const rota of ROTAS) {
+  // /remote-jobs é a listagem geral já documentada neste adaptador; somente arcJobs.
+  // Uma página pública, sem promessa de cobertura integral nem slugs por profissão.
+  c.limiteListagens = 1;
+  c.cobertura = 'listagem geral, primeira pagina';
+  for (const rota of ['']) {
     c.consultadas++;
     let html = null;
     try {
-      html = await buscar(`${BASE}/remote-jobs/${rota}`, { texto: true, tentativas: 2, timeoutMs: 25000 });
+      html = await buscar(`${BASE}/remote-jobs${rota ? "/" + rota : ""}`, { texto: true, tentativas: 2, timeoutMs: 25000 });
     } catch {
       c.falhas++;
       await dormir(PAUSA_MS);
@@ -209,5 +214,5 @@ export async function coletar() {
     await dormir(PAUSA_MS);
   }
 
-  return { vagas, contador: c };
+  return { vagas: vagas.map(v=>evidenciaModalidade(v,{localizacao:v.localizacaoBruta, padraoRemoto:true})), contador: c };
 }

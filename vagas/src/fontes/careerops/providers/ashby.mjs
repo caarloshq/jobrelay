@@ -209,6 +209,7 @@ export default {
     const jobs = Array.isArray(json?.jobs) ? json.jobs : [];
     return jobs.map(/** @param {any} j */ (j) => ({
       title: j.title || '',
+      workplaceType: j.workplaceType || null,
       url: j.jobUrl || '',
       company: entry.name,
       location: formatLocation(j),

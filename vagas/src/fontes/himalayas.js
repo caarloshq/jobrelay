@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Himalayas — remoto internacional. A melhor fonte de salario da lista:
 // traz minSalary, maxSalary e salaryCurrency estruturados, o que nenhuma
 // fonte BR faz. Tambem traz seniority e locationRestrictions.
@@ -30,7 +31,9 @@ export async function coletar() {
   const vagas = [];
   const vistos = new Set();
 
-  for (const termo of ['product designer', 'ux designer', 'design systems']) {
+  const termos=[...new Set([...(palavras.consultas_estreitas || []), ...(palavras.consultas_amplas || [])])];
+  c.limiteConsultas=10;c.termosConfigurados=termos.length;c.consultasTruncadas=termos.length>10;c.cobertura='primeira pagina, ate 100 itens por consulta';c.duplicadas=0;c.descartadas=0;
+  for (const termo of termos.slice(0, 10)) {
     c.consultadas++;
     let json = null;
     try {
@@ -44,12 +47,13 @@ export async function coletar() {
 
     for (const j of itens) {
       const id = j.guid || j.applicationLink || j.title;
-      if (!id || vistos.has(id)) continue;
-      if (!interessa(j.title)) continue;
+      if (!id) {c.descartadas++;continue;}
+      if (vistos.has(id)) {c.duplicadas++;continue;}
+      if (!interessa(j.title)) {c.descartadas++;continue;}
 
       const descricao = limparHtml(j.description || j.excerpt);
       const eleg = avaliarElegibilidade({ restricoes: j.locationRestrictions, descricao });
-      if (!eleg.entra) continue; // vaga que nao aceita LATAM nao serve
+      if (!eleg.entra) {c.descartadas++;continue;} // vaga que nao aceita LATAM nao serve
 
       vistos.add(id);
       const pub = j.pubDate ? new Date(Number(j.pubDate) * 1000) : null;
@@ -81,5 +85,5 @@ export async function coletar() {
     }
   }
 
-  return { vagas, contador: c };
+  return { vagas: vagas.map(v=>evidenciaModalidade(v,{localizacao:v.localizacaoBruta, padraoRemoto:true})), contador: c };
 }

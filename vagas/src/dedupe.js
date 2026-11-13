@@ -1,3 +1,4 @@
+import { fundirModalidade } from './modalidade.js';
 // Dedupe em quatro chaves.
 // A Remotar e ela mesma agregadora: o campo integrationSource dela devolve
 // inhire, recrutei e links de job-boards.greenhouse.io. Entao a mesma vaga
@@ -196,10 +197,11 @@ export function juntar(lista, { identidadeEstrita = false } = {}) {
     const canonico = idCanonico(v);
     const anuncio = chaveAnuncio(v);
     const requisicao = chaveRequisicao(v);
-    const forte = porId.get(v.idExterno)
+    const candidatoForte = porId.get(v.idExterno)
       || porCanonico.get(canonico)
       || (link ? porLink.get(link) : null)
       || (requisicao ? porRequisicao.get(requisicao) : null);
+    const forte = candidatoForte && !requisicoesConflitam(v,candidatoForte) ? candidatoForte : null;
     const fraco = anuncio ? candidatoPorAnuncio(porAnuncio, anuncio, v) : null;
     if (identidadeEstrita && !forte && fraco) {
       for (const [candidato, outro] of [[v, fraco], [fraco, v]]) {
@@ -222,7 +224,10 @@ export function juntar(lista, { identidadeEstrita = false } = {}) {
     }
 
     colisoes++;
-    if (prioridade(v.fonte) > prioridade(existente.fonte)) {
+    if (prioridade(v.fonte) > prioridade(existente.fonte) || (prioridade(v.fonte) === prioridade(existente.fonte) && `${v.fonte}|${v.idExterno}|${v.link}`.localeCompare(`${existente.fonte}|${existente.idExterno}|${existente.link}`) < 0)) {
+      for (const campo of ['descricao','salarioBruto','atualizadaEm','publicadaEm','cidade','estado']) if (!v[campo] && existente[campo]) v[campo]=existente[campo];
+      Object.assign(v, fundirModalidade(v,existente));
+      for (const mapa of [porId,porLink,porCanonico,porAnuncio,porRequisicao]) for (const [chave,valor] of mapa) if (valor===existente) mapa.set(chave,v);
       // a nova e mais direta: assume o lugar e herda o historico
       v.tambemVistoEm = [...new Set([...(existente.tambemVistoEm || []), existente.fonte])];
       v.idCanonico = canonico;
@@ -244,6 +249,7 @@ export function juntar(lista, { identidadeEstrita = false } = {}) {
       existente.idsAlternativos = [...new Set([
         ...(existente.idsAlternativos || []), v.idExterno, canonico,
       ].filter((x) => x && x !== existente.idExterno))];
+      Object.assign(existente,fundirModalidade(existente,v));
       // preenche lacunas com o que a fonte menos prioritaria trouxe
       for (const c of ['descricao', 'salarioBruto', 'atualizadaEm', 'publicadaEm', 'cidade', 'estado', 'modelo']) {
         if (!existente[c] && v[c]) existente[c] = v[c];

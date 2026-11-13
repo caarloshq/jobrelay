@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Importação opcional de Indeed/Glassdoor. Não faz scraping nem inicia Actors.
 // A única chamada externa permitida é GET de um dataset Apify já existente.
 import { open, lstat, realpath, readFile } from 'node:fs/promises';
@@ -89,7 +90,7 @@ export function normalizar(item, fonte) {
   const id = ler('id');
   const idSeguro = (typeof id === 'string' || typeof id === 'number') && /^[A-Za-z0-9_-]{1,200}$/.test(String(id)) ? String(id) : null;
   const descricao = texto(ler('description'));
-  return {
+  return evidenciaModalidade({
     idExterno: `${fonte.fonte.toLowerCase()}:${idSeguro || `url-${hash(normalizarLink(link))}`}`,
     fonte: fonte.fonte,
     camada: 'Importação',
@@ -105,7 +106,7 @@ export function normalizar(item, fonte) {
     atualizadaEm: null, prazo: null, salarioBruto: null, statusFonte: null,
     validada: false,
     descricaoPendente: !descricao,
-  };
+  }, { localizacao: texto(ler('location')) });
 }
 
 function inteiro(valor, padrao, maximo) {

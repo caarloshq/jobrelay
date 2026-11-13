@@ -250,7 +250,7 @@ export function parseWorkableWidget(payload, companyName) {
     seen.add(url);
 
     /** @type {any} */
-    const job = { title, url, location: formatLocation(raw), company: companyName };
+    const job = { title, url, location: formatLocation(raw), company: companyName,telecommuting:raw.telecommuting===true,workplaceType:raw.workplaceType||null };
 
     const description = toPlainText(raw?.description);
     if (description) job.description = description;

@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Fontes internacionais do career-ops, ligadas no nosso coletor.
 //
 // As fontes em si sao copia do upstream (careerops/CREDITO.md) e continuam
@@ -58,7 +59,7 @@ export function paraVaga(item, entrada, idProvedor, criterios = palavras) {
   if (!eleg.entra) return null;
 
   const pub = Number.isFinite(item.postedAt) ? new Date(item.postedAt) : null;
-  return {
+  return evidenciaModalidade({
     idExterno: `${idProvedor}:${idDaVaga(item.url, item.title)}`,
     fonte: entrada.name,
     camada: 'API',
@@ -79,7 +80,7 @@ export function paraVaga(item, entrada, idProvedor, criterios = palavras) {
     validada: true,
     elegibilidadeLatam: eleg.latam,
     elegibilidadeMotivo: eleg.motivo,
-  };
+  }, { localizacao: item.location,campos:[{campo:'workplaceType',valor:item.workplaceType},{campo:'workArrangement',valor:item.workArrangement},{campo:'telecommuting',valor:item.telecommuting===true?'remote':null}] });
 }
 
 async function carregarProvedor(id) {

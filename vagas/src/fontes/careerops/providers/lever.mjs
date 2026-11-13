@@ -89,6 +89,7 @@ export default {
     if (!Array.isArray(json)) return [];
     return json.map(j => ({
       title: j.text || '',
+      workplaceType: j.workplaceType || null,
       url: j.hostedUrl || '',
       company: entry.name,
       location: resolveLocation(j.categories),
