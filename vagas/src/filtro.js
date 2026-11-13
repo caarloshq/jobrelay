@@ -1,3 +1,4 @@
+import { evidenciaModalidade, modelosDaVaga } from './modalidade.js';
 // Filtro duro. Nada que passa daqui recebe nota; o que e descartado guarda o motivo.
 import { normalizarTexto, casaTermo } from './util.js';
 import { perfil, palavras } from './config.js';
@@ -142,11 +143,13 @@ export function pistasDaDescricao(descricao) {
 
 export function avaliarLocal(vaga) {
   const modelos = [
+    ...modelosDaVaga(evidenciaModalidade(vaga)),
     normalizarTexto(vaga.modelo),
     pistasDoTitulo(vaga.titulo).modelo,
     pistasDaDescricao(vaga.descricao).modelo,
   ].filter(Boolean);
-  const incompativel = modelos.find((m) => m === 'hibrido' || m === 'presencial');
+  const locais = modelos.filter(m=>m==='hibrido'||m==='presencial');
+  const incompativel = locais.find(m=>m==='hibrido'?perfil.aceita_hibrido!==true:perfil.aceita_presencial!==true) || locais[0];
   const sinalRemoto = modelos.includes('remoto') || vaga.remoto === true;
 
   if (incompativel) {
@@ -158,7 +161,8 @@ export function avaliarLocal(vaga) {
     if (aceita) {
       const cidade = normalizarTexto(perfil.cidade || '');
       if (!cidade) return { passa: true, modelo: incompativel };
-      const onde = normalizarTexto(`${vaga.cidade || ''} ${vaga.estado || ''} ${vaga.titulo || ''} ${(vaga.descricao || '').slice(0, 600)}`);
+      const onde = normalizarTexto(`${vaga.cidade || ''} ${vaga.estado || ''} ${vaga.localizacaoBruta || ''} ${(vaga.localizacaoEvidencias || []).map(e=>e.valor).join(' ')} ${vaga.titulo || ''} ${(vaga.descricao || '').slice(0, 600)}`);
+      if (vaga.conflitoLocalizacao && (vaga.localizacaoEvidencias || []).some(e=>!casaTermo(normalizarTexto(e.valor),cidade))) return {passa:false,motivo:'localizacao conflitante: conferir cidade'};
       if (casaTermo(onde, cidade)) return { passa: true, modelo: incompativel };
       return { passa: false, motivo: `${incompativel} fora de ${perfil.cidade}` };
     }

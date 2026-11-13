@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // UX Jobs — jobs.uxjobs.io. Agregador diario so de UX e produto: ~3.300 vagas
 // de Greenhouse, Ashby, Workday, Lever, JazzHR e outros.
 //
@@ -153,17 +154,16 @@ export function paraVaga(j, agora = Date.now()) {
   const origem = urlHttps(j.u);
   if (!origem) return null;
   if (typeof j.p === 'number' && (agora - j.p) / 864e5 > DIAS_MAX) return null;
-  if (j.wp === 'Hybrid' || j.wp === 'On-site') return null;
   const aceita = aceitaBrasil(j);
   if (aceita === false) return null;
   const remoto = j.rm === 1 || j.wp === 'Remote';
   // Sem sinal de remoto, so entra o que esta no Brasil: o filtro de modalidade
   // decide depois, pelo texto. Fora do Brasil sem remoto e presencial la fora.
-  if (!remoto && j.c !== 'BR') return null;
+  if (!remoto && j.c !== 'BR' && !['Hybrid','On-site'].includes(j.wp)) return null;
   if (j.sen === 'Junior / Entry') return null;
   const titulo = tituloLimpo(j);
   if (!interessa(titulo)) return null;
-  return {
+  return evidenciaModalidade({
     idExterno: `uxjobs:${j.s}`,
     fonte: NOME,
     camada: 'API',
@@ -190,7 +190,7 @@ export function paraVaga(j, agora = Date.now()) {
     salarioBruto: null,
     statusFonte: 'aberta',
     validada: true,
-  };
+  }, { campos:[{campo:'wp',valor:j.wp}], localizacao:j.l });
 }
 
 /** JobPosting em ld+json da pagina /jobs/<slug>/. Sem ele, null. */
@@ -274,6 +274,6 @@ export async function coletar({ fetchImpl = globalThis.fetch, pausaMs = PAUSA_MS
     await dormir(pausaMs);
   }
 
-  return { vagas, contador: c };
+  return { vagas: vagas.map(v=>evidenciaModalidade(v)), contador: c };
 }
 

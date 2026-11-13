@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Vagas Remotas — WordPress com WP Job Manager.
 // Achei pelo nome oficial no navegador: o link do post do LinkedIn era lnkd.in
 // atras de reCAPTCHA, e CAPTCHA nao se contorna.
@@ -105,5 +106,5 @@ export async function coletar() {
     await dormir(400);
   }
 
-  return { vagas: [...vistos.values()], contador: c };
+  return { vagas: [...vistos.values()].map(v=>evidenciaModalidade(v,{padraoRemoto:true})), contador: c };
 }

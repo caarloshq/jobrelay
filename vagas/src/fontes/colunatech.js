@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Coluna Tech — WordPress com wp-json aberto e robots.txt permissivo.
 // As vagas sao "post" comum, nao custom post type: nao existe /wp/v2/jobs aqui.
 //
@@ -61,5 +62,5 @@ export async function coletar() {
     });
   }
 
-  return { vagas, contador: c };
+  return { vagas: vagas.map(v=>evidenciaModalidade(v,{localizacao:v.localizacaoBruta, padraoRemoto:true})), contador: c };
 }

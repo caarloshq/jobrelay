@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // ATS internacionais, por empresa.
 //
 // Consulta quadros públicos por empresa; o filtro de cargo vem da configuração.
@@ -101,6 +102,15 @@ export const PROVEDORES = {
   },
 };
 
+// Os parsers públicos também preservam os campos explícitos fora do coletor.
+for (const provedor of Object.values(PROVEDORES)) {
+ const normalizar = provedor.normalizar;
+ provedor.normalizar = (bruto, ...args) => {
+  const vaga = normalizar(bruto, ...args);
+  return evidenciaModalidade(vaga, {origem:provedor.rotulo,campos:[{campo:'workplaceType',valor:bruto.workplaceType},{campo:'workArrangement',valor:bruto.workArrangement},{campo:'workplace_type',valor:bruto.workplace_type}],localizacao:vaga.local});
+ };
+}
+
 function montarSalarioAshby(comp) {
   const c = comp?.compensationTierSummary || comp?.summaryComponents?.[0];
   if (!c) return null;
@@ -161,7 +171,7 @@ export async function coletar(empresas) {
       const eleg = avaliarElegibilidade({ restricoes: v.local, descricao: v.descricao });
       if (!eleg.entra) continue; // vaga que nao aceita LATAM nao serve
 
-      vagas.push({
+      vagas.push(evidenciaModalidade({
         idExterno: `${provedor}:${v.id}`,
         fonte: p.rotulo,
         camada: 'API',
@@ -169,7 +179,9 @@ export async function coletar(empresas) {
         empresa: v.empresa,
         descricao: v.descricao,
         link: v.link,
-        cidade: v.local,
+        cidade: typeof bruto.city==='string' ? bruto.city : typeof bruto.location?.city==='string' ? bruto.location.city : null,
+        modalidadeEvidencias:v.modalidadeEvidencias,
+        localizacaoEvidencias:v.localizacaoEvidencias,
         estado: null,
         pais: v.local,
         modelo: v.modelo || (v.remoto ? 'remoto' : null),
@@ -182,7 +194,7 @@ export async function coletar(empresas) {
         validada: true,
         elegibilidadeLatam: eleg.latam,
         elegibilidadeMotivo: eleg.motivo,
-      });
+      }, { campos: [{campo:'workplaceType',valor:bruto.workplaceType},{campo:'workArrangement',valor:bruto.workArrangement},{campo:'workplace_type',valor:bruto.workplace_type}],localizacao:v.local }));
     }
     await dormir(250);
   }

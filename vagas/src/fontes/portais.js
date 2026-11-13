@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // Listagens públicas: descobre links verificáveis; não contorna login/CAPTCHA.
 // Sem descrição estruturada, o anúncio fica pendente para leitura antes de aplicar.
 import { readFileSync } from 'node:fs';
@@ -54,7 +55,7 @@ export function lerPagina(html, id) {
     const data = dataEstrita(j.datePosted);
     const local = j.jobLocation?.address;
     const remoto = j.jobLocationType === 'TELECOMMUTE' ? true : null;
-    const vaga = {
+    const vaga = evidenciaModalidade({
       idExterno: `${id}:${createHash('sha1').update(url).digest('hex').slice(0, 12)}`,
       fonte: portal.nome, camada: 'HTML público', titulo,
       empresa: j.hiringOrganization?.name || null, descricao, link: url,
@@ -64,7 +65,7 @@ export function lerPagina(html, id) {
       atualizadaEm: null, prazo: dataEstrita(j.validThrough), salarioBruto: null,
       statusFonte: null, validada: false, descricaoPendente: !descricao,
       elegibilidadeLatam: null, elegibilidadeMotivo: 'Conferir região e anúncio original antes de aplicar.',
-    };
+    }, { campos:[{campo:'jobLocationType',valor:j.jobLocationType}],localizacao:[local?.addressLocality,local?.addressRegion,local?.addressCountry].filter(Boolean).join(', ') });
     if (!vagas.has(url) || descricao) vagas.set(url, vaga);
   }
   for (const j of objetosJsonLd(String(html || ''))) adicionar(j.url, j.title, j);

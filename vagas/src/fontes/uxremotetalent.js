@@ -1,3 +1,4 @@
+import { evidenciaModalidade } from '../modalidade.js';
 // UX Remote Talent — uxremotetalent.com. Board 100% de UX/UI remoto, entao o
 // ruido de titulo e quase zero: e a mesma vantagem que faz a Vagas UX valer a
 // pena mesmo trazendo pouca vaga.
@@ -149,7 +150,7 @@ export function lerDetalhe(html) {
 
 export function paraVaga(i) {
   const aceita = aceitaBrasil(i.restricao);
-  return {
+  return evidenciaModalidade({
     idExterno: `uxremotetalent:${i.slug}`,
     fonte: NOME,
     camada: 'API',
@@ -172,7 +173,7 @@ export function paraVaga(i) {
     salarioBruto: null,
     statusFonte: 'aberta',
     validada: true,
-  };
+  }, {padraoRemoto:true});
 }
 
 export async function coletar() {
@@ -217,5 +218,5 @@ export async function coletar() {
     await dormir(PAUSA_MS);
   }
 
-  return { vagas: [...vistos.values()], contador: c };
+  return { vagas: [...vistos.values()].map(v=>evidenciaModalidade(v,{padraoRemoto:true})), contador: c };
 }
