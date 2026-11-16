@@ -2,7 +2,8 @@
 // JSON somente por arquivo/stdin. Não imprime conteúdo de pacotes nem respostas.
 import fs from 'node:fs';
 import path from 'node:path';
-import { operarLote, resumoColeta, resumoAplicacao, linhaProgressoAplicacao } from '../src/rodada-lote.js';
+import { configuracaoFeed } from '../src/linkedin-feed-config.js';
+import { operarLote, resumoColeta, resumoAplicacao, resumoColeta2Fora, linhaProgressoAplicacao } from '../src/rodada-lote.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 
 try {
@@ -16,11 +17,15 @@ try {
   }
   const args = entrada ? lerJsonSeguro(path.resolve(entrada)) : JSON.parse(fs.readFileSync(0, 'utf8'));
   if (!args || Array.isArray(args) || typeof args !== 'object') throw new Error('ENTRADA_INVALIDA');
-  const textos = { resumo_coleta: resumoColeta, resumo_aplicacao: resumoAplicacao, progresso_aplicacao: linhaProgressoAplicacao };
+  const textos = { resumo_coleta: resumoColeta, resumo_aplicacao: resumoAplicacao, resumo_coleta2_fora: resumoColeta2Fora, progresso_aplicacao: linhaProgressoAplicacao };
   if (Object.hasOwn(textos, acao)) {
     process.stdout.write(`${textos[acao](args)}\n`);
   } else {
     if (!dados) throw new Error('DADOS_OBRIGATORIOS');
+    // A coleta 2 existe só onde o LinkedIn assistido está ligado (config/linkedin-feed.json).
+    if (acao === 'iniciar' && args.coleta2Habilitada === undefined) {
+      args.coleta2Habilitada = configuracaoFeed().habilitado === true;
+    }
     const resultado = operarLote(dados, acao, args, { consultarFila: () => args.filaAtual,
       gateEnvio: () => args.gateEnvio });
     // O gate atestado na entrada não comprova navegador, status externo ou Submit.

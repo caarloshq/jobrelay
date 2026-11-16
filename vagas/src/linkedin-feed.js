@@ -43,7 +43,8 @@ function forte(a, b) {
 }
 
 function referencia(observacao) {
-  return { chave: observacao.chave || null, postOriginal: observacao.postOriginal || null,
+  return { chave: observacao.chave || null, idObservacao: observacao.chave || null,
+    postOriginal: observacao.postOriginal || null,
     evidencia: observacao.evidencia || null, origem: observacao.origem || 'LinkedIn feed' };
 }
 
@@ -57,6 +58,15 @@ function destino(observacao) {
   const resolvida = observacao.urlResolvida;
   if (texto(resolvida) && urlValida(resolvida) && observacao.evidenciaResolucao && !ehPost(resolvida)) return resolvida;
   return original;
+}
+
+function fonteDoJobOriginal(obs) {
+  const id = extrair(obs.postOriginal);
+  const fonte = obs.desfecho?.fonte;
+  if (id?.fonte !== 'LinkedIn' || !texto(fonte)) return false;
+  if (urlValida(fonte)) return extrair(fonte)?.idExterno === id.idExterno;
+  const numero = id.idExterno.slice('linkedin:'.length);
+  return !/[;\n]/.test(fonte) && fonte.replaceAll('\\', '/').split('/').at(-1) === `linkedin-${numero}.json`;
 }
 
 function revisaoCompleta(vaga, revisao) {
@@ -76,6 +86,46 @@ function revisaoCompleta(vaga, revisao) {
     && r.paisCompativel === true && r.modeloCompativel === true;
 }
 
+const criteriosDescarte = new Set(['modalidade_incompativel', 'inscricoes_encerradas',
+  'pais_incompativel', 'nivel_excluido', 'fora_perfil', 'escopo_incompativel',
+  'canal_indisponivel', 'decisao_rodada']);
+const criteriosPista = new Set(['sem_destino', 'ats_sem_suporte', 'identidade_nao_comprovada',
+  'conflito_factual', 'fonte_inacessivel', 'canal_incompleto', 'dados_incompletos']);
+
+function desfechoValido(obs, vaga, filtro = null) {
+  if (!obs || typeof obs !== 'object') return false;
+  const d = obs.desfecho;
+  const dia = Date.parse(`${d?.verificadoEm}T00:00:00Z`);
+  if (!d || d.idObservacao !== obs.chave || !texto(d.motivo) || !texto(d.evidencia)
+    || !texto(d.fonte) || !texto(d.alcance) || !/^\d{4}-\d{2}-\d{2}$/.test(d.verificadoEm || '')
+    || !Number.isFinite(dia) || new Date(dia).toISOString().slice(0, 10) !== d.verificadoEm) return false;
+  if (d.tipo === 'pista') return criteriosPista.has(d.criterio)
+    && texto(d.lacuna) && texto(d.proximaAcao);
+  if (d.tipo !== 'descartada' || !criteriosDescarte.has(d.criterio)) return false;
+  const r = obs.revisao || obs.vagaRevisada?.revisao || {};
+  if (d.criterio === 'modalidade_incompativel') return r.modeloCompativel === false;
+  if (d.criterio === 'inscricoes_encerradas') return r.aberta === false;
+  if (d.criterio === 'pais_incompativel') return r.paisCompativel === false;
+  if (d.criterio === 'canal_indisponivel') return r.canal === 'indisponivel';
+  if (d.criterio === 'escopo_incompativel') return r.escopoCompativel === false && texto(d.regraRef);
+  if (d.criterio === 'decisao_rodada') return d.alcance === 'rodada' && d.decisaoPor === 'pessoa';
+  if (d.criterio === 'nivel_excluido') return filtro?.passa === false
+    && (/^nivel acima:|^senioridade:/.test(filtro.motivo));
+  return filtro?.passa === false && filtro.motivo !== 'modelo de trabalho desconhecido';
+}
+
+export const validarDesfecho = (observacao, filtro = null) => desfechoValido(observacao, observacao?.vaga, filtro);
+
+function registrarDesfecho(resultado, obs, vaga = null, filtro = null) {
+  if (!desfechoValido(obs, vaga, filtro)) return false;
+  resultado[obs.desfecho.tipo === 'pista' ? 'pistas' : 'descartadas'].push({
+    ...problema(obs, obs.desfecho.motivo, vaga), desfecho: { ...obs.desfecho },
+    revisao: obs.revisao || obs.vagaRevisada?.revisao || null,
+    ...(filtro?.passa === false ? { motivoFiltro: filtro.motivo } : {}),
+  });
+  return true;
+}
+
 /**
  * @param {object} args observacoes: capturas; cache: cache.carregar();
  * estado: arquivo.carregar() atualizado. A observacao so vira `novas` com
@@ -87,16 +137,62 @@ export function prepararLote({ observacoes = [], cache = { vagas: {} }, estado =
   const existentes = entradasCache(cache).map((v) => ({ ...v, idsAlternativos: [...(v.idsAlternativos || [])] }));
   const quadro = estado?.vagas || {};
   const data = agora instanceof Date ? agora : new Date(agora);
+  const idsObservados = new Set();
 
   for (const obs of observacoes) {
-    if (!obs || typeof obs !== 'object') { resultado.pistas.push({ motivo: 'observacao invalida' }); continue; }
+    if (!obs || typeof obs !== 'object' || !texto(obs.chave) || idsObservados.has(obs.chave)) {
+      resultado.pendencias.push(problema(obs || {}, 'idObservacao ausente ou repetido')); continue;
+    }
+    idsObservados.add(obs.chave);
     const link = destino(obs);
-    if (!link) { resultado.pistas.push(problema(obs, 'sem link de candidatura verificavel')); continue; }
+    if (!link) {
+      if (obs.desfecho?.tipo !== 'pista' || !registrarDesfecho(resultado, obs))
+        resultado.pendencias.push(problema(obs, 'sem link de candidatura verificavel ou desfecho revisado'));
+      continue;
+    }
     if (texto(obs.urlResolvida) && (!obs.evidenciaResolucao || !urlValida(obs.urlResolvida) || ehPost(obs.urlResolvida))) {
       resultado.pendencias.push(problema(obs, 'resolucao de URL sem evidencia valida')); continue;
     }
     const id = extrair(link);
-    if (!id) { resultado.pistas.push(problema(obs, 'destino sem identidade reconhecida')); continue; }
+    if (!id) {
+      const original = extrair(obs.postOriginal);
+      let idQuadro = original?.fonte === 'LinkedIn' && quadro[original.idExterno]
+        ? original.idExterno : null;
+      if (!idQuadro) for (const vinculo of Array.isArray(obs.vinculos) ? obs.vinculos : []) {
+        if (!texto(vinculo?.evidencia) || !urlValida(vinculo.urlA) || !urlValida(vinculo.urlB)) continue;
+        const a = normalizarLink(vinculo.urlA);
+        const b = normalizarLink(vinculo.urlB);
+        const outro = a === normalizarLink(link) ? vinculo.urlB
+          : b === normalizarLink(link) ? vinculo.urlA : null;
+        const idVinculado = extrair(outro);
+        if (idVinculado && quadro[idVinculado.idExterno]) {
+          idQuadro = idVinculado.idExterno;
+          break;
+        }
+      }
+      if (idQuadro) {
+        const conhecida = aplicarArquivo({ idExterno: idQuadro },
+          estado, { identidadeEstrita: true });
+        if (conhecida.noNotion) {
+          resultado.duplicatas.push({ ...problema(obs, conhecida.concluida
+            ? 'ja concluida no quadro' : 'ja publicada no quadro'),
+          existente: idQuadro, status: conhecida.statusNotion, publicacaoPendente: false });
+          continue;
+        }
+      }
+      if (obs.desfecho?.tipo === 'descartada'
+        && ['modalidade_incompativel', 'nivel_excluido'].includes(obs.desfecho.criterio)
+        && fonteDoJobOriginal(obs)) {
+        const revisada = obs.vagaRevisada || {};
+        const vaga = { ...revisada, titulo: revisada.titulo || obs.titulo,
+          empresa: revisada.empresa || obs.empresa, link };
+        const filtro = avaliarFiltro({ ...vaga }, data);
+        if (registrarDesfecho(resultado, obs, vaga, filtro)) continue;
+      }
+      if (obs.desfecho?.tipo !== 'pista' || !registrarDesfecho(resultado, obs))
+        resultado.pendencias.push(problema(obs, 'destino sem identidade reconhecida ou desfecho revisado'));
+      continue;
+    }
 
     const revisada = obs.vagaRevisada || {};
     // IDs/links alternativos soltos nao provam equivalencia. So aceitamos
@@ -117,6 +213,7 @@ export function prepararLote({ observacoes = [], cache = { vagas: {} }, estado =
     const aliases = linksVinculados.map((l) => extrair(l)?.idExterno);
     const vaga = {
       ...revisada,
+      idObservacao: obs.chave,
       idExterno: id.idExterno,
       fonte: id.fonte,
       titulo: revisada.titulo || obs.titulo,
@@ -183,18 +280,36 @@ export function prepararLote({ observacoes = [], cache = { vagas: {} }, estado =
     const fracos = [...existentes, ...resultado.novas].filter((e) => e !== anteriorCache &&
       chaveAnuncio(vaga) && chaveAnuncio(vaga) === chaveAnuncio(e) && !requisicoesConflitam(vaga, e));
     if (fracos.length || vaga.conflitoIdentidade) {
+      if (obs.desfecho?.tipo === 'descartada'
+        && ['modalidade_incompativel', 'nivel_excluido'].includes(obs.desfecho.criterio)
+        && fonteDoJobOriginal(obs)) {
+        const filtro = avaliarFiltro({ ...vaga }, data);
+        if (registrarDesfecho(resultado, obs, vaga, filtro)) continue;
+      }
+      if (obs.desfecho?.tipo === 'pista' && desfechoValido(obs, vaga)) {
+        registrarDesfecho(resultado, obs, vaga); continue;
+      }
       resultado.pendencias.push({ ...problema(obs, 'empresa e titulo exigem conferencia de identidade', vaga),
         possiveisDuplicatas: unico([...fracos.map((v) => v.idExterno), ...(vaga.possiveisDuplicatas || [])]) });
       continue;
     }
     if (!texto(vaga.titulo) || !texto(vaga.empresa)) {
-      resultado.pistas.push(problema(obs, 'titulo ou empresa ausente', vaga)); continue;
+      if (obs.desfecho?.tipo !== 'pista' || !registrarDesfecho(resultado, obs, vaga))
+        resultado.pendencias.push(problema(obs, 'titulo ou empresa ausente ou desfecho revisado', vaga));
+      continue;
+    }
+    const filtro = avaliarFiltro({ ...vaga }, data);
+    if (obs.desfecho) {
+      if (!registrarDesfecho(resultado, obs, vaga, filtro))
+        resultado.pendencias.push(problema(obs, 'desfecho sem prova ou critério compatível', vaga));
+      continue;
     }
     if (!revisaoCompleta(vaga, obs.revisao || revisada.revisao)) {
       resultado.pendencias.push(problema(obs, 'leitura factual ou elegibilidade incompleta', vaga)); continue;
     }
-    const filtro = avaliarFiltro(vaga, data);
-    if (!filtro.passa) { resultado.descartadas.push(problema(obs, filtro.motivo, vaga)); continue; }
+    if (!filtro.passa) {
+      resultado.pendencias.push(problema(obs, `filtro rejeita sem desfecho revisado: ${filtro.motivo}`, vaga)); continue;
+    }
     vaga.score = calcular(vaga, data);
     vaga.senioridade = vaga.score.nivel;
     vaga.lida = true;

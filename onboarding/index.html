@@ -341,7 +341,7 @@
         <label class="opcao"><input type="radio" name="frentes" value="aplicacao"><span class="t">Trabalhar na fila existente</span><span class="d">Prepara candidaturas sem iniciar uma nova busca.</span></label>
         <label class="opcao"><input type="radio" name="frentes" value="ambas" checked><span class="t">Buscar, depois trabalhar na fila</span><span class="d">Primeiro salva e confere a busca, depois prepara as candidaturas.</span></label>
       </div>
-      <label class="toggle"><input type="checkbox" id="linkedin-feed" role="switch"><span class="switch" aria-hidden="true"></span><span><span class="t">Testar captura do LinkedIn (beta)</span><br><span class="d">Busca usando seus cargos: 15 min em Vagas, 12 em Postagens e 3 no Feed, após as outras fontes. O Feed depende da sua conta e pode trazer outros assuntos. Teste opcional. Exige login no LinkedIn pelo painel do navegador autorizado antes de começar.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="linkedin-feed" role="switch"><span class="switch" aria-hidden="true"></span><span><span class="t">Testar captura do LinkedIn (beta)</span><br><span class="d">Busca usando seus cargos: 15 min em Vagas, 12 em Postagens e 3 no Feed, depois das candidaturas e só se você disser sim à pergunta antes. O Feed depende da sua conta e pode trazer outros assuntos. Teste opcional. Exige login no LinkedIn pelo painel do navegador autorizado antes de começar.</span></span></label>
     </div>
     <div class="grupo">
       <label class="rotulo">O que fazer com candidaturas</label>
@@ -699,7 +699,7 @@
       ['Candidaturas', estado.politica?.modoCandidatura === 'chrome_assistido' ? 'configurar com o assistente' : 'só mapear e avaliar'],
       ['Rodada recorrente', estado.politica?.ativa ? 'a cada 4 horas' : 'desligada'],
       ['Frentes', valor('frentes') === 'ambas' ? 'Busca, depois fila' : valor('frentes') === 'coleta' ? 'Buscar vagas' : 'Fila existente'],
-      ['Captura do LinkedIn (beta)', $('#linkedin-feed').checked ? 'Sim, após as outras fontes' : 'Não'],
+      ['Captura do LinkedIn (beta)', $('#linkedin-feed').checked ? 'Sim, depois das candidaturas, com pergunta' : 'Não'],
       ['Checar atualização (pede confirmação)', estado.politica?.atualizarAutomaticamente !== false ? 'ativada' : 'desativada'],
       ['Apify', estado.env?.token ? (estado.env.task ? 'token e Task salvos' : 'conexão salva') : 'sem conexão Apify'],
       ['Próximas tarefas', 'preparar currículo e ajustar a busca'],

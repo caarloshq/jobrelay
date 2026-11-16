@@ -31,7 +31,7 @@ function enviar(f, id) {
 
 test('cinco vagas: perguntas 1/3/5 aguardam, 2/4 seguem antes do bloco final', t => {
   const f = fixture(t);
-  assert.throws(() => fixar(f, 'ats:2'), /COLETA_ANTES_APLICACAO/);
+  assert.equal(f.plano().podeAplicar, true);
   f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:captura-encerrada', integracaoRef: 'fixture:local-notion-conferidos', arquivosRef: 'fixture:arquivos-salvos' });
   for (const n of [1, 3, 5]) f.fazer('atualizar', { id: `ats:${n}`, estado: 'aguardando_pessoa', provaRef: `fixture:pergunta-${n}` });
   assert.equal(f.plano().podePerguntar, false);
@@ -160,13 +160,16 @@ test('gate externo pode recusar envio e hashes iguais de conteúdo não confunde
   assert.equal(f.plano().trabalhoIndependente.find(v => v.id === 'ats:A').estado, 'revisada');
 });
 
-test('ambas exigem coleta salva e conferida; impedimento não libera aplicação e parcial exige prova', t => {
+test('retomada confirmada avança com coleta pendente, sem fingir encerramento da coleta', t => {
   const f = fixture(t, ['ats:A']);
-  assert.equal(f.plano().podeAplicar, false);
-  assert.throws(() => f.fazer('atualizar', { id: 'ats:A', estado: 'preparando', provaRef: 'fixture:cedo' }), /COLETA_ANTES_APLICACAO/);
+  assert.equal(f.plano().podeAplicar, true);
+  assert.equal(f.plano().capturaPendente, true);
+  assert.equal(f.plano().podeEncerrar, false);
+  f.fazer('atualizar', { id: 'ats:A', estado: 'preparando', provaRef: 'fixture:retomada-confirmada' });
   assert.throws(() => f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:apenas-tempo' }), /PROVA_INTEGRACAO_OBRIGATORIA/);
   f.fazer('captura', { estado: 'impedida', provaRef: 'fixture:login' });
-  assert.equal(f.plano().podeAplicar, false);
+  assert.equal(f.plano().podeAplicar, true);
+  assert.equal(f.plano().capturaPendente, true);
   assert.throws(() => f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:parcial', integracaoRef: 'fixture:conferida' }), /PROVA_ARQUIVOS_OBRIGATORIA/);
   assert.throws(() => f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:parcial', integracaoRef: 'fixture:conferida', arquivosRef: 'fixture:salvos', cobertura: 'parcial' }), /LIMITE_COBERTURA_OBRIGATORIO/);
   f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:parcial', integracaoRef: 'fixture:destinos-validos-conferidos', arquivosRef: 'fixture:salvos', cobertura: 'parcial', limiteRef: 'fixture:fonte-inacessivel' });
@@ -281,4 +284,83 @@ test('CLI imprime resumos e progresso e devolve só o código de erro', () => {
   const e = rodar('progresso_aplicacao', { numero: 0, vaga: 'NAO-ECOAR-SEGREDO' });
   assert.notEqual(e.status, 0);
   assert.equal(e.stderr.trim(), '{"ok":false,"erro":"NUMERO_VAGA_INVALIDO"}');
+});
+
+
+test('coleta pendente não remove gates de revisão exata, confirmação e fonte da vaga', t => {
+  const f = fixture(t, ['ats:antiga']);
+  const pacoteHash = fixar(f, 'ats:antiga');
+  assert.throws(() => f.fazer('liberar_envio', { id: 'ats:antiga', pacoteHash }), /REVISAO_EXATA_OBRIGATORIA/);
+  assert.throws(() => f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash, provaRef: 'fixture:sem-aceite' }), /ACEITE_EXATO_OBRIGATORIO/);
+  assert.throws(() => fixar(f, 'ats:bruta'), /VAGA_FORA_DO_LOTE/);
+  assert.throws(() => f.fazer('integrar', { confirmadas: { ids: ['ats:bruta'], provaRef: 'fixture:so-cache' } }), /INTEGRACAO_NAO_CONFIRMADA_NA_FILA/);
+  f.fazer('revisar', { id: 'ats:antiga', pacoteHash, revisor: 'revisor-b', observacaoAlvoRef: 'fixture:formulario-atual', aprovada: true, provaRef: 'fixture:parecer' });
+  f.fazer('liberar_envio', { id: 'ats:antiga', pacoteHash });
+  assert.throws(() => f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash }), /CONFIRMACAO_EXTERNA_OBRIGATORIA/);
+  f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash, provaRef: 'fixture:recibo-simulado' });
+  assert.equal(f.plano().capturaPendente, true);
+  assert.equal(f.plano().podeEncerrar, false);
+  assert.throws(() => fixar(f, 'ats:antiga'), /VAGA_TERMINAL/);
+});
+
+test('planejamento coloca retomada bloqueada antes de nova confirmada sem fundir os IDs', t => {
+  const f = fixture(t, ['ats:antiga']);
+  f.fazer('atualizar', { id: 'ats:antiga', estado: 'bloqueada', provaRef: 'fixture:acesso-indisponivel' });
+  f.fila(['ats:nova', 'ats:antiga']);
+  assert.deepEqual(f.plano().naoPercorridas, ['ats:nova']);
+  f.fazer('integrar', { confirmadas: { ids: ['ats:nova'], provaRef: 'fixture:nova-salva-relida' } });
+  assert.deepEqual(f.plano().ordemAplicacao.map(v => v.id), ['ats:antiga', 'ats:nova']);
+  enviar(f, 'ats:nova');
+  assert.equal(f.plano().ordemAplicacao[0].id, 'ats:antiga');
+  assert.equal(f.plano().ordemAplicacao[0].estado, 'bloqueada');
+});
+
+
+test('prova livre não substitui ID presente na consulta atual da fila', t => {
+  const f = fixture(t, ['ats:antiga']);
+  f.fila([]);
+  assert.equal(f.plano().podeAplicar, false);
+  assert.throws(() => f.fazer('atualizar', { id: 'ats:antiga', estado: 'preparando', provaRef: 'fixture:so-um-texto' }), /VAGA_NAO_CONFIRMADA_NA_FILA/);
+  assert.throws(() => fixar(f, 'ats:antiga'), /VAGA_NAO_CONFIRMADA_NA_FILA/);
+  f.fila(['ats:antiga']);
+  assert.equal(f.plano().podeAplicar, true);
+  assert.ok(fixar(f, 'ats:antiga'));
+});
+
+
+test('recibo exato pode ser registrado após a vaga sair da fila ativa, sem reautorizar envio', t => {
+  const f = fixture(t, ['ats:antiga']);
+  const pacoteHash = fixar(f, 'ats:antiga');
+  f.fazer('revisar', { id: 'ats:antiga', pacoteHash, revisor: 'revisor-b', observacaoAlvoRef: 'fixture:formulario-atual', aprovada: true, provaRef: 'fixture:parecer' });
+  f.fazer('liberar_envio', { id: 'ats:antiga', pacoteHash });
+  f.fila([]);
+  assert.equal(f.plano().podeAplicar, false);
+  assert.throws(() => f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash: J, provaRef: 'fixture:recibo' }), /ACEITE_EXATO_OBRIGATORIO/);
+  assert.throws(() => f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash }), /CONFIRMACAO_EXTERNA_OBRIGATORIA/);
+  f.fazer('confirmar_envio', { id: 'ats:antiga', pacoteHash, provaRef: 'fixture:recibo-simulado-apos-retirada' });
+  assert.throws(() => fixar(f, 'ats:antiga'), /VAGA_TERMINAL/);
+  assert.equal(f.plano().capturaPendente, true);
+});
+
+
+test('perguntas da aplicação não aguardam captura, mas o ciclo e melhorias exigem sua prova', t => {
+  const f = fixture(t, ['ats:A', 'ats:B']);
+  f.fazer('atualizar', { id: 'ats:A', estado: 'aguardando_pessoa', provaRef: 'fixture:pergunta-A' });
+  assert.equal(f.plano().podePerguntar, false);
+  f.fazer('atualizar', { id: 'ats:B', estado: 'preparando', provaRef: 'fixture:campos-B' });
+  assert.equal(f.plano().podePerguntar, false);
+  f.fazer('atualizar', { id: 'ats:B', estado: 'bloqueada', provaRef: 'fixture:limite-B' });
+  assert.equal(f.plano().capturaPendente, true);
+  assert.equal(f.plano().podePerguntar, true);
+  assert.deepEqual(f.plano().perguntasPendentes.map(p => p.id), ['ats:A']);
+  f.fazer('perguntas', { estado: 'apresentada', provaRef: 'fixture:cartao-A' });
+  f.fazer('perguntas', { estado: 'impedida', provaRef: 'fixture:aguarda-resposta-A' });
+  assert.equal(f.plano().fronteiraOperacionalPronta, false);
+  assert.equal(f.plano().podeEncerrar, false);
+  assert.equal(f.plano().podeOferecerMelhorias, false);
+  assert.throws(() => f.fazer('encerrar', { provaRef: 'fixture:sem-captura' }), /FECHAMENTO_PENDENTE/);
+  assert.throws(() => f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:incompleta' }), /PROVA_INTEGRACAO_OBRIGATORIA/);
+  f.fazer('captura', { estado: 'encerrada', provaRef: 'fixture:captura', integracaoRef: 'fixture:integracao', arquivosRef: 'fixture:arquivos' });
+  assert.equal(f.plano().podeEncerrar, true);
+  assert.equal(f.plano().podeOferecerMelhorias, true);
 });

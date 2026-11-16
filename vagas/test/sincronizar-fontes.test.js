@@ -84,7 +84,18 @@ test('nenhum campo pessoal dos configs da origem é incluído no plano ou destin
   assert.deepEqual(gringas.fontes[0].builtin.queries, []);
   assert.equal(gringas.fontes[1].search, '');
   assert.deepEqual(lerJson(destino, 'config/fontes-portais.json').fontes, [{ id: 'vanhack', enabled: false }]);
+  assert.deepEqual(lerJson(destino, 'config/linkedin-feed.json'), { habilitado: false });
   assert.equal(lerJson(destino, 'config/catalogo-fontes.json').fontes[0].nome, 'Built In');
+});
+
+test('sincronizar feed preserva o opt-in existente do destino, sem importar o pessoal', t => {
+  const { origem, destino } = preparar(t);
+  gravar(origem, 'config/linkedin-feed.json', { habilitado: true });
+  const optin = '{ "habilitado": true }\n';
+  gravar(destino, 'config/linkedin-feed.json', optin);
+  const plano = planoFontes(origem, destino);
+  aplicarPlano(plano, destino);
+  assert.equal(readFileSync(join(destino, 'config/linkedin-feed.json'), 'utf8'), optin);
 });
 
 test('config de importações existente é preservado byte a byte, inclusive dataset e credenciais do destino', t => {

@@ -17,7 +17,7 @@ function fixture(t) {
   fazer.rota = () => planejar({ ...comum, agora: tempo(0) }).rotaAtual;
   return { comum, fazer, dirDados };
 }
-function iniciar(fazer) { return fazer('iniciar', 0, { browserLiberadoRef: 'checkpoint-browser-liberado' }); }
+function iniciar(fazer) { return fazer('iniciar', 0, { aceiteRef: 'fixture:aceite', browserLiberadoRef: 'checkpoint-browser-liberado' }); }
 function intervalo(fazer, inicio, fim, dono, rota = fazer.rota()) {
   return fazer('intervalo', fim, { rota, inicioEm: tempo(inicio), fimEm: tempo(fim), evidenciaInicio: `feed-${inicio}`, evidenciaFim: `feed-${fim}`, provaRef: `snapshot-${fim}` }, dono);
 }
@@ -27,10 +27,11 @@ test('primeira coleta reserva o dia; aplicação isolada e opt-out não criam se
   assert.deepEqual(planejar({ ...comum, frente: 'aplicacao', agora: tempo(0) }), { acao: 'desabilitada' });
   assert.deepEqual(planejar({ ...comum, habilitado: false, agora: tempo(0) }), { acao: 'desabilitada' });
   assert.equal(fs.existsSync(path.join(dirDados, 'linkedin-feed')), false);
-  assert.throws(() => fazer('iniciar', 0), /CAMPO_INVALIDO:browserLiberadoRef/);
+  assert.throws(() => fazer('iniciar', 0), /CAMPO_INVALIDO:aceiteRef/);
+  assert.throws(() => fazer('iniciar', 0, { aceiteRef: 'fixture:aceite' }), /CAMPO_INVALIDO:browserLiberadoRef/);
   const s = iniciar(fazer);
   assert.equal(planejar({ ...comum, agora: tempo(1) }).acao, 'retomar');
-  assert.throws(() => fazer('iniciar', 1, { browserLiberadoRef: 'outro' }, 'coletor-b'), /JANELA_JA_RESERVADA/);
+  assert.throws(() => fazer('iniciar', 1, { aceiteRef: 'fixture:aceite', browserLiberadoRef: 'outro' }, 'coletor-b'), /JANELA_JA_RESERVADA/);
   assert.throws(() => fazer('observar', 2, { observacao: { url: 'https://example.com' } }, 'coletor-b'), /POSSE_NEGADA/);
   assert.throws(() => executar({ ...comum, frente: 'aplicacao', acao: 'iniciar', dono: 'coletor-b', agora: tempo(3) }), /FRENTE_INVALIDA/);
   assert.equal(consultar({ ...comum, runId: s.runId }).dono, 'coletor-a');
@@ -60,8 +61,9 @@ test('checkpoints curtos contam atividade; pausa, espera e interrupção não co
   fazer('pausar', 90, { referencia: 'interrupcao' });
   assert.throws(() => intervalo(fazer, 90, 120), /CAPTURA_INATIVA/);
   assert.throws(() => fazer('retomar', 200, {}, 'coletor-b'), /POSSE_NEGADA/);
-  assert.throws(() => fazer('retomar', 200), /CAMPO_INVALIDO:browserLiberadoRef/);
-  fazer('retomar', 200, { browserLiberadoRef: 'browser-reconferido' });
+  assert.throws(() => fazer('retomar', 200), /CAMPO_INVALIDO:aceiteRef/);
+  assert.throws(() => fazer('retomar', 200, { aceiteRef: 'fixture:aceite' }), /CAMPO_INVALIDO:browserLiberadoRef/);
+  fazer('retomar', 200, { aceiteRef: 'fixture:aceite', browserLiberadoRef: 'browser-reconferido' });
   assert.throws(() => intervalo(fazer, 100, 160), /INTERVALO_INVALIDO/);
   for (let i = 0; i < 29; i++) intervalo(fazer, 200 + i * 60, 260 + i * 60);
   assert.equal(consultar({ ...comum, runId: s.runId }).segundosAtivos, 1800);
@@ -82,8 +84,8 @@ test('checkpoints curtos contam atividade; pausa, espera e interrupção não co
 test('guarda central recusa mutação sem posse quando operação principal está ativa', t => {
   const { comum, dirDados } = fixture(t);
   const { token } = operar(dirDados, 'iniciar', { dono: 'outro-controlador' });
-  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-a', agora: tempo(0), browserLiberadoRef: 'livre' }), /POSSE_NEGADA/);
-  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-a', agora: tempo(0), browserLiberadoRef: 'livre', token }), /TOKEN_EXPLICITO_NAO_ACEITO/);
+  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-a', agora: tempo(0), aceiteRef: 'fixture:aceite', browserLiberadoRef: 'livre' }), /POSSE_NEGADA/);
+  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-a', agora: tempo(0), aceiteRef: 'fixture:aceite', browserLiberadoRef: 'livre', token }), /TOKEN_EXPLICITO_NAO_ACEITO/);
   assert.equal(planejar({ ...comum, agora: tempo(0) }).acao, 'iniciar');
   operar(dirDados, 'encerrar', { token });
 });
@@ -110,10 +112,11 @@ test('liberação explícita permite outro dono retomar mesmo lote; virada de di
   const amanha = tempo(86400);
   assert.equal(planejar({ ...comum, agora: amanha }).runId, antigo.runId);
   assert.equal(planejar({ ...comum, agora: amanha }).acao, 'retomar');
-  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-b', agora: amanha, browserLiberadoRef: 'livre' }), /JANELA_JA_RESERVADA/);
-  assert.throws(() => executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, browserLiberadoRef: 'livre' }), /CAMPO_INVALIDO:handoffRef/);
-  assert.throws(() => executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, handoffRef: 'handoff' }), /CAMPO_INVALIDO:browserLiberadoRef/);
-  const retomada = executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, browserLiberadoRef: 'browser-novo', handoffRef: 'handoff-confirmado' });
+  assert.throws(() => executar({ ...comum, acao: 'iniciar', dono: 'coletor-b', agora: amanha, aceiteRef: 'fixture:aceite', browserLiberadoRef: 'livre' }), /JANELA_JA_RESERVADA/);
+  assert.throws(() => executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, aceiteRef: 'fixture:aceite', browserLiberadoRef: 'livre' }), /CAMPO_INVALIDO:handoffRef/);
+  assert.throws(() => executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, handoffRef: 'handoff' }), /CAMPO_INVALIDO:aceiteRef/);
+  assert.throws(() => executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, aceiteRef: 'fixture:aceite', handoffRef: 'handoff' }), /CAMPO_INVALIDO:browserLiberadoRef/);
+  const retomada = executar({ ...comum, acao: 'retomar', dono: 'coletor-b', agora: amanha, aceiteRef: 'fixture:aceite', browserLiberadoRef: 'browser-novo', handoffRef: 'handoff-confirmado' });
   assert.equal(retomada.runId, antigo.runId);
   assert.equal(retomada.dia, '2026-11-09');
   assert.equal(retomada.segundosAtivos, 60);
@@ -186,4 +189,21 @@ test('checkpoints fracionários preservam contagem por rota sem divergência dec
   assert.equal(plano.segundosAtivos, 0.3);
   assert.equal(plano.rotas[0].segundosAtivos, 0.3);
   assert.equal(plano.rotas[0].restantes, 899.7);
+});
+
+test('spec 015: abrir o LinkedIn exige aceiteRef, inclusive ao retomar sessão já ativa; integrar não exige', t => {
+  const { comum, fazer } = fixture(t);
+  assert.equal(planejar({ ...comum, agora: tempo(0) }).requerAceite, true);
+  const s = iniciar(fazer);
+  assert.equal(consultar({ ...comum, runId: s.runId }).aceiteRef, 'fixture:aceite');
+  assert.equal(planejar({ ...comum, agora: tempo(1) }).acao, 'retomar');
+  assert.equal(planejar({ ...comum, agora: tempo(1) }).requerAceite, true);
+  assert.throws(() => fazer('retomar', 2), /CAMPO_INVALIDO:aceiteRef/);
+  assert.equal(fazer('retomar', 2, { aceiteRef: 'fixture:aceite-2' }).estado, 'ativa');
+  for (let i = 0; i < 30; i++) intervalo(fazer, 10 + i * 60, 70 + i * 60);
+  fazer('concluir', 2000, { referencia: 'captura' });
+  const integrar = planejar({ ...comum, agora: tempo(2001) });
+  assert.equal(integrar.acao, 'integrar');
+  assert.equal('requerAceite' in integrar, false);
+  assert.equal(fazer('retomar', 2002).estado, 'capturada');
 });
