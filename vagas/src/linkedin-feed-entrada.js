@@ -7,8 +7,8 @@ export function entradaFeed({ dirDados = DIR_DADOS, frente = 'coleta', fuso = pr
   habilitado = configuracaoFeed().habilitado, agora } = {}) {
   const plano = planejar({ dirDados, frente, habilitado, fuso, agora });
   const instrucoes = {
-    iniciar: 'Primeira coleta do dia: o agente deve obter a liberação do navegador autorizado e executar a captura assistida. Siga coleta/LINKEDIN-FEED.md.',
-    retomar: 'Há captura parcial ou sob controle de outro dono. Consulte o status e retome somente após liberação explícita; não comece outra janela.',
+    iniciar: 'Coleta 2 (LinkedIn assistido): só depois da aplicação (ou, sem aplicação instalada, depois da coleta principal) e do sim da pessoa à pergunta "Quer continuar com a coleta 2 (LinkedIn assistido)?". Com o sim, obtenha a liberação do navegador autorizado e execute a captura. Siga coleta/LINKEDIN-FEED.md.',
+    retomar: 'Há captura parcial ou sob controle de outro dono. Pergunte à pessoa antes de abrir o LinkedIn de novo e retome somente após o sim e a liberação explícita; não comece outra janela.',
     integrar: 'A captura já terminou. Retome triagem, deduplicação e confirmação da fila; não repita o scroll.',
     dispensar: 'A janela diária já foi integrada. Esta coleta não inicia outro bloco de feed.',
     desabilitada: 'Feed não habilitado nesta instalação ou frente de aplicação isolada.',

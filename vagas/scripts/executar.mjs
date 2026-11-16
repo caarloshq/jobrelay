@@ -31,6 +31,7 @@ const resultado = politica.atualizarAutomaticamente !== false && destinoDados !=
   ? { status: 'desativada', motivo: 'Preferência desta instalação' }
   : await atualizarAutomaticamente({ raiz });
 console.log(`[Atualização: ${resultado.status}] ${resultado.tag || resultado.motivo || ''}`);
+if (resultado.mensagem) console.log(resultado.mensagem);
 if (!podeIniciarOperacao(resultado)) {
   console.log(JSON.stringify(resultado));
   throw new Error('ATUALIZACAO_PENDENTE: confirme a release específica com atualizar antes de iniciar a operação, ou desative a checagem nas preferências.');

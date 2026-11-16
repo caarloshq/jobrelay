@@ -56,7 +56,7 @@ A opção **Verificar atualizações ao iniciar**, recomendada, tem um switch pr
 
 Você pode escolher buscar vagas, trabalhar na fila existente ou fazer os dois em sequência. Com as duas frentes, o assistente conclui a busca, salva e confere seu quadro antes de iniciar candidaturas.
 
-A opção **Testar captura do LinkedIn (beta)** vem desligada. As consultas usam seus cargos e sua profissão. O percurso leva 15 minutos em Vagas, 12 em Postagens e 3 no Feed, contando atividade observada. O login no LinkedIn é obrigatório para os três métodos: entre diretamente no painel local e avise quando terminar. O assistente confere a sessão e o filtro antes de iniciar. Sem login, a captura aguarda e as demais fontes continuam. O Feed depende da sua conta e não oferece filtro por cargo.
+A opção **Testar captura do LinkedIn (beta)** vem desligada. As consultas usam seus cargos e sua profissão. O percurso leva 15 minutos em Vagas, 12 em Postagens e 3 no Feed, contando atividade observada. O login no LinkedIn é obrigatório para os três métodos: entre diretamente no painel local e avise quando terminar. O assistente confere a sessão e o filtro antes de iniciar. A captura é a coleta 2: acontece depois das candidaturas, e o assistente pergunta antes de abrir o LinkedIn. Sem o seu sim, ou sem login, ela não roda e as demais fontes continuam. O Feed depende da sua conta e não oferece filtro por cargo.
 
 ## 7. Inclua vagas do LinkedIn pela Apify, se quiser
 

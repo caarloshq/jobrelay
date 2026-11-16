@@ -13,6 +13,9 @@ const arquivo = dir => path.join(path.resolve(dir), 'rodada-lote.json');
 const ler = dir => {
   const s = lerJsonSeguro(arquivo(dir));
   if (s.contrato !== 1 || !s.rodadaId || !s.vagas || !Array.isArray(s.frentes)) erro('LOTE_INVALIDO');
+  // Lote anterior à spec 015: lido como sem coleta 2, só em memória. A primeira gravação o persiste.
+  if (!s.coleta2) s.coleta2 = { estado: 'dispensada', motivo: 'lote_anterior' };
+  if (!s.origem) s.origem = 'manual';
   return s;
 };
 function fila(valor) {
@@ -30,17 +33,37 @@ function coletaLiberada(s) {
   return !s.frentes.includes('coleta') || (s.captura.estado === 'encerrada' &&
     Boolean(s.captura.provaRef && s.captura.filaConferidaRef && s.captura.integracaoRef && s.captura.arquivosRef));
 }
+// Coleta 2 pendente de uma rodada agendada nunca terá resposta: vale sem_resposta.
+const coleta2Efetiva = s => s.coleta2.estado === 'pendente' && s.origem === 'agendada' ? { ...s.coleta2, estado: 'sem_resposta', provaRef: 'origem:agendada' } : s.coleta2;
+function vagaConfirmada(v, atual) {
+  return ['filaInicial', 'novaConfirmada', 'filaConferida', 'coleta2'].includes(v.origem) && atual.ids.includes(v.id);
+}
 function plano(s, atual) {
   const desconhecidas = atual.ids.filter(i => !Object.hasOwn(s.vagas, i));
   const vagas = Object.values(s.vagas);
   const naoPercorridas = s.frentes.includes('aplicacao') ? [...new Set([...desconhecidas, ...vagas.filter(v => v.estado === 'nao_percorrida').map(v => v.id)])] : [];
   const independentes = vagas.filter(v => ['preparando', 'aguardando_revisao', 'revisada', 'liberada'].includes(v.estado)).map(v => ({ id: v.id, estado: v.estado }));
   const capturaPendente = !coletaLiberada(s);
-  const podePerguntar = s.estado === 'ativa' && naoPercorridas.length === 0 && independentes.length === 0 && !capturaPendente && coletaLiberada(s);
+  const autorizouNovas = Boolean(s.coleta2.aplicarNovas?.provaRef);
+  const acionaveis = vagas.filter(v => !['enviada', 'descartada', 'adiada'].includes(v.estado) && vagaConfirmada(v, atual) && (v.origem !== 'coleta2' || autorizouNovas));
+  const retomadas = acionaveis.filter(v => v.origem === 'filaInicial' || v.estado !== 'nao_percorrida');
+  const novasConfirmadas = acionaveis.filter(v => !retomadas.includes(v));
+  const podePerguntar = s.estado === 'ativa' && naoPercorridas.length === 0 && independentes.length === 0;
+  const fronteiraColetaPronta = podePerguntar && coletaLiberada(s);
   const perguntasConcluidas = !s.houvePerguntas || ['encerrada', 'impedida'].includes(s.perguntas?.estado);
+  const fronteiraOperacionalPronta = fronteiraColetaPronta && perguntasConcluidas;
+  const coleta2 = coleta2Efetiva(s);
+  const coleta2Resolvida = !['pendente', 'aceita'].includes(coleta2.estado);
+  const podeOferecerColeta2 = s.estado === 'ativa' && s.frentes.includes('coleta') && s.coleta2.estado === 'pendente' &&
+    s.origem !== 'agendada' && fronteiraOperacionalPronta;
+  // Motivos que impedem a pergunta enquanto valem; a rodada pode continuar e a pergunta voltar.
+  const motivoPendente = coleta2.estado !== 'pendente' ? null : !coletaLiberada(s) ? 'coleta_principal_nao_encerrada'
+    : s.frentes.includes('aplicacao') && !(podePerguntar && perguntasConcluidas) ? 'aplicacao_nao_concluida' : null;
+  const novasColeta2 = vagas.filter(v => v.origem === 'coleta2' && !['descartada', 'adiada'].includes(v.estado)).map(v => v.id);
   return { rodadaId: s.rodadaId, estado: s.estado, filaAtualRef: atual.provaRef, naoPercorridas, trabalhoIndependente: independentes,
-    capturaPendente, podeAplicar: s.estado === 'ativa' && s.frentes.includes('aplicacao') && coletaLiberada(s), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta: podePerguntar && perguntasConcluidas, podeEncerrar: podePerguntar && perguntasConcluidas && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa').map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
-    podeOferecerMelhorias: s.estado !== 'encerrada' && s.frentes.includes('aplicacao') && podePerguntar && perguntasConcluidas && s.melhorias.estado === 'nao_oferecida', melhorias: s.melhorias, liberadoSubmit: false };
+    capturaPendente, podeAplicar: s.estado === 'ativa' && s.frentes.includes('aplicacao') && acionaveis.length > 0,
+    ordemAplicacao: [...retomadas, ...novasConfirmadas].map(v => ({ id: v.id, estado: v.estado, origem: v.origem })), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta, origem: s.origem, coleta2: { ...coleta2, motivoPendente }, podeOferecerColeta2, novasColeta2, podeEncerrar: fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa').map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
+    podeOferecerMelhorias: s.estado !== 'encerrada' && s.frentes.includes('aplicacao') && fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado === 'nao_oferecida', melhorias: s.melhorias, liberadoSubmit: false };
 }
 export function planejarLote(dirDados, dependencias = {}) { return plano(ler(dirDados), consultar(dependencias)); }
 
@@ -55,7 +78,10 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
       const frentes = [...new Set(args.frentes || [])];
       if (!frentes.length || frentes.some(f => !['coleta', 'aplicacao'].includes(f))) erro('FRENTES_INVALIDAS');
       const inicial = fila(args.filaInicial);
-      s = { contrato: 1, estado: 'ativa', historico: anterior ? [...(anterior.historico || []), Object.fromEntries(Object.entries(anterior).filter(([k]) => k !== 'historico'))] : [], rodadaId: crypto.randomUUID(), frentes, leituraRegrasRef: texto(args.leituraRegrasRef, 'LEITURA_REGRAS_OBRIGATORIA'),
+      const origem = args.origem === undefined ? 'manual' : ['manual', 'agendada'].includes(args.origem) ? args.origem : erro('ORIGEM_INVALIDA');
+      const coleta2 = !frentes.includes('coleta') ? { estado: 'dispensada', motivo: 'frente_coleta_ausente' }
+        : args.coleta2Habilitada === true ? { estado: 'pendente' } : { estado: 'dispensada', motivo: 'linkedin_desligado' };
+      s = { contrato: 1, origem, coleta2, estado: 'ativa', historico: anterior ? [...(anterior.historico || []), Object.fromEntries(Object.entries(anterior).filter(([k]) => k !== 'historico'))] : [], rodadaId: crypto.randomUUID(), frentes, leituraRegrasRef: texto(args.leituraRegrasRef, 'LEITURA_REGRAS_OBRIGATORIA'),
         captura: { estado: frentes.includes('coleta') ? 'pendente' : 'dispensada', provaRef: null }, vagas: {}, houvePerguntas: false, perguntas: { estado: 'pendente', provaRef: null }, melhorias: { estado: 'nao_oferecida', provaRef: null } };
       acrescentar(s, inicial.ids, 'filaInicial', inicial.provaRef);
     } else {
@@ -64,6 +90,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
       if (s.estado === 'encerrada') erro('RODADA_ENCERRADA');
       if (acao === 'encerrar') {
         if (!plano(s, consultar(dependencias)).podeEncerrar) erro('FECHAMENTO_PENDENTE');
+        s.coleta2 = coleta2Efetiva(s);
         s.estado = 'encerrada'; s.encerramentoRef = texto(args.provaRef, 'PROVA_ENCERRAMENTO_OBRIGATORIA');
       } else if (acao === 'integrar') {
         const atual = consultar(dependencias);
@@ -83,6 +110,54 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         }
         s.captura = registro;
         acrescentar(s, atual.ids, 'filaConferida', atual.provaRef);
+      } else if (acao === 'coleta2_decidir') {
+        if (!s.frentes.includes('coleta')) erro('COLETA2_NAO_APLICAVEL');
+        if (s.coleta2.estado !== 'pendente') erro('COLETA2_JA_DECIDIDA');
+        if (!['aceita', 'recusada', 'sem_resposta', 'dispensada'].includes(args.decisao)) erro('DECISAO_COLETA2_INVALIDA');
+        // Rodada agendada não tem quem responda: a única decisão válida é sem_resposta (ou janela já feita hoje).
+        if (s.origem === 'agendada' && !['sem_resposta', 'dispensada'].includes(args.decisao)) erro('DECISAO_INVALIDA_NA_AGENDADA');
+        const provaRef = texto(args.provaRef, 'PROVA_DECISAO_OBRIGATORIA');
+        if (args.decisao === 'aceita' && !plano(s, consultar(dependencias)).podeOferecerColeta2) erro('COLETA2_NAO_DEVIDA');
+        if (args.decisao === 'dispensada') {
+          if (args.motivo !== 'ja_feita_hoje') erro('MOTIVO_COLETA2_INVALIDO');
+          s.coleta2 = { estado: 'dispensada', motivo: 'ja_feita_hoje', provaRef };
+        } else s.coleta2 = { estado: args.decisao, provaRef };
+      } else if (acao === 'coleta2_captura') {
+        if (!['aceita', 'impedida'].includes(s.coleta2.estado)) erro('COLETA2_NAO_ACEITA');
+        if (!['encerrada', 'impedida'].includes(args.estado)) erro('CAPTURA_INVALIDA');
+        const atual = consultar(dependencias);
+        const registro = { estado: args.estado, provaRef: texto(args.provaRef, 'PROVA_CAPTURA_OBRIGATORIA'), filaConferidaRef: atual.provaRef };
+        if (args.estado === 'encerrada') {
+          registro.integracaoRef = texto(args.integracaoRef, 'PROVA_INTEGRACAO_OBRIGATORIA');
+          registro.arquivosRef = texto(args.arquivosRef, 'PROVA_ARQUIVOS_OBRIGATORIA');
+          registro.cobertura = args.cobertura || 'completa';
+          if (!['completa', 'parcial'].includes(registro.cobertura)) erro('COBERTURA_INVALIDA');
+          if (registro.cobertura === 'parcial') registro.limiteRef = texto(args.limiteRef, 'LIMITE_COBERTURA_OBRIGATORIO');
+          acrescentar(s, atual.ids, 'coleta2', atual.provaRef);
+        } else {
+          registro.motivo = 'impedida';
+          registro.acaoRef = texto(args.acaoRef, 'ACAO_NECESSARIA_OBRIGATORIA');
+        }
+        s.coleta2 = registro;
+      } else if (acao === 'coleta2_integrar') {
+        // Captura de outro dia que só esperava integração: trabalho local, sem pergunta, também na rodada agendada.
+        if (!s.frentes.includes('coleta') || s.coleta2.estado !== 'pendente') erro('COLETA2_NAO_PENDENTE');
+        if (!coletaLiberada(s)) erro('COLETA_PRINCIPAL_NAO_ENCERRADA');
+        const atual = consultar(dependencias);
+        s.coleta2 = { estado: 'encerrada', motivo: 'so_integracao', provaRef: texto(args.provaRef, 'PROVA_INTEGRACAO_OBRIGATORIA'), filaConferidaRef: atual.provaRef,
+          integracaoRef: texto(args.integracaoRef, 'PROVA_INTEGRACAO_OBRIGATORIA'), arquivosRef: texto(args.arquivosRef, 'PROVA_ARQUIVOS_OBRIGATORIA'), cobertura: 'completa' };
+        acrescentar(s, atual.ids, 'coleta2', atual.provaRef);
+      } else if (acao === 'aplicar_novas') {
+        // O sim da pessoa à segunda pergunta: sem esta referência, vaga da coleta 2 não entra na aplicação.
+        if (s.coleta2.estado !== 'encerrada') erro('COLETA2_NAO_ENCERRADA');
+        s.coleta2 = { ...s.coleta2, aplicarNovas: { decisao: 'sim', provaRef: texto(args.provaRef, 'PROVA_ACEITE_OBRIGATORIA') } };
+      } else if (acao === 'adiar') {
+        if (s.coleta2.estado !== 'encerrada') erro('COLETA2_NAO_ENCERRADA');
+        if (s.coleta2.aplicarNovas) erro('NOVAS_JA_AUTORIZADAS');
+        const provaRef = texto(args.provaRef, 'PROVA_ADIAMENTO_OBRIGATORIA');
+        let n = 0;
+        for (const v of Object.values(s.vagas)) if (v.origem === 'coleta2' && v.estado === 'nao_percorrida') { v.estado = 'adiada'; v.provaRef = provaRef; n++; }
+        s.coleta2 = { ...s.coleta2, adiadas: (s.coleta2.adiadas || 0) + n };
       } else if (acao === 'perguntas') {
         if (!plano(s, consultar(dependencias)).podePerguntar) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         if (!['apresentada', 'encerrada', 'impedida'].includes(args.estado)) erro('FASE_PERGUNTAS_INVALIDA');
@@ -103,9 +178,10 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         const v = Object.hasOwn(s.vagas, identidade) ? s.vagas[identidade] : null;
         if (!v) erro('VAGA_FORA_DO_LOTE');
         if (['enviada', 'descartada'].includes(v.estado)) erro('VAGA_TERMINAL');
-        if (s.frentes.includes('coleta') && !coletaLiberada(s) &&
-            (['fixar', 'liberar_envio', 'confirmar_envio', 'revisar'].includes(acao) ||
-              (acao === 'atualizar' && ['preparando', 'aguardando_pessoa'].includes(args.estado)))) erro('COLETA_ANTES_APLICACAO');
+        if (v.estado === 'adiada') erro('VAGA_ADIADA');
+        if (v.origem === 'coleta2' && !s.coleta2.aplicarNovas?.provaRef && ['fixar', 'revisar', 'liberar_envio', 'confirmar_envio', 'atualizar'].includes(acao)) erro('APLICAR_NOVAS_NAO_AUTORIZADO');
+        if ((['fixar', 'liberar_envio', 'revisar'].includes(acao) ||
+              (acao === 'atualizar' && ['preparando', 'aguardando_pessoa'].includes(args.estado))) && !vagaConfirmada(v, consultar(dependencias))) erro('VAGA_NAO_CONFIRMADA_NA_FILA');
         if (acao === 'atualizar') {
           if (['preparando', 'aguardando_pessoa'].includes(args.estado) && !s.frentes.includes('aplicacao')) erro('APLICACAO_NAO_SELECIONADA');
           if (!['preparando', 'aguardando_pessoa', 'bloqueada', 'descartada'].includes(args.estado)) erro('ESTADO_INVALIDO');
@@ -155,12 +231,14 @@ const linhaUnica = (v, codigo) => typeof v === 'string' && v.trim() && !/[\u0000
 
 // Texto aprovado na spec 010. Contagens em vagas únicas do mesmo lote:
 // encontradas = compatíveis gravadas na fila + compatíveis aguardando gravação + descartadas.
+const fase = valor => valor === undefined || valor === 'principal' ? 'principal' : valor === 'coleta2' ? 'coleta2' : erro('FASE_INVALIDA');
 export function resumoColeta(entrada) {
-  const campos = somenteCampos(entrada, ['encontradas', 'compativeis', 'descartadas', 'pendentesGravacao']);
+  const campos = somenteCampos(entrada, ['encontradas', 'compativeis', 'descartadas', 'pendentesGravacao', 'fase']);
   const { encontradas, compativeis, descartadas, pendentesGravacao = 0 } = campos;
+  const nome = fase(campos.fase) === 'coleta2' ? 'Coleta 2 (LinkedIn assistido)' : 'Coleta';
   if (![encontradas, compativeis, descartadas, pendentesGravacao].every(contagem) ||
       compativeis + pendentesGravacao + descartadas !== encontradas) erro('CONTAGENS_INCOMPATIVEIS');
-  const titulo = pendentesGravacao ? 'Coleta com gravação pendente ⚠️' : 'Coleta concluída ✅';
+  const titulo = pendentesGravacao ? `${nome} com gravação pendente ⚠️` : `${nome} concluída ✅`;
   const tabela = `| Resultado | Vagas |\n|---|---:|\n| 🔎 Encontradas | ${encontradas} |\n| 🎯 Compatíveis (adicionadas à fila) | ${compativeis} |\n| 🗑️ Descartadas (fora do perfil, encerradas, duplicadas ou já conhecidas) | ${descartadas} |`;
   const aviso = pendentesGravacao ? `\n\n${pendentesGravacao === 1 ? '1 vaga compatível aguarda' : `${pendentesGravacao} vagas compatíveis aguardam`} gravação na fila.` : '';
   return `${titulo}\n\n${tabela}${aviso}`;
@@ -168,11 +246,29 @@ export function resumoColeta(entrada) {
 
 // `enviadas` vem do chamador somente após recibos reais; o formatador não verifica portais.
 export function resumoAplicacao(entrada) {
-  const campos = somenteCampos(entrada, ['total', 'enviadas', 'pendentes', 'naoEnviadas']);
+  const campos = somenteCampos(entrada, ['total', 'enviadas', 'pendentes', 'naoEnviadas', 'fase']);
   const { total, enviadas, pendentes, naoEnviadas } = campos;
+  const nome = fase(campos.fase) === 'coleta2' ? 'Aplicação das novas da coleta 2' : 'Aplicação';
   if (![total, enviadas, pendentes, naoEnviadas].every(contagem) || enviadas + pendentes + naoEnviadas !== total) erro('CONTAGENS_INCOMPATIVEIS');
-  const titulo = pendentes ? 'Aplicação encerrada com pendências ⏳' : 'Aplicação concluída ✅';
+  const titulo = pendentes ? `${nome} encerrada com pendências ⏳` : `${nome} concluída ✅`;
   return `${titulo}\n\n| Resultado | Vagas |\n|---|---:|\n| 📨 Enviadas (recebimento confirmado) | ${enviadas} |\n| ⏳ Pendentes (aguardando você ou o site) | ${pendentes} |\n| 🚫 Não enviadas (encerradas, fora do perfil ou impedidas) | ${naoEnviadas} |`;
+}
+
+// Coleta 2 que não rodou ou parou (spec 015). Sem travessão; motivos sem resumo são recusados.
+const FRASES_COLETA2 = Object.freeze({
+  recusada: 'Você escolheu fechar a rodada sem ela.',
+  sem_resposta: 'A rodada agendada não tinha ninguém para responder, e a coleta 2 só roda com o seu aceite.',
+  ja_feita_hoje: 'A janela de hoje já foi feita e integrada em outra rodada.',
+  aplicacao_nao_concluida: 'A aplicação ainda não terminou, então a pergunta não foi feita.',
+  coleta_principal_nao_encerrada: 'A coleta principal não fechou, e a coleta 2 grava no mesmo quadro.',
+});
+export function resumoColeta2Fora(entrada) {
+  const { motivo, acao } = somenteCampos(entrada, ['motivo', 'acao']);
+  if (['linkedin_desligado', 'lote_anterior', 'frente_coleta_ausente'].includes(motivo)) erro('MOTIVO_SEM_RESUMO');
+  if (motivo === 'impedida') return `Coleta 2 (LinkedIn assistido) parou ⚠️\n\n${linhaUnica(acao, 'ACAO_NECESSARIA_INVALIDA')}`;
+  if (!Object.hasOwn(FRASES_COLETA2, motivo)) erro('MOTIVO_COLETA2_INVALIDO');
+  if (acao !== undefined) erro('ACAO_SOMENTE_IMPEDIDA');
+  return `Coleta 2 (LinkedIn assistido) ficou de fora ⏭️\n\n${FRASES_COLETA2[motivo]}`;
 }
 
 // Uma linha por vaga no terminal, sem etapas internas (spec 010 substitui "Aplicando à vaga").

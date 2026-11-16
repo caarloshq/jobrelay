@@ -94,10 +94,11 @@ function acaoPlanejada(controle, dia) {
   if (controle.pendenteRunId) {
     const sessao = lerSessao(controle, controle.pendenteRunId);
     if (sessao.estado === 'integrada') falhar('CONTROLE_DIVERGENTE');
-    return { acao: sessao.estado === 'capturada' ? 'integrar' : 'retomar', runId: sessao.runId, dia: sessao.dia, segundosAtivos: sessao.segundosAtivos, restantes: Math.max(0, META_SEGUNDOS - sessao.segundosAtivos), dono: sessao.dono, ...progressoRotas(sessao) };
+    // Abrir o LinkedIn exige o sim da pessoa (spec 015); integrar é trabalho local e não exige.
+    return { acao: sessao.estado === 'capturada' ? 'integrar' : 'retomar', ...(sessao.estado === 'capturada' ? {} : { requerAceite: true }), runId: sessao.runId, dia: sessao.dia, segundosAtivos: sessao.segundosAtivos, restantes: Math.max(0, META_SEGUNDOS - sessao.segundosAtivos), dono: sessao.dono, ...progressoRotas(sessao) };
   }
   if (controle.dias[dia]) return { acao: 'dispensar', runId: controle.dias[dia], dia };
-  return { acao: 'iniciar', dia, metaSegundos: META_SEGUNDOS, ...progressoRotas({ rotasCaptura: ROTAS_CAPTURA, intervalos: [], segundosAtivos: 0 }) };
+  return { acao: 'iniciar', requerAceite: true, dia, metaSegundos: META_SEGUNDOS, ...progressoRotas({ rotasCaptura: ROTAS_CAPTURA, intervalos: [], segundosAtivos: 0 }) };
 }
 
 /** Consulta sem criar arquivo ou adquirir posse. Não reserva navegador. */
@@ -128,9 +129,10 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
     const plano = acaoPlanejada(controle, dia);
     if (acao === 'iniciar') {
       if (plano.acao !== 'iniciar') falhar('JANELA_JA_RESERVADA');
+      const aceiteRef = texto(args.aceiteRef, 'aceiteRef');
       const browserLiberadoRef = texto(args.browserLiberadoRef, 'browserLiberadoRef');
       const runId = crypto.randomUUID();
-      const sessao = { contrato: 1, runId, dia, fuso, estado: 'ativa', dono: quem, browserLiberadoRef, iniciadaEm: momento.toISOString(), segmentoInicioEm: momento.toISOString(), segundosAtivos: 0, rotasCaptura: ROTAS_CAPTURA, intervalos: [], pausas: [], observacoes: [], capturadaEm: null, integradaEm: null };
+      const sessao = { contrato: 1, runId, dia, fuso, estado: 'ativa', dono: quem, aceiteRef, browserLiberadoRef, iniciadaEm: momento.toISOString(), segmentoInicioEm: momento.toISOString(), segundosAtivos: 0, rotasCaptura: ROTAS_CAPTURA, intervalos: [], pausas: [], observacoes: [], capturadaEm: null, integradaEm: null };
       controle.sessoes[runId] = sessao;
       controle.dias[dia] = runId;
       controle.pendenteRunId = runId;
@@ -143,6 +145,8 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
     if (acao === 'retomar') {
       if (!['ativa', 'parcial', 'capturada'].includes(sessao.estado)) falhar('RETOMADA_INVALIDA');
       if (sessao.dono && sessao.dono !== quem) falhar('POSSE_NEGADA');
+      // Janela que volta ao navegador precisa do sim da pessoa, inclusive a sessão já ativa; a integração (capturada) não.
+      const aceiteRetomada = sessao.estado === 'capturada' ? null : texto(args.aceiteRef, 'aceiteRef');
       if (sessao.estado === 'ativa') return sessao;
       if (sessao.estado === 'capturada') {
         if (!sessao.dono) {
@@ -159,6 +163,7 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
       sessao.estado = 'ativa';
       sessao.segmentoInicioEm = momento.toISOString();
       sessao.browserLiberadoRef = browserLiberadoRef;
+      sessao.aceiteRef = aceiteRetomada;
       if (handoffRef) sessao.handoffRef = handoffRef;
       // Um lote atravessando meia-noite consome a janela do dia em que é retomado.
       if (!controle.dias[dia]) controle.dias[dia] = sessao.runId;

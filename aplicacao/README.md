@@ -1,6 +1,6 @@
 # Aplicação em vagas
 
-Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura, pergunta da coleta 2 depois da aplicação e melhorias opcionais somente depois dela. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
 Esta é a entrada independente para preparar, preencher e acompanhar candidaturas já selecionadas. Leia [as regras de respostas](#protocolo-de-respostas), [o perfil](PERFIL.md), [as respostas abertas](RESPOSTAS.md) e [o histórico literal](RESPOSTAS-PREENCHIDAS.md). A [coleta](../coleta/README.md) é uma frente separada; a aplicação não dispara fontes, Apify nem uma rodada.
 
@@ -35,7 +35,7 @@ pendente. Se o host não oferecer objetivo nativo, declare essa limitação e an
 o objetivo e o progresso num relatório datado dentro de `../vagas/data/`, sem
 afirmar que uma ferramenta de objetivos foi acionada.
 
-Percorra **todas** as vagas em `Avaliar` por prioridade do quadro atual, além das
+Retome primeiro as candidaturas pendentes ou travadas que já tenham fatos, acesso e autorização, e só então avance às vagas novas confirmadas; um impedimento concreto preserva o rascunho, o motivo e a próxima ação, sem parar a fila. Percorra **todas** as vagas em `Avaliar` por prioridade do quadro atual, além das
 que já estejam em fase de aplicação, sem encerrar a leitura quando a meta diária
 for alcançada. Releia o estado antes de cada candidatura e antes do envio. Para
 cada `ID externo`, confronte anúncio e formulário oficiais,

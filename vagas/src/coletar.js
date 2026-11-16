@@ -340,7 +340,7 @@ function imprimir(r, aprovadas) {
 
   console.log(`\nFeito em ${r.duracaoSegundos}s. Detalhe em data/rodada-${r.dia}.json\n`);
   const capturaFinal = entradaFeed();
-  console.log(JSON.stringify({ etapaAssistidaFinal: capturaFinal, iniciarSomenteAposBuscasComplementares: true }));
+  console.log(JSON.stringify({ coleta2LinkedinAssistido: capturaFinal, iniciarSomenteDepoisDaAplicacaoEDoAceite: true }));
 }
 
 main().catch((e) => {

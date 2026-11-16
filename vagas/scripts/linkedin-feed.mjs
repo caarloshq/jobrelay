@@ -9,7 +9,7 @@ import { DIR_DADOS, RAIZ, perfil, palavras } from '../src/config.js';
 import { planejarConsultasLinkedin, conferirConsultaLinkedin } from '../src/linkedin-consultas.js';
 import { configuracaoFeed } from '../src/linkedin-feed-config.js';
 import { planejar, consultar, executar, META_SEGUNDOS } from '../src/linkedin-feed-sessao.js';
-import { prepararLote } from '../src/linkedin-feed.js';
+import { prepararLote, validarDesfecho } from '../src/linkedin-feed.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 import { lerEstado, salvarEstado } from '../src/estado-central.js';
 import * as cache from '../src/cache.js';
@@ -67,6 +67,17 @@ function observacoesRevisadas(sessao, revisoes) {
       chave: o.id, titulo: o.cargo, empresa: o.empresa, postOriginal: o.url,
       urlCandidatura: o.linkCandidatura, origem: o.origem, evidencia: o.referencia };
   });
+}
+function coberturaPacoteValida(pacote, sessao) {
+  const grupos = ['novas', 'duplicatas', 'pistas', 'descartadas', 'pendencias'];
+  if (grupos.some(grupo => !Array.isArray(pacote[grupo]))) return false;
+  const ids = grupos.flatMap(grupo => pacote[grupo].map(item => item?.idObservacao));
+  const originais = new Set(sessao.observacoes.map(item => item.id));
+  if (ids.length !== originais.size || new Set(ids).size !== ids.length ||
+      ids.some(id => !originais.has(id))) return false;
+  return ['pistas', 'descartadas'].every(grupo => pacote[grupo].every(item =>
+    validarDesfecho(item, item.motivoFiltro ? { passa: false, motivo: item.motivoFiltro } : null)
+    && item.desfecho.tipo === (grupo === 'pistas' ? 'pista' : 'descartada')));
 }
 function sessaoCapturada(dono) {
   const s = consultar({ dirDados: DIR_DADOS, fuso: fuso() });
@@ -168,7 +179,8 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
   }
   if (acao !== 'confirmar') falha('ACAO_DESCONHECIDA');
   const p = lerJsonSeguro(arqPacote);
-  if (p.versao !== 1 || p.runId !== s.runId || p.observacoesHash !== hash(s.observacoes) || p.fonteEstado !== modo || !Array.isArray(p.novas) || !Array.isArray(p.pendencias)) falha('PACOTE_DESATUALIZADO: prepare novamente.');
+  if (p.versao !== 1 || p.runId !== s.runId || p.observacoesHash !== hash(s.observacoes) || p.fonteEstado !== modo ||
+      !coberturaPacoteValida(p, s)) falha('PACOTE_DESATUALIZADO: prepare novamente.');
   const estado = modo === 'local' ? arquivo.carregar() : estadoConsultado(opcoes['--estado'], agora);
   // No público, o agente importa o snapshot completo pelo adaptador existente.
   const espelhoPublico = modo === 'notion' && existsSync(join(RAIZ, 'src/fonte-estado.js')) ? arquivo.carregar() : null;

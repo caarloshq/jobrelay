@@ -9,12 +9,14 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
 
 export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
-  'src/linkedin-consultas.js', 'test/linkedin-consultas.test.js',
-  'src/rodada-lote.js', 'scripts/rodada-lote.mjs', 'test/rodada-lote.test.js',
+  'src/rodada-lote.js', 'scripts/rodada-lote.mjs', 'test/rodada-lote.test.js', 'test/rodada-lote-coleta2.test.js', 'test/coleta2-fronteiras.test.js',
   'src/regras-projeto.js', 'src/regras-projeto-leitura.js', 'scripts/regras-projeto.mjs', 'test/regras-projeto.test.js',
-  'src/coordenacao-frentes.js', 'scripts/coordenar-frentes.mjs', 'test/coordenacao-frentes.test.js',
-  'src/linkedin-feed.js', 'src/linkedin-feed-sessao.js', 'src/linkedin-feed-config.js', 'src/linkedin-feed-entrada.js', 'scripts/linkedin-feed.mjs',
+  'src/coordenacao-frentes.js', 'scripts/coordenar-frentes.mjs', 'test/coordenacao-frentes.test.js', 'COORDENACAO-FRENTES.md',
+  'src/linkedin-feed.js', 'src/linkedin-feed-sessao.js', 'src/linkedin-feed-config.js', 'src/linkedin-feed-entrada.js',
+  'scripts/linkedin-feed.mjs', 'src/busca/extrair-id.js', 'config/linkedin-feed.json',
+  'test/linkedin-feed.test.js', 'test/linkedin-feed-sessao.test.js', 'test/linkedin-feed-cli.test.js',
   'src/fontes-respostas.js', 'test/fontes-respostas.test.js',
+  'src/base-respostas.js', 'test/base-respostas.test.js',
   'src/registro-md.js', 'scripts/registrar-respostas.mjs', 'test/registro-md.test.js',
   'src/cota-apify.js', 'test/cota-apify.test.js',
   'src/revisao-respostas.js', 'src/texto-respostas.js', 'test/revisao-respostas.test.js', 'test/revisor-operacao.test.js',
@@ -24,7 +26,7 @@ export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
   'src/fontes/uxjobs.js', 'src/fontes/portais.js', 'src/fontes/importadas.js', 'src/versao-git.js',
   'config/catalogo-fontes.json', 'config/fontes-portais.json',
   'config/fontes-importadas.json', 'config/fontes-gringas.json',
-  'scripts/fontes.mjs', 'scripts/verificar-fontes.mjs', 'scripts/verificar-versao.mjs',
+  'scripts/fontes.mjs', 'scripts/verificar-fontes.mjs', 'scripts/verificar-versao.mjs', 'src/versao-produto.js', 'test/versao-produto.test.js',
   'scripts/sincronizar-fontes.mjs', 'test/fontes-novas.test.js', 'test/importadas.test.js',
   'test/gringas.test.js', 'test/uxjobs.test.js', 'test/uxjobs-security.test.js', 'test/providers-unknown.test.js',
   'test/versao-git.test.js', 'test/sincronizar-fontes.test.js', 'docs-fontes.md', 'docs-importadas.md',
@@ -171,6 +173,7 @@ export function planoFontes(origem, destino) {
     } else if (caminho === 'config/fontes-portais.json') {
       conteudo = completarConfig(anterior, catalogo.fontes.filter(f => f.config === caminho).map(f => f.id), 'id', id => ({ id, enabled: false }));
     } else if (caminho === 'config/fontes-importadas.json') conteudo = anterior ?? importadasNeutras();
+    else if (caminho === 'config/linkedin-feed.json') conteudo = anterior ?? serializar({ habilitado: false });
     else conteudo = lerArquivo(origem, src);
     return { caminho, destino: dst, conteudo, hashAnterior: anterior === null ? null : hash(anterior), alterado: anterior !== conteudo };
   });

@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { baixarZip, instalarZip, permitidoZip } from './atualizacao-zip.js';
+import { mensagemVersao, lerVersaoInstalada } from './versao-produto.js';
 
 const executar = promisify(execFile);
 const ORIGEM = 'https://github.com/caarloshq/jobrelay.git';
@@ -188,7 +189,7 @@ export function lerConfirmacao(args = []) {
   return { aceita: true, tag: args[1], tagSha: args[3], ...(args[5] ? { assetSha256: args[5] } : {}) };
 }
 
-export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fetch, consultarRelease = null, obterTag = null, aplicarMerge = null, confirmacao = null, antesGravarZip = null } = {}) {
+async function atualizarInterno({ raiz, fetchImpl = globalThis.fetch, consultarRelease = null, obterTag = null, aplicarMerge = null, confirmacao = null, antesGravarZip = null } = {}) {
   if (typeof raiz !== 'string' || !path.isAbsolute(raiz)) throw new TypeError('raiz absoluta obrigatória');
   // A injeção da aplicação serve apenas às fixtures offline, junto com release
   // e tag locais. A execução real sempre chama git merge --ff-only.
@@ -326,4 +327,18 @@ export async function atualizarAutomaticamente({ raiz, fetchImpl = globalThis.fe
       } catch { resultado.trava = 'revisao_necessaria'; }
     }
   }
+}
+
+// Acrescenta a versão atual, a de destino e a frase para a pessoa (spec 015). Não altera nenhum outro campo.
+function comVersao(resultado, antes) {
+  if (!resultado || typeof resultado !== 'object' || !resultado.tag) return resultado;
+  const destino = String(resultado.tag).replace(/^v/, '').split('+')[0];
+  const evidencia = resultado.status === 'sem_atualizacao' ? 'sem_atualizacao' : resultado.status === 'bloqueado' ? 'bloqueado' : null;
+  const { texto } = mensagemVersao({ instalada: antes, destino, evidencia, motivo: resultado.motivo, depois: resultado.status === 'atualizado' });
+  return { ...resultado, versao_instalada: antes, versao_destino: destino, mensagem: texto };
+}
+
+export async function atualizarAutomaticamente(opcoes = {}) {
+  const antes = typeof opcoes.raiz === 'string' && path.isAbsolute(opcoes.raiz) ? lerVersaoInstalada(path.join(opcoes.raiz, 'vagas')).versao : null;
+  return comVersao(await atualizarInterno(opcoes), antes);
 }

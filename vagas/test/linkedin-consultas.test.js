@@ -65,9 +65,9 @@ test('CLI recusa perfil pendente e consulta incerta sem contar tempo; atestado v
   const perfilPath = path.join(raiz, 'config/perfil.json'); const perfil = JSON.parse(fs.readFileSync(perfilPath));
   const run = (acao, dados) => { const arq = path.join(raiz, 'entrada.json'); fs.writeFileSync(arq, JSON.stringify(dados)); return spawnSync(process.execPath, [path.join(raiz, 'scripts/linkedin-feed.mjs'), acao, '--dono', 'fixture', '--arquivo', arq], { encoding: 'utf8', env: { PATH: process.env.PATH, TMPDIR: process.env.TMPDIR } }); };
   perfil._configurado = false; fs.writeFileSync(perfilPath, JSON.stringify(perfil));
-  assert.match(run('iniciar', { browserLiberadoRef: 'fixture:navegador' }).stderr, /PERFIL_CONSULTA_PENDENTE/);
+  assert.match(run('iniciar', { aceiteRef: 'fixture:aceite', browserLiberadoRef: 'fixture:navegador' }).stderr, /PERFIL_CONSULTA_PENDENTE/);
   perfil._configurado = true; perfil.cargo_alvo = 'Enfermagem'; perfil.profissao_confirmada = false; fs.writeFileSync(perfilPath, JSON.stringify(perfil));
-  const inicio = run('iniciar', { browserLiberadoRef: 'fixture:navegador' }); assert.equal(inicio.status, 0, inicio.stderr);
+  const inicio = run('iniciar', { aceiteRef: 'fixture:aceite', browserLiberadoRef: 'fixture:navegador' }); assert.equal(inicio.status, 0, inicio.stderr);
   const sessao = JSON.parse(inicio.stdout);
   const intervalo = { rota: 'jobs', inicioEm: sessao.iniciadaEm, fimEm: new Date().toISOString(), evidenciaInicio: 'fixture:inicio', evidenciaFim: 'fixture:fim', provaRef: 'fixture:atividade' };
   assert.match(run('intervalo', intervalo).stderr, /CONSULTA_UI_OBRIGATORIA/);
