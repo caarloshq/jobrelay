@@ -1,6 +1,10 @@
 # Contexto atual do JobRelay
 
-## Candidata 1.5.0 preparada, sem publicação
+## Estado local em 17 de Novembro de 2026
+
+O layout vigente usa `app/`, `core/`, `skills/`, `docs/` e `local/`. A [continuidade da coleta 2](docs/specs/concluidas/008-continuidade-coleta2-optin-publico.md) foi concluída no recorte local (`99bbda7`). O commit `1726812` corrige o envelope JOIN e acrescenta avisos de empresas/ferramentas declaradas fora da base, após revisão independente. Integração Node: 853 aprovados, quatro ignorados, zero falhas. Os avisos não aprovam fatos nem comprovam registro real no quadro. Não houve push ou release. As seções antigas abaixo são registros datados e não substituem os contratos vigentes.
+
+## Registro histórico: candidata 1.5.0 preparada, sem publicação
 
 A sequência vigente está em [FLUXO-DA-RODADA](vagas/FLUXO-DA-RODADA.md): consultar regras, confirmar atualização, concluir e conferir a coleta antes de aplicar, revisar cada rascunho antes do envio, reunir perguntas após esgotar o trabalho independente e oferecer melhorias somente ao final da aplicação, com aceite. Coleta isolada não oferece melhorias.
 
