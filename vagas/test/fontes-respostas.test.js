@@ -95,12 +95,12 @@ test('pendências vêm primeiro em ambas as fontes sem alterar ordem do banco', 
 test('Arsenal de entrevista fecha RESPOSTAS.md e texto livre nele não altera o banco', () => {
   const origem = exemplo();
   const fontes = renderizarFontes(origem);
-  assert.ok(fontes.respostas.indexOf('## Respostas disponíveis') < fontes.respostas.indexOf('# Arsenal de entrevista'));
-  assert.ok(!fontes.perfil.includes('# Arsenal de entrevista'));
+  assert.ok(fontes.respostas.indexOf('## Respostas disponíveis') < fontes.respostas.indexOf('# Respostas para entrevista e candidaturas'));
+  assert.ok(!fontes.perfil.includes('# Respostas para entrevista e candidaturas'));
   const editado = fontes.respostas + '\n## 1. Fale sobre você\n\n> Resposta em fala, escrita a partir das palavras da pessoa.\n';
   assert.deepEqual(lerFontes({ ...fontes, respostas: editado }), origem);
   const anterior = renderizarFontes(origem, { arsenal: false });
-  assert.ok(!anterior.respostas.includes('# Arsenal de entrevista'));
+  assert.ok(!anterior.respostas.includes('# Respostas para entrevista e candidaturas'));
   assert.equal(anterior.perfil, fontes.perfil);
   assert.deepEqual(lerFontes(anterior), origem);
 });

@@ -8,9 +8,11 @@
 // alimentar rodando um comando a cada vaga que aplicasse. Era um segundo banco
 // guardando o que o Notion ja guardava — complicacao inventada por mim, e ele
 // cortou. O estado mora num lugar so.
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { existsSync, mkdirSync, copyFileSync, constants } from 'node:fs';
 import { DIR_DADOS } from './config.js';
 import { lerEstado, salvarEstado } from './estado-central.js';
+import { comEscritaCentral } from './operacao.js';
 import { carregarFonte, exigirLocal } from './fonte-estado.js';
 import { normalizarLink } from './util.js';
 import { chaveAnuncio, chaveRequisicao, idCanonico, requisicoesConflitam } from './dedupe.js';
@@ -207,4 +209,79 @@ export function resumo(dados = carregar()) {
   for (const v of Object.values(dados.vagas)) por[v.status] = (por[v.status] || 0) + 1;
   const concluidas = Object.values(dados.vagas).filter((v) => CONCLUIDOS.includes(v.status)).length;
   return { total: Object.keys(dados.vagas).length, concluidas, por, sincronizadoEm: dados.sincronizadoEm };
+}
+
+
+// API operacional de coleta: não altera carregarFonte/exigirLocal nem a seleção da GUI.
+export function carregarOperacional({ arquivo = ARQ } = {}) {
+  const local = lerEstado(arquivo, { versao: 2, sincronizadoEm: null, vagas: {} });
+  const remoto = lerEstado(join(dirname(arquivo), 'notion.json'), { vagas: {} });
+  const vagas = { ...local.vagas };
+  const conflitosStatus = [];
+  for (const [id, linha] of Object.entries(remoto.vagas || {})) {
+    const encontrada = Object.entries(vagas).find(([chave, anterior]) => mesmaLinha(chave, anterior, id, linha));
+    const chave = encontrada?.[0] || id;
+    const anterior = encontrada?.[1];
+    if (anterior && CONCLUIDOS.includes(anterior.status)) {
+      if (CONCLUIDOS.includes(linha.status) && anterior.status !== linha.status) conflitosStatus.push({ id: chave, idRemoto: id, local: anterior.status, remoto: linha.status, motivo: 'RECONCILIACAO_OBRIGATORIA' });
+      continue;
+    }
+    if (!anterior || CONCLUIDOS.includes(linha.status)) vagas[chave] = { ...anterior, ...linha,
+      historico: anterior?.historico || linha.historico || [] };
+  }
+  return { ...local, vagas, conflitosStatus };
+}
+function urlOperacional(valor) {
+  try {
+    const u = new URL(valor);
+    if (!['https:', 'http:'].includes(u.protocol)) return null;
+    for (const chave of [...u.searchParams.keys()]) if (/^(?:utm_|source$|ref$|fbclid$|gclid$|gh_src$)/i.test(chave)) u.searchParams.delete(chave);
+    u.searchParams.sort();
+    return `${u.hostname.replace(/^www\./, '')}${u.pathname.replace(/\/+$/, '')}${u.search}${u.hash}`;
+  } catch { return null; }
+}
+function mesmaLinha(id, linha, idNovo, nova) {
+  const ids = new Set([id, ...(linha.idsAlternativos || [])]);
+  return [idNovo, ...(nova.idsAlternativos || [])].some(chave => ids.has(chave)) ||
+    Boolean(urlOperacional(linha.url) && urlOperacional(linha.url) === urlOperacional(nova.url || nova.link));
+}
+export function concluidaOperacional(vaga, estado = carregarOperacional()) {
+  return Object.entries(estado.vagas).some(([id, linha]) => CONCLUIDOS.includes(linha.status) && mesmaLinha(id, linha, vaga.idExterno, vaga));
+}
+export function mesclar(linhas, { arquivo = ARQ, origem = 'local', pendenteNotion = false, agora = new Date() } = {}) {
+  const dados = lerEstado(arquivo, { versao: 2, sincronizadoEm: null, vagas: {} });
+  const conhecidos = carregarOperacional({ arquivo });
+  for (const linha of linhas) {
+    if (!linha?.idExterno || ['__proto__', 'constructor', 'prototype'].includes(linha.idExterno)) throw new Error('VAGA_SEM_IDENTIDADE');
+    const similares = Object.entries(conhecidos.vagas).filter(([id, anterior]) => mesmaLinha(id, anterior, linha.idExterno, linha));
+    const terminal = similares.find(([, anterior]) => CONCLUIDOS.includes(anterior.status));
+    const alvo = similares.find(([id]) => Object.hasOwn(dados.vagas, id)) || terminal;
+    const id = alvo?.[0] || linha.idExterno;
+    const anterior = dados.vagas[id] || alvo?.[1] || {};
+    const status = terminal?.[1].status || anterior.status || linha.status || 'Avaliar';
+    const campos = Object.fromEntries(Object.entries(linha).filter(([k, v]) => k !== 'idExterno' && v !== null && v !== undefined));
+    const nova = { ...anterior, ...campos, status,
+      url: linha.url || linha.link || anterior.url || null,
+      idsAlternativos: [...new Set([...(anterior.idsAlternativos || []), ...(linha.idsAlternativos || []), ...(id !== linha.idExterno ? [linha.idExterno] : [])])],
+      registradaEm: anterior.registradaEm || agora.toISOString(),
+      historico: anterior.historico || [{ em: agora.toISOString(), de: null, para: status, por: 'rodada' }] };
+    if (linha.confianca != null) nova.compatibilidade = linha.confianca * 100;
+    if (origem === 'notion') delete nova.pendenteNotion;
+    else if (pendenteNotion && !CONCLUIDOS.includes(status)) nova.pendenteNotion = true;
+    dados.vagas[id] = nova;
+  }
+  mkdirSync(dirname(arquivo), { recursive: true });
+  if (existsSync(arquivo)) {
+    const backups = join(dirname(arquivo), 'backups');
+    mkdirSync(backups, { recursive: true });
+    const copia = join(backups, `quadro-${agora.toISOString().slice(0, 10)}.json`);
+    comEscritaCentral(dirname(arquivo), () => {
+      try { copyFileSync(arquivo, copia, constants.COPYFILE_EXCL); }
+      catch (erro) { if (erro.code !== 'EEXIST') throw erro; }
+    }, [copia]);
+  }
+  dados.versao = 2;
+  dados.sincronizadoEm = agora.toISOString();
+  salvarEstado(arquivo, dados, dirname(arquivo));
+  return dados;
 }

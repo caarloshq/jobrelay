@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import { validarRevisaoRespostas } from './revisao-respostas.js';
-import { lerJsonSeguro, gravarJsonAtomico } from './persistencia.js';
+import { lerJsonSeguro, gravarJsonAtomico, nlinkTolerado } from './persistencia.js';
 
 const CONTRATO = 1;
 const agora = () => new Date().toISOString();
@@ -105,7 +106,7 @@ function validarArquivoConcedido(arquivo, dados) {
     try { info = fs.lstatSync(atual); }
     catch (erro) { if (erro.code === 'ENOENT') break; throw erro; }
     if (info.isSymbolicLink()) falha('CAMINHO_INSEGURO', atual);
-    if (atual === absoluto && (!info.isFile() || info.nlink !== 1)) falha('ARQUIVO_CONCEDIDO_INVALIDO', atual);
+    if (atual === absoluto && (!info.isFile() || !nlinkTolerado(absoluto, info))) falha('ARQUIVO_CONCEDIDO_INVALIDO', atual);
     if (atual !== absoluto && !info.isDirectory()) falha('CAMINHO_INSEGURO', atual);
   }
   return absoluto;
@@ -119,10 +120,10 @@ function hashArtefatoSeguro(caminho, dados) {
     const real = fs.realpathSync(absoluto);
     if (real !== absoluto) falha('ARTEFATO_INSEGURO', 'link simbólico no caminho');
     const info = fs.lstatSync(absoluto);
-    if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1) falha('ARTEFATO_INSEGURO', 'arquivo não regular ou com hardlink');
+    if (!info.isFile() || info.isSymbolicLink() || !nlinkTolerado(absoluto, info)) falha('ARTEFATO_INSEGURO', 'arquivo não regular ou com hardlink');
     fd = fs.openSync(absoluto, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
     const aberto = fs.fstatSync(fd);
-    if (!aberto.isFile() || aberto.nlink !== 1 || aberto.ino !== info.ino || aberto.dev !== info.dev) falha('ARTEFATO_INSEGURO', 'arquivo trocado durante leitura');
+    if (!aberto.isFile() || !nlinkTolerado(absoluto, aberto) || aberto.ino !== info.ino || aberto.dev !== info.dev) falha('ARTEFATO_INSEGURO', 'arquivo trocado durante leitura');
     if (fs.realpathSync(absoluto) !== absoluto) falha('ARTEFATO_INSEGURO', 'caminho mudou durante leitura');
     return hash(fs.readFileSync(fd));
   } catch (erro) {
@@ -137,6 +138,32 @@ function pidVivo(pid) {
   if (!Number.isInteger(pid) || pid <= 0) return false;
   try { process.kill(pid, 0); return true; }
   catch (erro) { return erro.code === 'EPERM'; }
+}
+
+// Operação cujo processo dono morreu não pode travar a rodada seguinte (16 de Novembro de 2026).
+// Os relógios e a prova de vida são trocáveis só pelos testes; nenhum argumento de CLI chega aqui.
+export const _dependencias = { pidVivo: null, agoraMs: () => Date.now(), bootMs: () => Date.now() - os.uptime() * 1000 };
+export const LIMITES_ORFA = Object.freeze({
+  margemBootMs: 60_000,          // folga do relógio ao comparar com a hora do último reinício
+  donoMortoSemSinalMs: 900_000,  // dono declarado (pidDono) morto e 15 minutos sem sinal
+  semDonoSemSinalMs: 7_200_000,  // sem dono declarado: só depois de 2 horas sem sinal
+  lockSemDonoMs: 10_000,         // lock criado e nunca assinado
+});
+const vivo = pid => (_dependencias.pidVivo || pidVivo)(pid);
+
+/** Uma operação ativa é órfã quando é certo ou muito provável que ninguém mais a opera. */
+export function diagnosticarOperacaoOrfa(estado) {
+  if (estado?.status !== 'ativa') return { orfa: false };
+  const ultimo = Date.parse(estado.ultimoProgresso || estado.iniciadoEm || '');
+  const ocioso = Number.isFinite(ultimo) ? _dependencias.agoraMs() - ultimo : Infinity;
+  if (Number.isFinite(ultimo) && ultimo < _dependencias.bootMs() - LIMITES_ORFA.margemBootMs) return { orfa: true, motivo: 'reinicio_do_computador' };
+  // Donos que levam o próprio PID no nome (`legado:123`, `apify:123`, `coleta:123`): o processo é o dono, e a morte dele é a prova.
+  const legado = /^(?:legado|coleta|apify|enriquecer|contador|instrucoes):(\d+)$/.exec(String(estado.dono || ''));
+  if (legado) return vivo(Number(legado[1])) ? { orfa: false } : { orfa: true, motivo: 'processo_dono_morto' };
+  if (Number.isInteger(estado.pidDono)) {
+    return !vivo(estado.pidDono) && ocioso >= LIMITES_ORFA.donoMortoSemSinalMs ? { orfa: true, motivo: 'dono_morto_sem_sinal' } : { orfa: false };
+  }
+  return ocioso >= LIMITES_ORFA.semDonoSemSinalMs ? { orfa: true, motivo: 'sem_sinal_ha_horas' } : { orfa: false };
 }
 
 const fingerprint = info => `${info.dev}:${info.ino}`;
@@ -241,7 +268,11 @@ function comLock(p, fn, recuperar = false) {
     try { fs.mkdirSync(p.lock); }
     catch (erro) {
       if (erro.code !== 'EEXIST') throw erro;
-      if (!recuperar) falha('ESCRITA_OCUPADA', 'lock existente; recuperação requer parada confirmada');
+      if (!recuperar) {
+        if (!retirarLockOrfao(p)) falha('ESCRITA_OCUPADA', 'lock existente; recuperação requer parada confirmada');
+        try { fs.mkdirSync(p.lock); }
+        catch { falha('ESCRITA_OCUPADA', 'outro processo adquiriu o lock'); }
+      } else {
       const antigo = fs.lstatSync(p.lock);
       if (!antigo.isDirectory() || antigo.isSymbolicLink()) falha('CAMINHO_INSEGURO', p.lock);
       let donoLock, donoAusente = false;
@@ -262,6 +293,7 @@ function comLock(p, fn, recuperar = false) {
       if (!donoAusente) fs.rmSync(quarentena, { recursive: true });
       try { fs.mkdirSync(p.lock); }
       catch { falha('ESCRITA_OCUPADA', 'outro processo adquiriu o lock'); }
+      }
     }
     meuLock = fs.lstatSync(p.lock);
     exigirSemAtualizacao();
@@ -295,6 +327,45 @@ function proximaGeracao(p) {
   const geracao = controle.geracao + 1;
   gravarJsonAtomico(p.controle, { contrato: CONTRATO, geracao });
   return geracao;
+}
+
+/** Mesma conta de `retomar` + `encerrar`, sem pedir confirmação: a prova é o processo morto. Roda dentro do lock. */
+function encerrarOrfa(p, estado, diagnostico) {
+  if (fs.existsSync(p.tentativas)) estado = projetarLedger(estado, lerTentativas(p)).estado;
+  const registro = { runId: estado.runId, dono: estado.dono, geracao: estado.geracao, motivo: diagnostico.motivo, em: agora() };
+  for (const concessao of Object.values(estado.concessoes || {})) {
+    if (concessao.status === 'ativa') { concessao.status = 'revogada'; concessao.revogadaEm = agora(); }
+  }
+  estado.status = 'encerrada';
+  estado.concessao = null;
+  estado.recuperacoes = [...(estado.recuperacoes || []), registro].slice(-20);
+  estado.geracao = proximaGeracao(p);
+  gravarEstado(p, estado);
+  return { estado, registro };
+}
+
+/** Retira o lock de escrita quando o dono comprovadamente morreu. Devolve se retirou. */
+function retirarLockOrfao(p) {
+  let antigo;
+  try { antigo = fs.lstatSync(p.lock); } catch { return false; }
+  if (!antigo.isDirectory() || antigo.isSymbolicLink()) return false;
+  let dono = null;
+  try { dono = lerJsonSeguro(path.join(p.lock, 'dono.json')); }
+  catch (erro) {
+    if (!String(erro.message).startsWith('ARQUIVO_AUSENTE:')) return false;
+    if (fs.readdirSync(p.lock).length || _dependencias.agoraMs() - antigo.mtimeMs < LIMITES_ORFA.lockSemDonoMs) return false;
+  }
+  if (dono && vivo(dono.pid)) return false;
+  const quarentena = `${p.lock}.revogado-${crypto.randomUUID()}`;
+  try { fs.renameSync(p.lock, quarentena); } catch { return false; }
+  // Se o que saiu do lugar não é o lock órfão visto (outro processo tomou e assinou no intervalo), devolve e desiste.
+  const movido = fs.lstatSync(quarentena);
+  if (movido.dev !== antigo.dev || movido.ino !== antigo.ino) {
+    try { fs.renameSync(quarentena, p.lock); } catch { /* já há outro lock; o dele não foi apagado */ }
+    return false;
+  }
+  fs.rmSync(quarentena, { recursive: true, force: true });
+  return true;
 }
 
 function identidadeForte(estado, entrada) {
@@ -483,10 +554,16 @@ function contarProntasValidas(estado, dados, exceto = null) {
 export function comEscritaCentral(dirDados, fn, arquivos = []) {
   const p = caminhos(dirDados);
   return comLock(p, () => {
-    const estado = lerEstado(p);
+    let estado = lerEstado(p);
     const token = tokenDoAmbiente();
+    if (estado.status === 'ativa' && !token) {
+      const diagnostico = diagnosticarOperacaoOrfa(estado);
+      if (diagnostico.orfa) estado = encerrarOrfa(p, estado, diagnostico).estado;
+    }
     if (estado.status === 'ativa') {
       const papel = verificarToken(p, estado, token);
+      // Escrita com posse válida é sinal de vida da operação: sem isso, uma coleta longa parece parada.
+      if (_dependencias.agoraMs() - Date.parse(estado.ultimoProgresso || 0) > 60_000) gravarEstado(p, estado);
       if (!Array.isArray(arquivos)) falha('ARQUIVOS_INVALIDOS');
       if (papel === 'filho' && !arquivos.length) falha('ARQUIVO_CONCEDIDO_OBRIGATORIO');
       for (const arquivo of arquivos) {
@@ -546,15 +623,22 @@ export function operar(dirDados, acao, args = {}) {
   const recuperar = acao === 'retomar' && args.paradaConfirmada === true;
   return comLock(p, () => {
     let estado = lerEstado(p);
+    let recuperouOrfa = null;
     if (acao === 'iniciar' || acao === 'retomar') {
       if (args.token || tokenDoAmbiente()) falha('TOKEN_INESPERADO', 'início e retomada exigem controlador externo sem token de filho');
-      if (acao === 'iniciar' && estado.status === 'ativa') falha('OPERACAO_ATIVA', estado.runId);
+      if (acao === 'iniciar' && estado.status === 'ativa') {
+        const diagnostico = diagnosticarOperacaoOrfa(estado);
+        if (!diagnostico.orfa) falha('OPERACAO_ATIVA', estado.runId);
+        ({ estado, registro: recuperouOrfa } = encerrarOrfa(p, estado, diagnostico));
+      }
       if (acao === 'retomar' && (estado.status !== 'ativa' || args.paradaConfirmada !== true)) falha('PARADA_NAO_CONFIRMADA');
       if (acao === 'retomar' && string(args.runId, 'runId') !== estado.runId) falha('RUN_DIVERGENTE');
       if (fs.existsSync(p.tentativas)) estado = projetarLedger(estado, lerTentativas(p)).estado;
       estado.runId = crypto.randomUUID();
       estado.geracao = proximaGeracao(p);
       estado.dono = string(args.dono, 'dono');
+      if (args.pidDono !== undefined && !(Number.isInteger(args.pidDono) && args.pidDono > 0)) falha('PID_DONO_INVALIDO');
+      estado.pidDono = args.pidDono ?? null;
       estado.concessao = crypto.randomUUID();
       estado.status = 'ativa';
       estado.iniciadoEm = agora();
@@ -564,7 +648,7 @@ export function operar(dirDados, acao, args = {}) {
       }
       gravarEstado(p, estado);
       if (args.bootstrapNovo === true && !fs.existsSync(p.tentativas)) gravarJsonAtomico(p.tentativas, { contrato: CONTRATO, tentativas: {} });
-      return { token: gerarToken(estado), estado };
+      return { token: gerarToken(estado), estado, ...(recuperouOrfa ? { recuperouOrfa } : {}) };
     }
     const token = args.token || tokenDoAmbiente();
     const papel = verificarToken(p, estado, token);

@@ -68,6 +68,12 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](aplicacao/RESPOSTAS.md) |
 | Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](aplicacao/PERFIL.md) |
 
+## Consultar Respostas e pendências antes de candidatar
+
+Perguntas abertas usam somente a seção enxuta de `aplicacao/RESPOSTAS.md#arsenal-de-entrevista`, consultada por `npm run respostas -- --consultar-base` em `vagas/`. O banco técnico antigo permanece vazio; não recuperar respostas de backups ou históricos. Os modelos públicos chegam pendentes e não comprovam experiência ou aprovação. Fatos e escolhas continuam no Perfil, e a resposta final exige adaptação e revisão da vaga real.
+
+Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Aplicação](aplicacao/README.md#ações-pessoais-por-vaga). Consultar antes de abrir/preparar novamente; pendência conhecida sem fato novo é pulada e informada no fechamento. O Markdown é a fonte e o comando `npm run pendencias:candidaturas` mantém a projeção. Nenhuma instalação pública recebe os registros do mantenedor.
+
 ## Duas regras que valem sempre
 
 1. **Nunca inventar.** Salário, empresa, número, fato de encaixe, frase de currículo. Sem fonte, não entra.

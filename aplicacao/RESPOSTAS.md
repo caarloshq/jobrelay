@@ -44,3 +44,73 @@
 
 
 ## Respostas disponíveis
+
+<a id="arsenal-de-entrevista"></a>
+
+# Respostas para entrevista e candidaturas
+
+Base pessoal para adaptar às perguntas reais. Os modelos abaixo não confirmam experiência nem autorizam preenchimento.
+
+## 1. Fale sobre você e sua trajetória
+
+> Pendente de resposta da pessoa candidata.
+
+## 2. Por que você está buscando uma nova oportunidade?
+
+> Pendente de resposta da pessoa candidata.
+
+## 3. Conte um projeto de que você se orgulha: como descobriu o problema e como resolveu
+
+> Pendente de resposta da pessoa candidata.
+
+## 4. Conte um projeto com IA: qual foi o problema, como foi a investigação e o resultado
+
+> Pendente de resposta da pessoa candidata.
+
+## 5. Como é seu fluxo quando chega uma demanda nova?
+
+> Pendente de resposta da pessoa candidata.
+
+## 6. Conte um debate com o time para passar uma especificação
+
+> Pendente de resposta da pessoa candidata.
+
+## 7. Como era seu time e como você trabalhava no dia a dia?
+
+> Pendente de resposta da pessoa candidata.
+
+## 8. Como você usa as ferramentas da sua profissão e IA no trabalho?
+
+> Pendente de resposta da pessoa candidata.
+
+## 9. Fale de uma experiência profissional anterior
+
+> Pendente de resposta da pessoa candidata.
+
+## 10. Você já trabalhou com produtos ou serviços deste setor?
+
+> Pendente de resposta da pessoa candidata.
+
+## 11. O que você conseguiria ensinar ao time?
+
+> Pendente de resposta da pessoa candidata.
+
+## 12. Como você prioriza quando tudo parece urgente?
+
+> Pendente de resposta da pessoa candidata.
+
+## 13. O que você busca na próxima oportunidade?
+
+> Pendente de resposta da pessoa candidata.
+
+## 14. Pretensão salarial e modelo de contratação
+
+> Pendente de resposta da pessoa candidata.
+
+## 15. Você já utilizou o framework HEART para analisar métricas?
+
+> Pendente de resposta da pessoa candidata.
+
+## Perguntas para fazer ao entrevistador
+
+Adapte as perguntas ao contexto da vaga.

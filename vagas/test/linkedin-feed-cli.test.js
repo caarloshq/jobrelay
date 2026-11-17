@@ -122,24 +122,26 @@ test('Notion exige consulta completa para dedupe e releitura da página para con
   assert.equal(ok(f.cli('planejar')).acao, 'dispensar');
 });
 
-test('proveniência ausente no cache mantém integração pendente; rekey com alias é reconciliado e relido', t => {
-  const f = fixture(t), s = f.pronto();
-  const linha = { status: 'Cancelada', empresa: 'Empresa Exemplo', titulo: 'Senior Product Designer',
-    url: 'https://empresa-exemplo.gupy.io/jobs/12345', paginaId: 'pagina-existente' };
-  const base = { versao: 1, sincronizadoEm: new Date().toISOString(), vagas: { 'gupy:12345': linha } };
-  if (publico) Object.assign(base, { fonte: 'notion', databaseId: 'database-sintetica', paginacao: { completa: true, paginas: 1 } });
-  salvar(join(f.dados, 'notion.json'), base);
-  salvar(join(f.dados, 'vagas.json'), { versao: 1, vagas: { 'gupy:12345': { idExterno: 'gupy:12345', titulo: linha.titulo, empresa: linha.empresa, link: linha.url } } });
-  const p = ok(f.cli('preparar', '--dono', 'ensaio-sintetico', '--revisoes', f.revisoes(s), '--estado', f.estado(base.vagas)));
-  assert.equal(p.novas.length, 0); assert.equal(p.atualizacoesOrigem.length, 1);
-  salvar(join(f.dados, 'vagas.json'), { versao: 1, vagas: {} });
-  const falhou = ok(f.cli('confirmar', '--dono', 'ensaio-sintetico', '--estado', f.estado(base.vagas, false)));
-  assert.equal(falhou.concluida, false); assert.match(falhou.falhas[0].erro, /PROVENIENCIA_CACHE_AUSENTE/);
-  salvar(join(f.dados, 'vagas.json'), { versao: 1, vagas: { 'linkedin:87654': { idExterno: 'linkedin:87654', idsAlternativos: ['gupy:12345'], link: linha.url } } });
-  const r = ok(f.cli('confirmar', '--dono', 'ensaio-sintetico', '--estado', f.estado(base.vagas, false)));
-  assert.equal(r.concluida, true);
-  assert.deepEqual(ler(join(f.dados, 'vagas.json')).vagas['linkedin:87654'].origemFeed, ['https://www.linkedin.com/posts/exemplo-post']);
-  assert.equal(ler(join(f.dados, 'notion.json')).vagas['gupy:12345'].status, 'Cancelada');
+test('proveniência: quadro conhecido permite cache ausente; alias existente é relido; ausência nos dois bloqueia', t => {
+  for (const caso of ['semCache', 'alias', 'desconhecida']) {
+    const f = fixture(t), s = f.pronto();
+    const linha = { status: 'Cancelada', empresa: 'Empresa Exemplo', titulo: 'Senior Product Designer',
+      url: 'https://empresa-exemplo.gupy.io/jobs/12345', paginaId: 'pagina-existente' };
+    const base = { versao: 1, sincronizadoEm: new Date().toISOString(), vagas: { 'gupy:12345': linha } };
+    if (publico) Object.assign(base, { fonte: 'notion', databaseId: 'database-sintetica', paginacao: { completa: true, paginas: 1 } });
+    salvar(join(f.dados, 'notion.json'), base);
+    salvar(join(f.dados, 'vagas.json'), { versao: 1, vagas: { 'gupy:12345': { idExterno: 'gupy:12345', titulo: linha.titulo, empresa: linha.empresa, link: linha.url } } });
+    const p = ok(f.cli('preparar', '--dono', 'ensaio-sintetico', '--revisoes', f.revisoes(s), '--estado', f.estado(base.vagas)));
+    assert.equal(p.novas.length, 0); assert.equal(p.atualizacoesOrigem.length, 1);
+    const cache = caso === 'alias' ? { 'linkedin:87654': { idExterno: 'linkedin:87654', idsAlternativos: ['gupy:12345'], link: linha.url } } : {};
+    salvar(join(f.dados, 'vagas.json'), { versao: 1, vagas: cache });
+    const r = ok(f.cli('confirmar', '--dono', 'ensaio-sintetico', '--estado', f.estado(caso === 'desconhecida' ? {} : base.vagas, false)));
+    assert.equal(r.concluida, caso !== 'desconhecida');
+    if (caso === 'semCache') assert.deepEqual(r.semCache, ['gupy:12345']);
+    if (caso === 'desconhecida') assert.match(r.falhas[0].erro, /PROVENIENCIA_CACHE_AUSENTE/);
+    if (caso === 'alias') assert.deepEqual(ler(join(f.dados, 'vagas.json')).vagas['linkedin:87654'].origemFeed, ['https://www.linkedin.com/posts/exemplo-post']);
+    assert.equal(ler(join(f.dados, 'notion.json')).vagas['gupy:12345'].status, 'Cancelada');
+  }
 });
 
 test('sem desfecho da observação o lote não integra; pacote com cobertura adulterada é recusado', t => {

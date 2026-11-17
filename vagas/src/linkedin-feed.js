@@ -44,7 +44,9 @@ function forte(a, b) {
 
 function referencia(observacao) {
   return { chave: observacao.chave || null, idObservacao: observacao.chave || null,
-    postOriginal: observacao.postOriginal || null,
+    postOriginal: observacao.postOriginal || null, postLink: observacao.postLink || null,
+    linksOferta: [...(observacao.linksOferta || [])],
+    ...(observacao.linksOferta?.length > 1 ? { limiteTriagem: 'UMA_REVISAO_POR_OBSERVACAO: conferir todas as ofertas preservadas antes de concluir a triagem.' } : {}),
     evidencia: observacao.evidencia || null, origem: observacao.origem || 'LinkedIn feed' };
 }
 
@@ -144,6 +146,9 @@ export function prepararLote({ observacoes = [], cache = { vagas: {} }, estado =
       resultado.pendencias.push(problema(obs || {}, 'idObservacao ausente ou repetido')); continue;
     }
     idsObservados.add(obs.chave);
+    if (new Set(obs.linksOferta || []).size > 1) {
+      resultado.pendencias.push(problema(obs, 'MULTIPLAS_OFERTAS: expandir e revisar todos os destinos antes de concluir esta observação')); continue;
+    }
     const link = destino(obs);
     if (!link) {
       if (obs.desfecho?.tipo !== 'pista' || !registrarDesfecho(resultado, obs))
@@ -213,6 +218,7 @@ export function prepararLote({ observacoes = [], cache = { vagas: {} }, estado =
     const aliases = linksVinculados.map((l) => extrair(l)?.idExterno);
     const vaga = {
       ...revisada,
+      ...referencia(obs),
       idObservacao: obs.chave,
       idExterno: id.idExterno,
       fonte: id.fonte,

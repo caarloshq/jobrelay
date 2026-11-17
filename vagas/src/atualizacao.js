@@ -24,7 +24,7 @@ const TIMEOUT_GIT = 30000;
 const proteger = nome => {
   const p = nome.normalize('NFKC').replaceAll('\\', '/').toLowerCase();
   const partes = p.split('/');
-  return partes.some(n => n === '.env' || n.startsWith('.env.') || n.startsWith('regras-do-projeto')) ||
+  return p === 'aplicacao/pendencias-candidaturas.md' || partes.some(n => n === '.env' || n.startsWith('.env.') || n.startsWith('regras-do-projeto')) ||
     /(^|\/)(perfil|respostas|respostas-preenchidas)([.-]|$)/.test(p) ||
     ['historico/', 'aplicacao/historico/', 'backups/', 'backup/'].some(prefixo => p.startsWith(prefixo)) ||
     ['config/', 'data/', 'vagas/config/', 'vagas/data/', 'revisoes/', 'curriculo/',

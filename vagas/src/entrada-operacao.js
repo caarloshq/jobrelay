@@ -12,7 +12,7 @@ export function entrarEscritor(nome) {
   const dia = hoje();
   const diaBackup = new Date().toISOString().slice(0, 10);
   const entradas = {
-    coleta: ['cota-apify.json', 'vagas.json', 'quadro.json', `backups/quadro-${diaBackup}.json`, 'semantico.json', `rodada-${dia}.json`],
+    coleta: ['historico.json', 'fila-notion.json', 'cota-apify.json', 'vagas.json', 'quadro.json', `backups/quadro-${diaBackup}.json`, 'semantico.json', `rodada-${dia}.json`],
     apify: ['vagas.json', 'semantico.json', 'cota-apify.json'],
     enriquecer: ['vagas.json'],
     contador: ['candidaturas.json'],

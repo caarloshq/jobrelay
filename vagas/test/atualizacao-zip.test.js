@@ -144,3 +144,14 @@ test('ZIP exige migração para código fora da allowlist ou remoção de arquiv
   g.release.tagSha='c'.repeat(40);g.aceite.tagSha=g.release.tagSha;
   assert.equal((await atualizarAutomaticamente({...g.opcoes,confirmacao:g.aceite})).motivo,'ZIP_REMOCAO_EXIGE_MIGRACAO');
 });
+
+test('ZIP preserva bytes de pendências pessoais e atualiza somente seu módulo genérico', async t => {
+  const f = fixture(t, { 'jobrelay/aplicacao/PENDENCIAS-CANDIDATURAS.md': '# Modelo vazio\n', 'jobrelay/vagas/src/pendencias-candidaturas.js': '// módulo novo\n' });
+  fs.mkdirSync(path.join(f.raiz, 'aplicacao'));
+  const pendencia = path.join(f.raiz, 'aplicacao/PENDENCIAS-CANDIDATURAS.md');
+  const pessoal = '# Pendências\n\nVaga fictícia aguardando vídeo pessoal.\n';
+  fs.writeFileSync(pendencia, pessoal);
+  assert.equal((await atualizarAutomaticamente({ ...f.opcoes, confirmacao: f.aceite })).status, 'atualizado');
+  assert.equal(fs.readFileSync(pendencia, 'utf8'), pessoal);
+  assert.equal(fs.readFileSync(path.join(f.raiz, 'vagas/src/pendencias-candidaturas.js'), 'utf8'), '// módulo novo\n');
+});

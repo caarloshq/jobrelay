@@ -6,7 +6,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
-import { planoFontes, aplicarPlano, main, ARQUIVOS_COMPARTILHADOS } from '../scripts/sincronizar-fontes.mjs';
+import { planoFontes, aplicarPlano, main, ARQUIVOS_COMPARTILHADOS, ADAPTADORES_PRESERVADOS } from '../scripts/sincronizar-fontes.mjs';
 
 const PRIVADO = 'NAO_EXPORTAR_DADO_PRIVADO_123';
 const gravar = (raiz, caminho, conteudo) => {
@@ -330,4 +330,19 @@ test('--aplicar explícito aplica e relata o backup', t => {
   assert.ok(r.backup);
   assert.match(mensagens.at(-1), /arquivos atualizados/);
   assert.equal(existsSync(join(destino, 'src/fontes/ats.js')), true);
+});
+
+
+test('adaptadores divergentes não são copiados e preservam os bytes do destino', t => {
+  const { origem, destino } = preparar(t);
+  const contrato = nome => (nome === 'src/coletar.js' ? "import { criarFontes } from './fontes-registro.js';\n" : '') + `// Contrato do destino preservado: ${nome}\n`;
+  for (const nome of ADAPTADORES_PRESERVADOS) {
+    gravar(origem, nome, `// Adaptador de origem com contrato próprio: ${nome}\n`);
+    gravar(destino, nome, contrato(nome));
+    assert.equal(ARQUIVOS_COMPARTILHADOS.includes(nome), false);
+  }
+  const plano = planoFontes(origem, destino);
+  assert.equal(plano.some(item => ADAPTADORES_PRESERVADOS.includes(item.caminho)), false);
+  aplicarPlano(plano, destino);
+  for (const nome of ADAPTADORES_PRESERVADOS) assert.equal(readFileSync(join(destino, nome), 'utf8'), contrato(nome));
 });

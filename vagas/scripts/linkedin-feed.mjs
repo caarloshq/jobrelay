@@ -9,6 +9,9 @@ import { DIR_DADOS, RAIZ, perfil, palavras } from '../src/config.js';
 import { planejarConsultasLinkedin, conferirConsultaLinkedin } from '../src/linkedin-consultas.js';
 import { configuracaoFeed } from '../src/linkedin-feed-config.js';
 import { planejar, consultar, executar, META_SEGUNDOS } from '../src/linkedin-feed-sessao.js';
+import { aplicarProveniencia, conferirProvenienciaSalva, decidirLotePendente, arquivoRevisoes, temRevisoes, loteAntigo, reaproveitarNaoConfirmadas } from '../src/linkedin-feed-integracao.js';
+import * as filaNotion from '../src/fila-notion.js';
+import { ingerirDaSessao } from '../src/contatos-posts.js';
 import { prepararLote, validarDesfecho } from '../src/linkedin-feed.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 import { lerEstado, salvarEstado } from '../src/estado-central.js';
@@ -32,10 +35,10 @@ function guardar(caminho, valor) {
   Object.assign(atual, valor);
   salvarEstado(caminho, atual, DIR_DADOS);
 }
-async function fonte() {
-  const modulo = join(RAIZ, 'src/fonte-estado.js');
-  return existsSync(modulo) ? (await import(pathToFileURL(modulo).href)).configuracao().fonte : 'notion';
+async function fonte(opcoes) {
+  return opcoes['--estado'] ? 'notion' : 'local';
 }
+
 function estadoConsultado(nome, agora) {
   const estado = entrada(nome);
   const idade = agora - Date.parse(estado?.consultadoEm);
@@ -64,7 +67,7 @@ function observacoesRevisadas(sessao, revisoes) {
   return sessao.observacoes.map(o => {
     const r = mapa.get(o.id) || {};
     return { ...r, vagaRevisada: r.vagaRevisada ? { ...r.vagaRevisada, revisao: r.revisao || r.vagaRevisada.revisao } : undefined,
-      chave: o.id, titulo: o.cargo, empresa: o.empresa, postOriginal: o.url,
+      chave: o.id, titulo: o.cargo, empresa: o.empresa, postOriginal: o.postLink || o.url, postLink: o.postLink || null, linksOferta: o.linksOferta || [],
       urlCandidatura: o.linkCandidatura, origem: o.origem, evidencia: o.referencia };
   });
 }
@@ -81,7 +84,7 @@ function coberturaPacoteValida(pacote, sessao) {
 }
 function sessaoCapturada(dono) {
   const s = consultar({ dirDados: DIR_DADOS, fuso: fuso() });
-  if (!s || s.estado !== 'capturada' || s.segundosAtivos < META_SEGUNDOS) falha('CAPTURA_AINDA_NAO_CONCLUIDA');
+  if (!s || s.estado !== 'capturada' || (s.segundosAtivos < META_SEGUNDOS && !s.capturaEsgotada)) falha('CAPTURA_AINDA_NAO_CONCLUIDA');
   if (!dono || s.dono !== dono) falha('POSSE_NEGADA: assuma a integração pelo protocolo antes de gravar.');
   return s;
 }
@@ -118,6 +121,45 @@ function guardarConfirmada(vaga, linha, provaRef, modo) {
   if (cache.carregar().vagas[v.idExterno]?.confirmacaoFila?.fonte !== modo) falha('CACHE_NAO_CONFIRMADO');
 }
 
+// Os contatos dos posts passam para a lista de conexões e mensagens. Falha aqui não pode travar a integração.
+function ingerirContatos(sessao) {
+  try { return ingerirDaSessao(sessao); } catch { return null; }
+}
+
+// Início da rodada: o lote que sobrou de antes é integrado, ou fechado com registro, antes de abrir outro.
+// Nada aqui depende do Notion nem de uma pessoa. Leitura de vaga continua sendo trabalho do agente.
+async function integrarPendente(dono, saida) {
+  const agora = new Date(), tz = fuso();
+  const sess = consultar({ dirDados: DIR_DADOS, fuso: tz });
+  const decisao = decidirLotePendente(sess, { agora, fuso: tz, temRevisoes: !!sess && temRevisoes(DIR_DADOS, sess.runId) });
+  const sair = r => { saida(r); return r; };
+  if (['nada', 'captura_parcial', 'precisa_leitura'].includes(decisao.acao)) return sair(decisao);
+  if (sess.dono !== dono) {
+    try { executar({ dirDados: DIR_DADOS, acao: 'assumir', dono, fuso: tz, referencia: 'integrar-pendente: lote capturado sem integração, assumido no início da rodada' }); }
+    catch (erro) { if (/POSSE_NEGADA/.test(erro.message)) return sair({ acao: 'posse_de_outro', runId: sess.runId }); throw erro; }
+  }
+  const relatorio = join(DIR_DADOS, 'linkedin-feed', sess.runId, 'integracao-automatica.json');
+  let confirmadas = [], resumo = {};
+  if (decisao.acao === 'integrar') {
+    let r;
+    try { r = await main(['publicar', '--dono', dono, '--revisoes', arquivoRevisoes(DIR_DADOS, sess.runId)], { saida: () => {} }); }
+    catch (erro) {
+      // Arquivo de leituras inválido não pode prender o lote para sempre: de hoje, o agente corrige; antigo, fecha com registro.
+      const motivo = String(erro.message).split(':')[0];
+      if (!loteAntigo(sess, { agora, fuso: tz })) return sair({ acao: 'integracao_falhou', runId: sess.runId, erro: motivo });
+      r = { concluida: false, confirmadas: [], pendentes: [], falhas: [{ erro: motivo }], triagemPendente: 0 };
+    }
+    if (r.concluida) return sair({ acao: 'integrada', runId: sess.runId, confirmadas: r.confirmadas.length, semCache: r.semCache.length });
+    confirmadas = r.confirmadas.map(c => ({ idExterno: c.idExterno, referencia: c.referencia }));
+    resumo = { pendentes: r.pendentes.length, falhas: r.falhas.length, triagemPendente: r.triagemPendente };
+    if (!loteAntigo(sess, { agora, fuso: tz })) return sair({ acao: 'integracao_incompleta', runId: sess.runId, ...resumo, confirmadas: confirmadas.length });
+  }
+  ingerirContatos(sess);
+  guardar(relatorio, { runId: sess.runId, encerradoEm: agora.toISOString(), motivo: 'lote_antigo_sem_leitura_completa', observacoes: sess.observacoes.length, ...resumo, confirmadas });
+  executar({ dirDados: DIR_DADOS, acao: 'encerrar_sem_integrar', dono, fuso: tz, motivo: 'lote_antigo_sem_leitura_completa', relatorioRef: relatorio, confirmadas, referencia: 'integrar-pendente: lote antigo fechado com registro' });
+  return sair({ acao: 'encerrado_antigo', runId: sess.runId, observacoes: sess.observacoes.length, confirmadas: confirmadas.length });
+}
+
 export async function main(argv = process.argv.slice(2), { saida = valor => process.stdout.write(`${JSON.stringify(valor, null, 2)}\n`) } = {}) {
   const args = [...argv], acao = args.shift() || 'planejar';
   const opcoes = {};
@@ -139,7 +181,7 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
   if (frente !== 'coleta') falha('FRENTE_INVALIDA: aplicação isolada não inicia nem altera o feed.');
   const dono = opcoes['--dono'];
   if (!dono) falha('DONO_OBRIGATORIO');
-  if (['iniciar', 'retomar', 'observar', 'intervalo', 'pausar', 'liberar', 'concluir'].includes(acao)) {
+  if (['iniciar', 'retomar', 'observar', 'intervalo', 'pausar', 'liberar', 'concluir', 'esgotar_rota', 'assumir'].includes(acao)) {
     const dados = opcoes['--arquivo'] ? entrada(opcoes['--arquivo']) : {};
     if (dados.agora !== undefined || dados.dirDados !== undefined || dados.fuso !== undefined || dados.dono !== undefined || dados.acao !== undefined) falha('OPCOES_RESERVADAS: o comando usa relógio real e a instalação corrente.');
     const planoConsultas = planejarConsultasLinkedin(perfil, palavras);
@@ -155,20 +197,25 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
     const sessao = executar({ ...dados, dirDados: DIR_DADOS, acao, dono, frente, fuso: fuso() });
     const r = consultaConferida ? { ...sessao, consultaConferida } : sessao; saida(r); return r;
   }
-  const s = sessaoCapturada(dono), modo = await fonte(), agora = new Date();
+  if (acao === 'integrar-pendente') return integrarPendente(dono, saida);
+  const s = sessaoCapturada(dono), modo = await fonte(opcoes), agora = new Date();
   const arqPacote = join(DIR_DADOS, 'linkedin-feed', s.runId, 'publicacao.json');
   if (acao === 'preparar' || acao === 'publicar') {
     const revisoes = opcoes['--revisoes'] ? entrada(opcoes['--revisoes']) : [];
     const obs = observacoesRevisadas(s, revisoes);
-    const estado = modo === 'local' ? arquivo.carregar() : estadoConsultado(opcoes['--estado'], agora);
+    const estado = modo === 'local' ? arquivo.carregarOperacional() : estadoConsultado(opcoes['--estado'], agora);
     if (modo === 'notion' && estado.completo !== true) falha('CONSULTA_INCOMPLETA: deduplicação exige quadro completo atual.');
-    const lote = prepararLote({ observacoes: obs, cache: cache.carregar(), estado, agora });
+    const cacheAtual = cache.carregar();
+    let lote = prepararLote({ observacoes: obs, cache: cacheAtual, estado, agora });
+    if (modo === 'local' && existsSync(arqPacote)) lote = reaproveitarNaoConfirmadas(lote, lerJsonSeguro(arqPacote), { cache: cacheAtual, runId: s.runId, observacoesHash: hash(s.observacoes) });
     const pacote = { versao: 1, runId: s.runId, fonteEstado: modo, observacoesHash: hash(s.observacoes),
       preparadoEm: agora.toISOString(), consultaRef: estado.provaRef || 'quadro-local-relido', ...lote };
     guardar(arqPacote, pacote);
     if (acao === 'publicar' && modo === 'local') {
-      const quadro = await import(pathToFileURL(join(RAIZ, 'src/quadro.js')).href);
-      quadro.registrar(lote.novas);
+      const { configuracao } = await import('../src/fonte-estado.js');
+      const usaNotion = configuracao().fonte === 'notion';
+      arquivo.mesclar(lote.novas.map(v => ({ ...v, url: v.link, status: 'Avaliar' })), { pendenteNotion: usaNotion, agora });
+      if (usaNotion) filaNotion.enfileirar(lote.novas.map(v => ({ ...v, status: 'Avaliar' })));
       // O caminho comum de confirmação relê o quadro depois da escrita.
       return main(['confirmar', '--dono', dono], { saida });
     }
@@ -181,10 +228,10 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
   const p = lerJsonSeguro(arqPacote);
   if (p.versao !== 1 || p.runId !== s.runId || p.observacoesHash !== hash(s.observacoes) || p.fonteEstado !== modo ||
       !coberturaPacoteValida(p, s)) falha('PACOTE_DESATUALIZADO: prepare novamente.');
-  const estado = modo === 'local' ? arquivo.carregar() : estadoConsultado(opcoes['--estado'], agora);
+  const estado = modo === 'local' ? arquivo.carregarOperacional() : estadoConsultado(opcoes['--estado'], agora);
   // No público, o agente importa o snapshot completo pelo adaptador existente.
   const espelhoPublico = modo === 'notion' && existsSync(join(RAIZ, 'src/fonte-estado.js')) ? arquivo.carregar() : null;
-  const confirmadas = [], pendentes = [], falhas = [];
+  const confirmadas = [], pendentes = [], falhas = [], semCache = [];
   for (const vaga of p.novas) {
     const prova = provaNoEstado(vaga, estado);
     if (!prova || (espelhoPublico && !provaNoEstado(vaga, espelhoPublico))) { pendentes.push(vaga.idExterno); continue; }
@@ -194,26 +241,18 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
     } catch (erro) { falhas.push({ idExterno: vaga.idExterno, erro: erro.message }); }
   }
   if (Array.isArray(p.atualizacoesOrigem) && p.atualizacoesOrigem.length) {
-    const c = cache.carregar(); let mudou = false;
-    for (const a of p.atualizacoesOrigem) {
-      const v = c.vagas[a.idExterno] || Object.values(c.vagas).find(v => (v.idsAlternativos || []).includes(a.idExterno));
-      if (!v) { falhas.push({ idExterno: a.idExterno, erro: 'PROVENIENCIA_CACHE_AUSENTE: reconciliar identidade antes de encerrar.' }); continue; }
-      v.origemFeed = [...new Set([...(v.origemFeed || []), ...(a.origemFeed || [])])];
-      v.idsAlternativos = [...new Set([...(v.idsAlternativos || []), ...(a.idsAlternativos || [])])].filter(id => id !== v.idExterno);
-      mudou = true;
-    }
-    if (mudou) {
+    const c = cache.carregar();
+    const prov = aplicarProveniencia({ cache: c, atualizacoes: p.atualizacoesOrigem, estado });
+    semCache.push(...prov.semCache); falhas.push(...prov.falhas);
+    if (prov.mudou) {
       cache.salvar(c);
-      const salvo = cache.carregar();
-      for (const a of p.atualizacoesOrigem) {
-        const v = salvo.vagas[a.idExterno] || Object.values(salvo.vagas).find(v => (v.idsAlternativos || []).includes(a.idExterno));
-        if (v && (a.origemFeed || []).some(origem => !v.origemFeed?.includes(origem))) falhas.push({ idExterno: a.idExterno, erro: 'PROVENIENCIA_NAO_CONFIRMADA' });
-      }
+      falhas.push(...conferirProvenienciaSalva({ salvo: cache.carregar(), atualizacoes: p.atualizacoesOrigem, semCache: prov.semCache }));
     }
   }
-  const r = { runId: s.runId, fonte: modo, em: agora.toISOString(), confirmadas, pendentes, falhas,
+  const r = { runId: s.runId, fonte: modo, em: agora.toISOString(), confirmadas, pendentes, falhas, semCache,
     triagemPendente: p.pendencias.length, contagem: p.contagem, concluida: !pendentes.length && !falhas.length && !p.pendencias.length };
   const relatorio = join(DIR_DADOS, 'linkedin-feed', s.runId, 'integracao.json'); guardar(relatorio, r);
+  if (r.concluida) ingerirContatos(s);
   if (r.concluida) executar({ dirDados: DIR_DADOS, acao: 'integrado', dono, fuso: fuso(), referencia: relatorio,
     integracao: { pendentes: 0, confirmadas, relatorioRef: relatorio } });
   saida(r); return r;

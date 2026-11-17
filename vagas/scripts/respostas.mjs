@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { lerFontes } from '../src/fontes-respostas.js';
+import { consultarBaseRespostas } from '../src/base-respostas.js';
 import { importarLegado, lerFontesInstalacao } from '../src/fontes-instalacao.js';
 import { comEscritaCentral } from '../src/operacao.js';
 
@@ -83,10 +84,11 @@ async function exportarProjecoes(banco, perfil, fontes) {
 }
 
 const argumentos = process.argv.slice(2);
-if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '--importar-legado'].includes(a)) ||
+if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '--importar-legado', '--consultar-base'].includes(a)) ||
+    (argumentos.includes('--consultar-base') && argumentos.length !== 1) ||
     (argumentos.includes('--importar-legado') && argumentos.length !== 1) ||
     (argumentos.includes('--exportar') && argumentos.includes('--conferir-projecoes'))) {
-  console.error('Uso: node scripts/respostas.mjs [--validar | --exportar | --conferir-projecoes | --importar-legado]');
+  console.error('Uso: node scripts/respostas.mjs [--validar | --exportar | --conferir-projecoes | --importar-legado | --consultar-base]');
   process.exitCode = 2;
 } else {
   try {
@@ -104,7 +106,9 @@ if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '-
       perfil: await readFile(caminhos.perfil, 'utf8'),
     };
     const { banco, perfil } = lerFontes(fontes);
-    if (argumentos.includes('--conferir-projecoes')) {
+    if (argumentos.includes('--consultar-base')) {
+      console.log(JSON.stringify(consultarBaseRespostas(fontes.respostas, banco), null, 2));
+    } else if (argumentos.includes('--conferir-projecoes')) {
       const [bancoAtual, perfilAtual] = await Promise.all([
         readFile(caminhos.bancoJson, 'utf8').then(JSON.parse),
         readFile(caminhos.perfilJson, 'utf8').then(JSON.parse),

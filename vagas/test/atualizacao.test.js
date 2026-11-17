@@ -263,3 +263,18 @@ test('atualização preserva sessão aberta ou checkpoint pendente, sem sondar b
     assert.equal(r.motivo,'NAVEGADOR_SESSAO_PENDENTE');assert.equal(consultas,0);
   }
 });
+
+test('pendências pessoais: release não substitui Markdown e código do módulo continua atualizável', async t => {
+  const nome = 'aplicacao/PENDENCIAS-CANDIDATURAS.md';
+  const pessoal = '# Pendências\n\nVaga fictícia aguardando vídeo pessoal.\n';
+  const f = fixture(t, raiz => { fs.mkdirSync(path.join(raiz, 'aplicacao')); fs.writeFileSync(path.join(raiz, nome), '# Modelo vazio\n'); });
+  fs.mkdirSync(path.join(f.raiz, 'aplicacao'), { recursive: true });
+  fs.writeFileSync(path.join(f.raiz, nome), pessoal);
+  assert.equal((await atualizarAutomaticamente(f.opcoes)).motivo, 'RELEASE_ALTERA_DADOS_PROTEGIDOS');
+  assert.equal(fs.readFileSync(path.join(f.raiz, nome), 'utf8'), pessoal);
+  const g = fixture(t, raiz => fs.writeFileSync(path.join(raiz, 'vagas/src/pendencias-candidaturas.js'), '// módulo novo\n'));
+  fs.mkdirSync(path.join(g.raiz, 'aplicacao')); fs.writeFileSync(path.join(g.raiz, nome), pessoal);
+  assert.equal((await atualizarAutomaticamente(g.opcoes)).status, 'atualizado');
+  assert.equal(fs.readFileSync(path.join(g.raiz, nome), 'utf8'), pessoal);
+  assert.equal(fs.readFileSync(path.join(g.raiz, 'vagas/src/pendencias-candidaturas.js'), 'utf8'), '// módulo novo\n');
+});
