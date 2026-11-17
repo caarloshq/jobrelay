@@ -1,16 +1,18 @@
 # Coleta e preparação de vagas
 
+Antes de navegar no LinkedIn, seguir [a cadência e a interrupção por limites](../vagas/LINKEDIN-LIMITES.md). O procedimento vale para todas as frentes e não comprova liberação de acesso.
+
 Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
 Esta é a entrada independente para buscar, avaliar e preparar vagas. Execute os comandos dentro de `vagas/`. A aplicação tem [runbook próprio](../aplicacao/README.md); o [ciclo completo](../vagas/RODADA-DIARIA.md) encadeia ambos quando autorizado. Leia também [as regras do subsistema](../vagas/AGENTS.md).
 
-A coleta conserva os papéis de busca, preparação, maestro e revisão. Ela atualiza o quadro local por padrão; Notion é opcional e exige a conexão e o snapshot da própria instalação. Nenhuma coleta autoriza o preenchimento ou envio de candidatura.
+A coleta conserva os papéis de busca, preparação, maestro e revisão. Ela atualiza o quadro local por padrão; Notion é opcional e exige conexão autorizada para sincronizar. A coleta operacional lê e grava o quadro local persistido e enfileira a sincronização pendente; GUI e preflight de candidatura com Notion exigem snapshot completo da própria instalação. Nenhuma coleta autoriza o preenchimento ou envio de candidatura.
 
 ## 1. O quadro é o estado
 
 Desde 2026-09-14 o estado das vagas mora em `../vagas/data/quadro.json`, o quadro local (`cd ../vagas && npm run quadro` abre no navegador). A rodada lê esse arquivo sozinha: não existe passo de espelhar. Vaga com status `Já apliquei`, `Entrevista` ou `Cancelada` está **concluída**: sai do radar e da fila de leitura, e continua no quadro com o histórico. `Avaliar` e `Aplicar` seguem ativas.
 
-Quem escolhe Notion usa `cd ../vagas && npm run estado -- --fonte notion --database-id <id>` e consulta a database completa via conexão autorizada do agente. O snapshot normalizado é importado por `cd ../vagas && npm run estado -- --importar <arquivo.json>` para `../vagas/data/notion.json`. Não chamar `arquivo.espelhar()` em modo Notion. O quadro local fica preservado e não é uma fonte alternativa de status. Antes de preencher ou enviar, reconsultar o Notion; o verificador recusa snapshot com mais de cinco minutos, futuro ou sem Gaps.
+Quem escolhe Notion usa `cd ../vagas && npm run estado -- --fonte notion --database-id <id>` e consulta a database completa via conexão autorizada do agente. O snapshot normalizado é importado por `cd ../vagas && npm run estado -- --importar <arquivo.json>` para `../vagas/data/notion.json`. Não chamar `arquivo.espelhar()` em modo Notion. Na GUI e no preflight de candidatura com Notion, o quadro local fica preservado e não substitui a fonte de status. A coleta operacional pode atualizar o estado local e a fila de sincronização sem liberar aplicação. Antes de preencher ou enviar, reconsultar o Notion; o verificador recusa snapshot com mais de cinco minutos, futuro ou sem Gaps.
 
 **Nunca edite o `quadro.json` à mão nem apague uma vaga dele.** Pra mover por código, `quadro.mover(id, status, { por: 'agente' })`: fica no histórico.
 
@@ -153,3 +155,8 @@ Conferir a fonte de estado antes de coletar, porque coletar sem saber o que est�
 ## Revisar os textos da triagem
 
 Antes de registrar resumo e gaps, aplicar [review-escrita](../Skills/review-escrita/SKILL.md) ao texto autoral. A varredura mecânica ajuda a encontrar frases vazias; a leitura editorial confere cada afirmação contra anúncio e currículo. Não varrer a descrição copiada do empregador como texto autoral. Requisito sem prova permanece em gaps.
+
+
+## Conferir títulos descartados por área
+
+A partir desta implementação, o relatório diário guarda a frequência dos títulos rejeitados pelo motivo `titulo fora da area`. Em `vagas/`, execute `npm run descartes` para ver os mais frequentes, `npm run descartes -- --limite 40` para ampliar a lista ou `npm run descartes -- --json` para consultar os dados. A leitura usa os relatórios diários existentes e não muda filtros, notas, quadro ou candidaturas. Rodadas antigas sem esse campo aparecem como sem títulos registrados; seus totais de descarte não permitem reconstruir os nomes.

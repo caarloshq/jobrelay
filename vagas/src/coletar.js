@@ -1,3 +1,4 @@
+import * as historico from './historico.js';
 // Orquestrador da rodada. Node puro, zero LLM: se o Claude falhar depois,
 // o dado do dia ja esta coletado.
 import { entradaFeed } from './linkedin-feed-entrada.js';
@@ -17,7 +18,8 @@ import { resolver as resolverSalario, formatar as formatarSalario } from './sala
 import * as cache from './cache.js';
 import * as semantico from './semantico.js';
 import * as arquivo from './arquivo.js';
-import * as quadro from './quadro.js';
+import * as filaNotion from './fila-notion.js';
+import { contarTitulosForaDaArea } from './descartes.js';
 import { configuracao as fonteEstado } from './fonte-estado.js';
 import { readFileSync } from 'node:fs';
 import { perfil, palavras, linkedin, DIR_DADOS, RAIZ } from './config.js';
@@ -62,9 +64,8 @@ const forcar = process.argv.includes('--forcar');
 const semDdg = process.argv.includes('--sem-ddg');
 
 async function main() {
-  // Falha antes da coleta de rede se o Notion foi escolhido sem snapshot
-  // íntegro da database configurada. Releitura após a rede pega o mais novo.
-  arquivo.carregar();
+  // Coleta usa estado operacional local; GUI e candidatura mantêm seu preflight próprio.
+  arquivo.carregarOperacional();
   entrarEscritor('coleta');
   console.log(formatarVersaoGit(await verificarVersaoGit({ cwd: RAIZ })));
   const inicio = Date.now();
@@ -169,7 +170,7 @@ async function main() {
 
   // ---------- Filtro e score ----------
   const julgamentos = semantico.carregar();
-  const notion = arquivo.carregar();
+  const notion = arquivo.carregarOperacional();
   const todas = [...unicas, ...novasDaBusca];
   const aprovadas = [];
   const descartadas = [];
@@ -213,6 +214,10 @@ async function main() {
   const ativas = aprovadas.filter((v) => !v.concluida);
   ativas.sort((a, b) => b.compatibilidade - a.compatibilidade);
 
+  const memoriaHistorico = historico.atualizarHistorico(historico.carregar(), aprovadas, dia);
+  historico.salvar(memoriaHistorico);
+  historico.avisarReaparecimento(aprovadas, memoriaHistorico, dia);
+
   // ---------- Cache e saida ----------
   const c = cache.carregar();
   let novas = 0;
@@ -237,19 +242,25 @@ async function main() {
   const listaReconciliada = Object.values(reconciliadas);
   const julgamentosAtuais = semantico.carregar();
   for (const v of listaReconciliada) semantico.aplicar(v, julgamentosAtuais);
+  historico.avisarReaparecimento(listaReconciliada, memoriaHistorico, dia);
   const migradas = semantico.migrarChaves(listaReconciliada);
   c.vagas = reconciliadas;
   if (removidos.length) console.log(`\n  ${removidos.length} entrada(s) do cache reconciliada(s) com uma duplicata de outra chamada (${migradas} julgamento(s) migrado(s)).`);
 
   cache.salvar(c);
 
-  // Toda vaga aprovada entra no quadro em "Avaliar". Quem ja esta la so tem o
-  // retrato atualizado; status e historico ficam como a pessoa deixou.
-  // No modo Notion a rodada só lê o snapshot. A publicação/status pertence ao
-  // agente conectado; não se cria card local como se fosse status verdadeiro.
-  const noQuadro = fonteEstado().fonte === 'local'
-    ? quadro.registrar(aprovadas.filter((v) => !v.concluida))
-    : { novas: 0, atualizadas: 0 };
+  // Local primeiro, preservando a escolha de destino e qualquer status terminal conhecido.
+  const candidatas = aprovadas.filter(v => !v.concluida);
+  const usaNotion = fonteEstado().fonte === 'notion';
+  const antesQuadro = arquivo.carregarOperacional();
+  arquivo.mesclar(candidatas.map(v => ({ ...v, url: v.link, status: 'Avaliar' })), { pendenteNotion: usaNotion });
+  let sincronizacaoNotion = null;
+  if (usaNotion) {
+    try { filaNotion.enfileirar(candidatas); sincronizacaoNotion = { ...filaNotion.resumoFila(), destinoConfirmado: false, referencia: 'data/fila-notion.json' }; }
+    catch (erro) { sincronizacaoNotion = { destinoConfirmado: false, erro: String(erro.message), referencia: 'data/quadro.json', proximaAcao: 'Reconciliar a fila de sincronização a partir das vagas locais marcadas pendenteNotion.' }; }
+  }
+  const aposQuadro = arquivo.carregarOperacional();
+  const noQuadro = { novas: Object.keys(aposQuadro.vagas).filter(id => !Object.hasOwn(antesQuadro.vagas, id)).length };
 
   const porFonte = {};
   for (const v of aprovadas) porFonte[v.fonte] = (porFonte[v.fonte] || 0) + 1;
@@ -277,6 +288,10 @@ async function main() {
       jaNoNotion: aprovadas.filter((v) => v.noNotion && !v.concluida).length,
       novasNoQuadro: noQuadro.novas,
     },
+    titulosDescartadosForaDaArea: contarTitulosForaDaArea(descartadas),
+    sincronizacaoNotion,
+    conflitosStatus: aposQuadro.conflitosStatus,
+    reaparecimentos: listaReconciliada.flatMap(v => (Array.isArray(v.gaps) ? v.gaps : []).filter(g => typeof g === 'string' && g.startsWith('Reaparecimento: mesma empresa e cargo registrados por ')).map(aviso => ({ idExterno: v.idExterno, aviso }))),
     porFonte,
     porJanela: contarPor(aprovadas, 'janelaRotulo'),
     motivosDeDescarte: contarPor(descartadas, 'motivo'),
@@ -324,7 +339,7 @@ function imprimir(r, aprovadas) {
   console.log(`  ja no quadro ................. ${t.jaNoNotion}`);
   console.log(`  concluidas (fora do radar) ... ${t.concluidas}`);
   console.log(`  NOVAS no quadro .............. ${t.novasNoQuadro}`);
-  console.log(fonteEstado().fonte === 'local' ? '\n  Quadro: npm run quadro' : '\n  Estado Notion: consulte a database pelo agente e importe um novo snapshot antes da próxima rodada.');
+  console.log(fonteEstado().fonte === 'local' ? '\n  Quadro: npm run quadro' : '\n  Vagas salvas localmente. Confira fila:notion e grave/releia o destino antes de marcar a sincronização como concluída.');
 
   console.log(`\nPor janela de frescor`);
   for (const [k, v] of Object.entries(r.porJanela)) console.log(`  ${k.padEnd(14)} ${v}`);

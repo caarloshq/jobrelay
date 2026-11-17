@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { bloqueiosPendencias } from '../src/pendencias-candidaturas.js';
 import { hashPacoteRespostas } from '../src/revisao-respostas.js';
 import { readFileSync, realpathSync, lstatSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -51,6 +52,12 @@ try {
   } else if (args.length === 2 && args[0] === '--candidatura') {
     const candidatura = ler(resolve(args[1]));
     resultado = validarCandidatura(candidatura);
+    const dados = process.env.VAGAS_DIR_DADOS ? resolve(process.env.VAGAS_DIR_DADOS) : resolve(raiz, 'data');
+    const bloqueios = bloqueiosPendencias(dados, candidatura.idCanonico || candidatura.idExterno);
+    if (bloqueios.length && candidatura.estado !== 'enviada') {
+      resultado.ok = false;
+      resultado.pendencias.push(`Ação pessoal pendente: ${bloqueios.map(p => p.id).join(', ')}. Confira a mesma vaga e etapa antes de liberar envio.`);
+    }
     if (candidatura.estado !== 'enviada' && candidatura.respostas?.length) {
       const fontes = fontesAtuais(candidatura);
       if (fontes.length !== candidatura.fontesEscrita?.length || fontes.some(f => !candidatura.fontesEscrita?.some(r => r.papel === f.papel && r.caminho === f.caminho && r.hash === f.hash))) {

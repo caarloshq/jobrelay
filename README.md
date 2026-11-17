@@ -41,6 +41,8 @@ Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador.
 
 A captura de Vagas, Postagens e Feed do LinkedIn é um **teste beta opcional**, usando sua profissão e seus cargos. Se quiser testar, o login no LinkedIn é obrigatório: entre pelo painel do navegador e avise o assistente quando terminar. As outras fontes continuam disponíveis sem ativar esse teste.
 
+Vídeos, testes e outras ações pessoais ficam no [arquivo de pendências](aplicacao/PENDENCIAS-CANDIDATURAS.md). Enquanto a pendência não for resolvida, o assistente segue para outras vagas. Reencontrar o mesmo anúncio não inicia outra candidatura. Depois de confirmar e registrar um envio concluído, fecha somente a aba correspondente, preservando os rascunhos pendentes.
+
 ## Receba e instale atualizações
 
 Na instalação pelo prompt, o assistente configura uma checagem **a cada três dias** e avisa quando houver uma nova versão. A tarefa depende do agendador e do computador disponíveis. Para instalar a atualização, peça **“atualize para a versão mais recente”**.

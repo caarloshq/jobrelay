@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { lerJsonSeguro, gravarJsonAtomico } from './persistencia.js';
 import { comEscritaCentral } from './operacao.js';
+import { normalizarContato } from './contatos-posts.js';
 
 export const ROTAS_CAPTURA = Object.freeze([
   Object.freeze({ rota: 'jobs', metaSegundos: 900 }),
@@ -10,19 +11,22 @@ export const ROTAS_CAPTURA = Object.freeze([
   Object.freeze({ rota: 'feed', metaSegundos: 180 }),
 ]);
 export const META_SEGUNDOS = ROTAS_CAPTURA.reduce((total, item) => total + item.metaSegundos, 0);
+// Lote capturado que ninguém integra há mais de 2 horas pode ser assumido por quem abriu a rodada (spec 016).
+export const ABANDONO_LOTE_MS = 7_200_000;
 
 // Sessões anteriores sem contrato de rotas preservam a janela total original.
 function progressoRotas(sessao) {
   if (!Object.hasOwn(sessao, 'rotasCaptura')) return { legado: true, rotaAtual: null, rotas: [] };
   if (JSON.stringify(sessao.rotasCaptura) !== JSON.stringify(ROTAS_CAPTURA)) falhar('ROTAS_CAPTURA_INVALIDAS');
+  const esgotadas = new Set((sessao.rotasEsgotadas || []).map(r => r.rota));
   const rotas = ROTAS_CAPTURA.map(item => {
     const segundosAtivos = sessao.intervalos.filter(i => i.rota === item.rota).reduce((total, i) => total + Math.round(i.segundos * 1000), 0) / 1000;
-    return { ...item, segundosAtivos, restantes: Math.max(0, item.metaSegundos * 1000 - Math.round(segundosAtivos * 1000)) / 1000 };
+    return { ...item, segundosAtivos, restantes: Math.max(0, item.metaSegundos * 1000 - Math.round(segundosAtivos * 1000)) / 1000, esgotada: esgotadas.has(item.rota) };
   });
   if (sessao.intervalos.some(i => !ROTAS_CAPTURA.some(r => r.rota === i.rota)) ||
       rotas.some(r => r.segundosAtivos > r.metaSegundos) ||
       rotas.reduce((total, r) => total + Math.round(r.segundosAtivos * 1000), 0) !== Math.round(sessao.segundosAtivos * 1000)) falhar('ROTAS_CAPTURA_DIVERGENTES');
-  return { legado: false, rotaAtual: rotas.find(r => r.restantes > 0)?.rota || null, rotas };
+  return { legado: false, rotaAtual: rotas.find(r => r.restantes > 0 && !r.esgotada)?.rota || null, rotas };
 }
 const falhar = (codigo) => { throw new Error(codigo); };
 const texto = (valor, campo) => {
@@ -167,9 +171,15 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
       if (handoffRef) sessao.handoffRef = handoffRef;
       // Um lote atravessando meia-noite consome a janela do dia em que é retomado.
       if (!controle.dias[dia]) controle.dias[dia] = sessao.runId;
+    } else if (acao === 'assumir') {
+      // Integrar é trabalho local. O lote capturado e abandonado passa para quem está abrindo a rodada.
+      if (sessao.estado !== 'capturada') falhar('ASSUMIR_INVALIDO');
+      if (sessao.dono && sessao.dono !== quem && momento - iso(sessao.assumidaEm || sessao.capturadaEm) < ABANDONO_LOTE_MS) falhar('POSSE_NEGADA');
+      if (sessao.dono !== quem) { sessao.donoAnterior = sessao.dono; sessao.dono = quem; sessao.assumidaEm = momento.toISOString(); }
+      sessao.handoffRef = texto(args.referencia, 'referencia');
     } else {
       if (sessao.dono !== quem) falhar('POSSE_NEGADA');
-      if (sessao.estado === 'ativa' && ['observar', 'intervalo', 'concluir'].includes(acao) && !controle.dias[dia]) {
+      if (sessao.estado === 'ativa' && ['observar', 'intervalo', 'concluir', 'esgotar_rota'].includes(acao) && !controle.dias[dia]) {
         controle.dias[dia] = sessao.runId;
       }
       if (acao === 'observar') {
@@ -177,7 +187,20 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
         const observacao = args.observacao;
         if (!observacao || typeof observacao !== 'object' || Array.isArray(observacao)) falhar('OBSERVACAO_INVALIDA');
         const campo = (nome) => observacao[nome] == null ? null : texto(observacao[nome], nome);
-        const item = { id: crypto.randomUUID(), cargo: campo('cargo'), empresa: campo('empresa'), url: campo('url'), origem: campo('origem'), linkCandidatura: campo('linkCandidatura'), referencia: campo('referencia'), observadaEm: momento.toISOString() };
+        const urlMetadado = (valor, post = false) => {
+          const original = texto(valor, post ? 'postLink' : 'linksOferta');
+          let u; try { u = new URL(original); } catch { falhar('LINK_OBSERVACAO_INVALIDO'); }
+          if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || (post && (!/^([a-z]{2,3}\.)?linkedin\.com$/i.test(u.hostname) || !/^\/(feed\/update|posts)\//.test(u.pathname)))) falhar('LINK_OBSERVACAO_INVALIDO');
+          return original;
+        };
+        const metadados = {};
+        if (observacao.postLink != null) metadados.postLink = urlMetadado(observacao.postLink, true);
+        if (observacao.linksOferta != null) {
+          if (!Array.isArray(observacao.linksOferta) || observacao.linksOferta.length > 100) falhar('LINKS_OFERTA_INVALIDOS');
+          metadados.linksOferta = [...new Set(observacao.linksOferta.map(valor => urlMetadado(valor)))];
+        }
+        const item = { ...metadados, id: crypto.randomUUID(), cargo: campo('cargo'), empresa: campo('empresa'), url: campo('url'), origem: campo('origem'), linkCandidatura: campo('linkCandidatura'), referencia: campo('referencia'), observadaEm: momento.toISOString(),
+          ...(observacao.contato == null ? {} : { contato: normalizarContato(observacao.contato) }) };
         if (!item.url && !item.referencia) falhar('REFERENCIA_OBRIGATORIA');
         sessao.observacoes.push(item);
       } else if (acao === 'intervalo') {
@@ -210,12 +233,39 @@ export function executar({ dirDados, acao, dono, frente = 'coleta', fuso, agora,
           sessao.segmentoInicioEm = null;
         }
         if (acao === 'liberar') sessao.dono = null;
+      } else if (acao === 'esgotar_rota') {
+        // As buscas da rota acabaram antes da meta. A rota seguinte passa a valer e a captura pode fechar.
+        if (sessao.estado !== 'ativa') falhar('CAPTURA_INATIVA');
+        const progresso = progressoRotas(sessao);
+        if (progresso.legado) falhar('ROTAS_CAPTURA_INVALIDAS');
+        if (args.rota !== progresso.rotaAtual) falhar(ROTAS_CAPTURA.some(r => r.rota === args.rota) ? 'ROTA_FORA_DE_ORDEM' : 'ROTA_OBRIGATORIA');
+        const buscas = args.buscas;
+        if (!Number.isInteger(buscas) || buscas < 1) falhar('CAMPO_INVALIDO:buscas');
+        sessao.rotasEsgotadas = [...(sessao.rotasEsgotadas || []), { rota: args.rota, evidencia: texto(args.evidencia, 'evidencia'), buscas,
+          segundosAtivos: progresso.rotas.find(r => r.rota === args.rota).segundosAtivos, em: momento.toISOString() }];
       } else if (acao === 'concluir') {
-        if (sessao.estado !== 'ativa' || sessao.segundosAtivos < META_SEGUNDOS) falhar('TEMPO_INSUFICIENTE');
-        if (progressoRotas(sessao).rotas.some(r => r.restantes > 0)) falhar('TEMPO_ROTA_INSUFICIENTE');
+        if (sessao.estado !== 'ativa') falhar('TEMPO_INSUFICIENTE');
+        const progresso = progressoRotas(sessao);
+        const esgotada = (sessao.rotasEsgotadas || []).length > 0;
+        if (!esgotada && sessao.segundosAtivos < META_SEGUNDOS) falhar('TEMPO_INSUFICIENTE');
+        if (progresso.rotas.some(r => r.restantes > 0 && !r.esgotada)) falhar('TEMPO_ROTA_INSUFICIENTE');
+        if (esgotada) sessao.capturaEsgotada = { rotas: sessao.rotasEsgotadas.map(r => r.rota), segundosAtivos: sessao.segundosAtivos };
         sessao.estado = 'capturada';
         sessao.capturadaEm = momento.toISOString();
         sessao.referenciaConclusao = texto(args.referencia, 'referencia');
+      } else if (acao === 'encerrar_sem_integrar') {
+        // Lote antigo, sem leitura completa: fecha com registro para a janela nova poder abrir (spec 016).
+        if (sessao.estado !== 'capturada') falhar('INTEGRACAO_INVALIDA');
+        const motivo = texto(args.motivo, 'motivo');
+        const observacoes = sessao.observacoes.length;
+        const confirmadas = args.confirmadas ?? [];
+        if (!Array.isArray(confirmadas) || !confirmadas.every(item => item && typeof item.idExterno === 'string' && item.idExterno.trim() && typeof item.referencia === 'string' && item.referencia.trim())) falhar('INTEGRACAO_SEM_PROVA');
+        sessao.integracao = { pendentes: 0, confirmadas, relatorioRef: texto(args.relatorioRef, 'relatorioRef'),
+          encerradoSemIntegrar: { motivo, observacoes, confirmadas: confirmadas.length, em: momento.toISOString() } };
+        sessao.estado = 'integrada';
+        sessao.integradaEm = momento.toISOString();
+        sessao.referenciaIntegracao = texto(args.referencia, 'referencia');
+        controle.pendenteRunId = null;
       } else if (acao === 'integrado') {
         if (sessao.estado !== 'capturada') falhar('INTEGRACAO_INVALIDA');
         const integracao = args.integracao;

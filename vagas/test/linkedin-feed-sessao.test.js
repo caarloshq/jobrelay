@@ -1,3 +1,5 @@
+import { prepararLote } from '../src/linkedin-feed.js';
+import { postsDoRetrato } from '../scripts/lib-captura.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -206,4 +208,43 @@ test('spec 015: abrir o LinkedIn exige aceiteRef, inclusive ao retomar sessão j
   assert.equal(integrar.acao, 'integrar');
   assert.equal('requerAceite' in integrar, false);
   assert.equal(fazer('retomar', 2002).estado, 'capturada');
+});
+
+
+test('produtor e sessão preservam post e todas as ofertas sem fundir requisições', t => {
+  const { comum, fazer } = fixture(t); const sessao = iniciar(fazer);
+  const retrato = `- heading "Feed post" [level=2]
+- paragraph
+  - StaticText "Estamos contratando Product Designer remoto para nosso time. Inscreva-se nas vagas disponíveis."
+- link "Post" [ref=e11]
+  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7001
+- link "Oferta A" [ref=e12]
+  - /url: https://example.invalid/careers?gh_jid=1
+- link "Oferta B" [ref=e13]
+  - /url: https://example.invalid/careers?gh_jid=2`;
+  const produzido = postsDoRetrato(retrato)[0]; assert.ok(produzido);
+  fazer('observar', 1, { observacao: { ...produzido, url: produzido.postLink, referencia: 'fixture:retrato' } });
+  const salvo = consultar({ ...comum, runId: sessao.runId }).observacoes[0];
+  const pacote = prepararLote({ observacoes: [{ ...salvo, chave: salvo.id, postOriginal: salvo.postLink, urlCandidatura: salvo.linksOferta[0], evidencia: salvo.referencia }] });
+  const item = ['novas', 'duplicatas', 'pistas', 'descartadas', 'pendencias'].flatMap(k => pacote[k]).find(x => x.idObservacao === salvo.id);
+  assert.equal(pacote.novas.length, 0); assert.equal(pacote.pendencias.length, 1); assert.match(item.motivo, /MULTIPLAS_OFERTAS/);
+  assert.deepEqual(item.linksOferta, produzido.linksOferta); assert.equal(item.postLink, produzido.postLink); assert.match(item.limiteTriagem, /UMA_REVISAO_POR_OBSERVACAO/);
+  assert.equal(salvo.postLink, produzido.postLink); assert.deepEqual(salvo.linksOferta, produzido.linksOferta); assert.equal(salvo.linksOferta.length, 2);
+  assert.throws(() => fazer('observar', 2, { observacao: { url: salvo.url, linksOferta: ['javascript:alert(1)'] } }), /LINK_OBSERVACAO_INVALIDO/);
+});
+
+
+test('metadados aceitam hosts LinkedIn regionais e rejeitam domínios semelhantes', t => {
+  const { comum, fazer } = fixture(t); const sessao = iniciar(fazer);
+  for (const host of ['br.linkedin.com', 'pt.linkedin.com']) {
+    const postLink = `https://${host}/feed/update/urn:li:activity:7001`;
+    fazer('observar', 1, { observacao: { url: postLink, postLink } });
+  }
+  for (const host of ['br.linkedin.com.example.invalid', 'linkedin.example.invalid', 'evil-linkedin.com', 'long.linkedin.com']) {
+    const postLink = `https://${host}/feed/update/urn:li:activity:7001`;
+    assert.throws(() => fazer('observar', 2, { observacao: { url: postLink, postLink } }), /LINK_OBSERVACAO_INVALIDO/);
+  }
+  const postLink = 'https://user:password@br.linkedin.com/feed/update/urn:li:activity:7001';
+  assert.throws(() => fazer('observar', 2, { observacao: { url: postLink, postLink } }), /LINK_OBSERVACAO_INVALIDO/);
+  assert.equal(consultar({ ...comum, runId: sessao.runId }).observacoes.length, 2);
 });

@@ -2,6 +2,53 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
+// O Google Drive cria um segundo nome temporário (hard link) para cada arquivo que sincroniza,
+// em `.tmp.driveupload`. Esse nome extra não altera o dado, porque toda gravação aqui troca o
+// arquivo inteiro por um novo. Só os nomes extras achados nessas pastas são tolerados; qualquer
+// outro segundo nome continua sendo erro de segurança.
+const PASTAS_TEMPORARIAS_DO_DRIVE = ['.tmp.driveupload', '.tmp.drivedownload'];
+
+function pastasDeLinkConhecido(absoluto) {
+  const pastas = new Set((process.env.VAGAS_PASTAS_LINK_CONHECIDO || '').split(path.delimiter).filter(Boolean).map(p => path.resolve(p)));
+  for (let dir = path.dirname(absoluto); ; ) {
+    for (const nome of PASTAS_TEMPORARIAS_DO_DRIVE) pastas.add(path.join(dir, nome));
+    const pai = path.dirname(dir);
+    if (pai === dir) break;
+    dir = pai;
+  }
+  return [...pastas];
+}
+
+function mesmoInode(a, b) { return a.ino === b.ino && a.dev === b.dev; }
+
+/** Verdadeiro quando o arquivo tem um só nome, ou quando todos os outros nomes são do Drive. */
+export function nlinkTolerado(absoluto, info) {
+  if (info.nlink === 1) return true;
+  if (!info.isFile() || info.isSymbolicLink() || !(info.nlink > 1)) return false;
+  const contados = new Set();
+  const diretorioReal = pasta => {
+    // Pasta "do Drive" que é link simbólico levaria a leitura para qualquer lugar: só diretório de verdade.
+    try { const st = fs.lstatSync(pasta); return st.isDirectory() && !st.isSymbolicLink(); } catch { return false; }
+  };
+  const olhar = pasta => {
+    if (!diretorioReal(pasta)) return [];
+    const filhos = [];
+    for (const entrada of fs.readdirSync(pasta, { withFileTypes: true })) {
+      const caminho = path.join(pasta, entrada.name);
+      let st;
+      try { st = fs.lstatSync(caminho); } catch { continue; }
+      if (st.isFile() && mesmoInode(st, info)) contados.add(caminho);
+      else if (st.isDirectory() && !st.isSymbolicLink()) filhos.push(caminho);
+    }
+    return filhos;
+  };
+  for (const pasta of pastasDeLinkConhecido(absoluto)) {
+    for (const filho of olhar(pasta)) olhar(filho);
+    if (contados.size >= info.nlink - 1) return true;
+  }
+  return false;
+}
+
 function validarAncestrais(diretorio) {
   const raiz = path.parse(diretorio).root;
   let atual = raiz;
@@ -30,7 +77,7 @@ function caminhoSeguro(caminho, criarDiretorio = false) {
   if (real !== diretorio) throw new Error('CAMINHO_INSEGURO: diretório contém link simbólico');
   try {
     const info = fs.lstatSync(absoluto);
-    if (info.isSymbolicLink() || !info.isFile() || info.nlink !== 1) throw new Error('CAMINHO_INSEGURO: JSON existente não é arquivo regular exclusivo');
+    if (info.isSymbolicLink() || !info.isFile() || !nlinkTolerado(absoluto, info)) throw new Error('CAMINHO_INSEGURO: JSON existente não é arquivo regular exclusivo');
   } catch (erro) {
     if (erro.code !== 'ENOENT') throw erro;
   }
@@ -46,13 +93,13 @@ export function lerJsonComHash(caminho, inicial) {
     if (erro.code === 'ENOENT') throw new Error(`ARQUIVO_AUSENTE: ${absoluto}`);
     throw erro;
   }
-  if (!anterior.isFile() || anterior.isSymbolicLink() || anterior.nlink !== 1) throw new Error(`CAMINHO_INSEGURO: ${absoluto}`);
+  if (!anterior.isFile() || anterior.isSymbolicLink() || !nlinkTolerado(absoluto, anterior)) throw new Error(`CAMINHO_INSEGURO: ${absoluto}`);
   let fd;
   try {
     if (fs.realpathSync(absoluto) !== absoluto) throw new Error(`CAMINHO_INSEGURO: ${absoluto}`);
     fd = fs.openSync(absoluto, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
     const aberto = fs.fstatSync(fd);
-    if (!aberto.isFile() || aberto.nlink !== 1 || aberto.ino !== anterior.ino || aberto.dev !== anterior.dev) throw new Error(`ARQUIVO_ALTERADO_DURANTE_LEITURA: ${absoluto}`);
+    if (!aberto.isFile() || !nlinkTolerado(absoluto, aberto) || aberto.ino !== anterior.ino || aberto.dev !== anterior.dev) throw new Error(`ARQUIVO_ALTERADO_DURANTE_LEITURA: ${absoluto}`);
     if (fs.realpathSync(absoluto) !== absoluto) throw new Error(`CAMINHO_INSEGURO: ${absoluto}`);
     const bruto = fs.readFileSync(fd);
     const depois = fs.fstatSync(fd);

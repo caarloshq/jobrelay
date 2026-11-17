@@ -25,3 +25,5 @@ O [runbook](../../vagas/RODADA-DIARIA.md) coordena o ciclo completo e a
 [operação multiagente](../../vagas/OPERACAO-MULTIAGENTE.md) distribui o
 trabalho. Retome a operação existente e suas abas; esta skill não concede nova
 autorização de envio, coleta ou uso de dados.
+
+Ação pessoal de vídeo, teste comportamental ou equivalente: registre em `aplicacao/PENDENCIAS-CANDIDATURAS.md` pelo comando `npm run pendencias:candidaturas` em `vagas/`. Consulte a lista antes de percorrer a fila; não tente enviar a vaga bloqueada. Ação realizada aguarda conferência da mesma vaga e etapa; resolução exige prova.

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configuracaoFeed } from '../src/linkedin-feed-config.js';
-import { operarLote, resumoColeta, resumoAplicacao, resumoColeta2Fora, linhaProgressoAplicacao } from '../src/rodada-lote.js';
+import { operarLote, resumoColeta, resumoAplicacao, resumoColeta2Fora, linhaProgressoAplicacao, resumoRodada } from '../src/rodada-lote.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 
 try {
@@ -18,7 +18,7 @@ try {
   }
   const args = entrada ? lerJsonSeguro(path.resolve(entrada)) : JSON.parse(fs.readFileSync(0, 'utf8'));
   if (!args || Array.isArray(args) || typeof args !== 'object') throw new Error('ENTRADA_INVALIDA');
-  const textos = { resumo_coleta: resumoColeta, resumo_aplicacao: resumoAplicacao, resumo_coleta2_fora: resumoColeta2Fora, progresso_aplicacao: linhaProgressoAplicacao };
+  const textos = { resumo_rodada: resumoRodada, resumo_coleta: resumoColeta, resumo_aplicacao: resumoAplicacao, resumo_coleta2_fora: resumoColeta2Fora, progresso_aplicacao: linhaProgressoAplicacao, resumoRodada };
   if (Object.hasOwn(textos, acao)) {
     process.stdout.write(`${textos[acao](args)}\n`);
   } else {

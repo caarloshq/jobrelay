@@ -9,18 +9,26 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
 
 export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
-  'src/rodada-lote.js', 'scripts/rodada-lote.mjs', 'test/rodada-lote.test.js', 'test/rodada-lote-coleta2.test.js', 'test/coleta2-fronteiras.test.js',
+  'src/intermediario.js', 'test/intermediario.test.js',
+  'src/historico.js', 'test/historico.test.js',
+  'src/descartes.js', 'scripts/descartes.mjs', 'test/descartes.test.js',
+  'src/pendencias-candidaturas.js', 'scripts/pendencias-candidaturas.mjs', 'test/pendencias-candidaturas.test.js',
   'src/regras-projeto.js', 'src/regras-projeto-leitura.js', 'scripts/regras-projeto.mjs', 'test/regras-projeto.test.js',
   'src/coordenacao-frentes.js', 'scripts/coordenar-frentes.mjs', 'test/coordenacao-frentes.test.js', 'COORDENACAO-FRENTES.md',
   'src/linkedin-feed.js', 'src/linkedin-feed-sessao.js', 'src/linkedin-feed-config.js', 'src/linkedin-feed-entrada.js',
-  'scripts/linkedin-feed.mjs', 'src/busca/extrair-id.js', 'config/linkedin-feed.json',
-  'test/linkedin-feed.test.js', 'test/linkedin-feed-sessao.test.js', 'test/linkedin-feed-cli.test.js',
-  'src/fontes-respostas.js', 'test/fontes-respostas.test.js',
+  'src/busca/extrair-id.js', 'config/linkedin-feed.json',
+  'test/linkedin-feed.test.js', 'test/linkedin-feed-sessao.test.js',
+
   'src/base-respostas.js', 'test/base-respostas.test.js',
   'src/registro-md.js', 'scripts/registrar-respostas.mjs', 'test/registro-md.test.js',
   'src/cota-apify.js', 'test/cota-apify.test.js',
   'src/revisao-respostas.js', 'src/texto-respostas.js', 'test/revisao-respostas.test.js', 'test/revisor-operacao.test.js',
   'src/operacao.js', 'src/persistencia.js', 'src/estado-central.js',
+  // Rodada autônoma (spec 016). O controle do navegador headless e `capturar-janela.mjs` ficam só no privado.
+  'src/linkedin-feed-integracao.js', 'src/ocorrencias.js', 'src/autonomia.js',
+  'scripts/contatos-posts.mjs', 'scripts/lib-captura.mjs',
+  'test/autonomia-persistencia.test.js', 'test/autonomia-operacao.test.js', 'test/autonomia-feed.test.js',
+  'test/autonomia-captura.test.js',
   'scripts/operacao.mjs', 'test/operacao.test.js',
   'src/fontes-registro.js', 'src/fontes/ats.js', 'src/fontes/gringas.js',
   'src/fontes/uxjobs.js', 'src/fontes/portais.js', 'src/fontes/importadas.js', 'src/versao-git.js',
@@ -32,6 +40,8 @@ export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
   'test/versao-git.test.js', 'test/sincronizar-fontes.test.js', 'docs-fontes.md', 'docs-importadas.md',
   'src/fontes/careerops/LICENSE', 'src/fontes/careerops/CREDITO.md', 'src/fontes/careerops/user-agent.mjs',
 ]);
+// Adaptadores possuem contratos próprios; integração exige diff e testes nos dois lados.
+export const ADAPTADORES_PRESERVADOS = Object.freeze(["test/linkedin-feed-cli.test.js", "src/rodada-lote.js", "scripts/rodada-lote.mjs", "test/rodada-lote.test.js", "test/rodada-lote-coleta2.test.js", "scripts/linkedin-feed.mjs", "src/fontes-respostas.js", "test/fontes-respostas.test.js", "src/fila-notion.js", "scripts/fila-notion.mjs", "scripts/autonomia.mjs", "test/autonomia-resumo.test.js", "src/contatos-posts.js", "src/coletar.js", "src/entrada-operacao.js", "test/coleta2-fronteiras.test.js"]);
 const PROVIDERS = 'src/fontes/careerops/providers';
 const CAMINHO_PROVIDER = /^src\/fontes\/careerops\/providers\/[a-z0-9_-]+\.(mjs|js)$/;
 const NOMES = Object.freeze({

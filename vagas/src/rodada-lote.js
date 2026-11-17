@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { lerJsonSeguro, gravarJsonAtomico } from './persistencia.js';
 import { comEscritaCentral } from './operacao.js';
+import { lerPendencias } from './pendencias-candidaturas.js';
 
 const erro = codigo => { throw new Error(codigo); };
 const texto = (v, codigo) => typeof v === 'string' && v.trim() ? v.trim() : erro(codigo);
@@ -62,18 +63,21 @@ function vagaConfirmada(v, atual) {
   return ['filaInicial', 'novaConfirmada', 'filaConferida', 'coleta2'].includes(v.origem) && atual.ids.includes(v.id);
 }
 function plano(s, atual, dependencias = {}) {
+  const pendenciasPessoais = (dependencias.consultarPendencias?.() || []).filter(p => ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado));
+  const bloqueados = new Set(pendenciasPessoais.map(p => p.idCanonico));
   const desconhecidas = atual.ids.filter(i => !Object.hasOwn(s.vagas, i));
   const vagas = Object.values(s.vagas);
   const aplicacaoAtiva = s.frentes.includes('aplicacao') && dependencias.modoCandidatura === 'chrome_assistido' && dependencias.autorizadoCandidatura === true;
   const autorizouNovas = Boolean(s.coleta2.aplicarNovas?.provaRef) &&
     aplicacaoAtiva;
   const naoPercorridas = aplicacaoAtiva ? [...new Set([...desconhecidas, ...vagas.filter(v => v.estado === 'nao_percorrida' &&
-    (v.origem !== 'coleta2' || autorizouNovas)).map(v => v.id)])] : [];
-  const independentes = aplicacaoAtiva ? vagas.filter(v => ['preparando', 'aguardando_revisao', 'revisada', 'liberada'].includes(v.estado)).map(v => ({ id: v.id, estado: v.estado })) : [];
+    (v.origem !== 'coleta2' || autorizouNovas)).map(v => v.id)])].filter(i => !bloqueados.has(i)) : [];
+  const independentes = aplicacaoAtiva ? vagas.filter(v => ['preparando', 'aguardando_revisao', 'revisada', 'liberada'].includes(v.estado) && !bloqueados.has(v.id)).map(v => ({ id: v.id, estado: v.estado })) : [];
   const capturaPendente = !coletaLiberada(s);
   const acionaveis = aplicacaoAtiva ? vagas.filter(v => !['enviada', 'descartada', 'adiada'].includes(v.estado) && vagaConfirmada(v, atual) && (v.origem !== 'coleta2' || autorizouNovas)) : [];
-  const retomadas = acionaveis.filter(v => v.origem === 'filaInicial' || v.estado !== 'nao_percorrida');
-  const novasConfirmadas = acionaveis.filter(v => !retomadas.includes(v));
+  const acionaveisSemPendencia = acionaveis.filter(v => !bloqueados.has(v.id));
+  const retomadas = acionaveisSemPendencia.filter(v => v.origem === 'filaInicial' || v.estado !== 'nao_percorrida');
+  const novasConfirmadas = acionaveisSemPendencia.filter(v => !retomadas.includes(v));
   const podePerguntar = s.estado === 'ativa' && naoPercorridas.length === 0 && independentes.length === 0;
   const fronteiraColetaPronta = podePerguntar && coletaLiberada(s);
   const perguntasConcluidas = !aplicacaoAtiva || !s.houvePerguntas || ['encerrada', 'impedida'].includes(s.perguntas?.estado);
@@ -87,11 +91,11 @@ function plano(s, atual, dependencias = {}) {
     : aplicacaoAtiva && !(podePerguntar && perguntasConcluidas) ? 'aplicacao_nao_concluida' : null;
   const novasColeta2 = vagas.filter(v => v.origem === 'coleta2' && !['descartada', 'adiada'].includes(v.estado)).map(v => v.id);
   return { rodadaId: s.rodadaId, estado: s.estado, filaAtualRef: atual.provaRef, naoPercorridas, trabalhoIndependente: independentes,
-    capturaPendente, podeAplicar: s.estado === 'ativa' && aplicacaoAtiva && acionaveis.length > 0,
-    ordemAplicacao: [...retomadas, ...novasConfirmadas].map(v => ({ id: v.id, estado: v.estado, origem: v.origem })), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta, origem: s.origem, coleta2: { ...coleta2, motivoPendente }, podeOferecerColeta2, novasColeta2, podeEncerrar: fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa').map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
+    capturaPendente, podeAplicar: s.estado === 'ativa' && aplicacaoAtiva && acionaveisSemPendencia.length > 0,
+    pendenciasPessoais, resumoPendenciasPessoais: { quantidade: pendenciasPessoais.length }, ordemAplicacao: [...retomadas, ...novasConfirmadas].map(v => ({ id: v.id, estado: v.estado, origem: v.origem })), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta, origem: s.origem, coleta2: { ...coleta2, motivoPendente }, podeOferecerColeta2, novasColeta2, podeEncerrar: fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa' && !bloqueados.has(v.id)).map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
     podeOferecerMelhorias: s.estado !== 'encerrada' && aplicacaoAtiva && fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado === 'nao_oferecida', melhorias: s.melhorias, liberadoSubmit: false };
 }
-export function planejarLote(dirDados, dependencias = {}) { return plano(ler(dirDados), consultar(dependencias), dependencias); }
+export function planejarLote(dirDados, dependencias = {}) { return plano(ler(dirDados), consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }); }
 
 export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
   if (acao === 'planejar') return planejarLote(dirDados, dependencias);
@@ -115,7 +119,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
       if (args.rodadaId !== s.rodadaId) erro('RODADA_DIVERGENTE');
       if (s.estado === 'encerrada') erro('RODADA_ENCERRADA');
       if (acao === 'encerrar') {
-        if (!plano(s, consultar(dependencias), dependencias).podeEncerrar) erro('FECHAMENTO_PENDENTE');
+        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podeEncerrar) erro('FECHAMENTO_PENDENTE');
         s.coleta2 = coleta2Efetiva(s);
         s.estado = 'encerrada'; s.encerramentoRef = texto(args.provaRef, 'PROVA_ENCERRAMENTO_OBRIGATORIA');
       } else if (acao === 'integrar') {
@@ -208,7 +212,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         for (const v of Object.values(s.vagas)) if (v.origem === 'coleta2' && v.estado === 'nao_percorrida') { v.estado = 'adiada'; v.provaRef = provaRef; n++; }
         s.coleta2 = { ...s.coleta2, adiadas: (s.coleta2.adiadas || 0) + n };
       } else if (acao === 'perguntas') {
-        if (!plano(s, consultar(dependencias), dependencias).podePerguntar) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podePerguntar) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         if (!['apresentada', 'encerrada', 'impedida'].includes(args.estado)) erro('FASE_PERGUNTAS_INVALIDA');
         if (args.estado !== 'apresentada' && s.perguntas?.estado !== 'apresentada') erro('PERGUNTAS_NAO_APRESENTADAS');
         if (args.estado === 'encerrada' && Object.values(s.vagas).some(v => v.estado === 'aguardando_pessoa')) erro('RESPOSTAS_PESSOAIS_PENDENTES');
@@ -216,10 +220,10 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
       } else if (acao === 'melhorias') {
         if (!s.frentes.includes('aplicacao')) erro('MELHORIAS_SOMENTE_APLICACAO');
         if (s.melhorias.estado !== 'nao_oferecida' || typeof args.aceite !== 'boolean') erro('ACEITE_MELHORIAS_INVALIDO');
-        if (!plano(s, consultar(dependencias), dependencias).podeOferecerMelhorias) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podeOferecerMelhorias) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         s.melhorias = { estado: args.aceite ? 'aceita' : 'recusada', provaRef: texto(args.provaRef, 'PROVA_ACEITE_OBRIGATORIA') };
       } else if (acao === 'concluir_melhorias') {
-        if (!plano(s, consultar(dependencias), dependencias).fronteiraOperacionalPronta) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).fronteiraOperacionalPronta) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         if (s.melhorias.estado !== 'aceita' || !['concluida', 'impedida'].includes(args.estado)) erro('CONCLUSAO_MELHORIAS_INVALIDA');
         s.melhorias = { ...s.melhorias, estado: args.estado, conclusaoRef: texto(args.provaRef, 'PROVA_MELHORIAS_OBRIGATORIA') };
       } else {
@@ -257,12 +261,14 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
           v.revisao = { pacoteHash: v.pacote.hash, revisor, aprovada: args.aprovada, provaRef: texto(args.provaRef, 'PROVA_REVISAO_OBRIGATORIA') };
           v.aceite = null; v.estado = args.aprovada ? 'revisada' : 'preparando';
         } else if (acao === 'liberar_envio') {
+          if (lerPendencias(dirDados).some(p => p.idCanonico === v.id && ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado))) erro('ACAO_PESSOAL_PENDENTE');
           if (!v.pacote || args.pacoteHash !== v.pacote.hash || !v.revisao?.aprovada || v.revisao.pacoteHash !== v.pacote.hash) erro('REVISAO_EXATA_OBRIGATORIA');
           if (typeof dependencias.gateEnvio !== 'function') erro('GATE_ENVIO_OBRIGATORIO');
           const aceite = dependencias.gateEnvio(structuredClone({ rodadaId: s.rodadaId, id: v.id, pacote: v.pacote, revisao: v.revisao }));
           if (aceite?.aceito !== true) erro('GATE_ENVIO_RECUSADO');
           v.aceite = { pacoteHash: v.pacote.hash, provaRef: texto(aceite.provaRef, 'PROVA_ACEITE_OBRIGATORIA') }; v.estado = 'liberada';
         } else if (acao === 'confirmar_envio') {
+          if (lerPendencias(dirDados).some(p => p.idCanonico === v.id && ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado))) erro('ACAO_PESSOAL_PENDENTE');
           if (v.estado !== 'liberada' || args.pacoteHash !== v.aceite?.pacoteHash) erro('ACEITE_EXATO_OBRIGATORIO');
           v.provaRef = texto(args.provaRef, 'CONFIRMACAO_EXTERNA_OBRIGATORIA'); v.estado = 'enviada';
         } else erro('ACAO_DESCONHECIDA');
@@ -291,7 +297,7 @@ const linhaUnica = (v, codigo) => typeof v === 'string' && v.trim() && !/[\u0000
 // encontradas = compatíveis gravadas na fila + compatíveis aguardando gravação + descartadas.
 const fase = valor => valor === undefined || valor === 'principal' ? 'principal' : valor === 'coleta2' ? 'coleta2' : erro('FASE_INVALIDA');
 export function resumoColeta(entrada) {
-  const campos = somenteCampos(entrada, ['encontradas', 'compativeis', 'descartadas', 'pendentesGravacao', 'fase']);
+  const campos = somenteCampos(entrada, ['encontradas', 'compativeis', 'descartadas', 'pendentesGravacao', 'fase', 'erros', 'precisaDeVoce']);
   const { encontradas, compativeis, descartadas, pendentesGravacao = 0 } = campos;
   const nome = fase(campos.fase) === 'coleta2' ? 'Coleta 2 (LinkedIn assistido)' : 'Coleta';
   if (![encontradas, compativeis, descartadas, pendentesGravacao].every(contagem) ||
@@ -299,17 +305,47 @@ export function resumoColeta(entrada) {
   const titulo = pendentesGravacao ? `${nome} com gravação pendente ⚠️` : `${nome} concluída ✅`;
   const tabela = `| Resultado | Vagas |\n|---|---:|\n| 🔎 Encontradas | ${encontradas} |\n| 🎯 Compatíveis (adicionadas à fila) | ${compativeis} |\n| 🗑️ Descartadas (fora do perfil, encerradas, duplicadas ou já conhecidas) | ${descartadas} |`;
   const aviso = pendentesGravacao ? `\n\n${pendentesGravacao === 1 ? '1 vaga compatível aguarda' : `${pendentesGravacao} vagas compatíveis aguardam`} gravação na fila.` : '';
-  return `${titulo}\n\n${tabela}${aviso}`;
+  return `${titulo}\n\n${tabela}${aviso}${rodape(campos)}`;
+}
+
+// Rodapé opcional dos resumos (spec 016): erros e o que precisa de a pessoa candidata, em linguagem de gente.
+const MAX_PEDIDOS = 6;
+function rodape(campos) {
+  const partes = [];
+  if (campos.erros !== undefined) {
+    if (!contagem(campos.erros)) erro('CONTAGENS_INCOMPATIVEIS');
+    partes.push(`⚠️ Com erro: ${campos.erros}`);
+  }
+  if (campos.precisaDeVoce !== undefined) {
+    if (!Array.isArray(campos.precisaDeVoce)) erro('PRECISA_DE_VOCE_INVALIDO');
+    const itens = campos.precisaDeVoce.map(t => linhaUnica(t, 'PRECISA_DE_VOCE_INVALIDO'));
+    if (itens.some(t => /[—–]/.test(t))) erro('TRAVESSAO_NAO_PERMITIDO');
+    if (itens.length) {
+      const mostrados = itens.slice(0, MAX_PEDIDOS).map(t => `- ${t}`);
+      if (itens.length > MAX_PEDIDOS) mostrados.push(`- e mais ${itens.length - MAX_PEDIDOS}`);
+      partes.push(`Precisa de você\n${mostrados.join('\n')}`);
+    }
+  }
+  return partes.length ? `\n\n${partes.join('\n\n')}` : '';
+}
+
+// Fechamento da rodada autônoma: os quatro números e a lista. Cada número é de vagas únicas.
+export function resumoRodada(entrada) {
+  const { mapeadas, aplicadas, comErro, precisaDeVoce = [] } = somenteCampos(entrada, ['mapeadas', 'aplicadas', 'comErro', 'precisaDeVoce']);
+  if (![mapeadas, aplicadas, comErro].every(contagem)) erro('CONTAGENS_INCOMPATIVEIS');
+  const titulo = comErro ? 'Rodada concluída com erros ⚠️' : precisaDeVoce.length ? 'Rodada concluída, aguardando você ⏳' : 'Rodada concluída ✅';
+  const tabela = `| Resultado | Vagas |\n|---|---:|\n| 🔎 Mapeadas | ${mapeadas} |\n| 📨 Aplicadas | ${aplicadas} |\n| ⚠️ Com erro | ${comErro} |`;
+  return `${titulo}\n\n${tabela}${rodape({ precisaDeVoce })}`;
 }
 
 // `enviadas` vem do chamador somente após recibos reais; o formatador não verifica portais.
 export function resumoAplicacao(entrada) {
-  const campos = somenteCampos(entrada, ['total', 'enviadas', 'pendentes', 'naoEnviadas', 'fase']);
+  const campos = somenteCampos(entrada, ['total', 'enviadas', 'pendentes', 'naoEnviadas', 'fase', 'erros', 'precisaDeVoce']);
   const { total, enviadas, pendentes, naoEnviadas } = campos;
   const nome = fase(campos.fase) === 'coleta2' ? 'Aplicação das novas da coleta 2' : 'Aplicação';
   if (![total, enviadas, pendentes, naoEnviadas].every(contagem) || enviadas + pendentes + naoEnviadas !== total) erro('CONTAGENS_INCOMPATIVEIS');
   const titulo = pendentes ? `${nome} encerrada com pendências ⏳` : `${nome} concluída ✅`;
-  return `${titulo}\n\n| Resultado | Vagas |\n|---|---:|\n| 📨 Enviadas (recebimento confirmado) | ${enviadas} |\n| ⏳ Pendentes (aguardando você/site, envio incerto ou impedimento com próxima ação) | ${pendentes} |\n| 🚫 Não enviadas (encerradas, fora do perfil ou sem próxima ação viável) | ${naoEnviadas} |`;
+  return `${titulo}\n\n| Resultado | Vagas |\n|---|---:|\n| 📨 Enviadas (recebimento confirmado) | ${enviadas} |\n| ⏳ Pendentes (aguardando você/site, envio incerto ou impedimento com próxima ação) | ${pendentes} |\n| 🚫 Não enviadas (encerradas, fora do perfil ou sem próxima ação viável) | ${naoEnviadas} |${rodape(campos)}`;
 }
 
 // Coleta 2 que não rodou ou parou (spec 015). Sem travessão; motivos sem resumo são recusados.

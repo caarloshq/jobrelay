@@ -1,10 +1,22 @@
 # Aplicação em vagas
 
+Antes de navegar no LinkedIn, seguir [a cadência e a interrupção por limites](../vagas/LINKEDIN-LIMITES.md). O procedimento vale para todas as frentes e não comprova liberação de acesso.
+
 Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura, pergunta da coleta 2 depois da aplicação e aplicação automática das novas somente quando modo e opt-in desta instalação estão ativos. Melhorias opcionais vêm somente depois da fila. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
 Esta é a entrada independente para preparar, preencher e acompanhar candidaturas já selecionadas. Leia [as regras de respostas](#protocolo-de-respostas), [o perfil](PERFIL.md), [as respostas abertas](RESPOSTAS.md) e [o histórico literal](RESPOSTAS-PREENCHIDAS.md). A [coleta](../coleta/README.md) é uma frente separada; a aplicação não dispara fontes, Apify nem uma rodada.
 
 O maestro/aplicador mantém o navegador e o registro; o preparador devolve rascunho e lacunas; o revisor confere o pacote e devolve falhas. O modo padrão é só mapear. Preenchimento e envio exigem o opt-in e as autorizações locais já definidos na instalação.
+
+### Ações pessoais por vaga
+
+Vídeo, teste comportamental e outra ação que só a pessoa pode concluir ficam em [Pendências pessoais de candidaturas](PENDENCIAS-CANDIDATURAS.md). Registre ID estável, ID canônico da vaga, empresa/cargo, tipo, etapa, URL ou checkpoint, exigência, próxima ação, fonte e data. O Markdown é a fonte; `vagas/data/pendencias-candidaturas.json` é projeção. O comando em `vagas/` é `npm run pendencias:candidaturas -- listar|registrar|realizada|resolver|dispensar`. `registrar --arquivo entrada.json` aceita objeto ou lista explícita e é idempotente para IDs e conteúdo iguais; não migra por palavras como “vídeo” ou “teste”. `realizada --id ID` mantém o bloqueio até conferir a mesma vaga e etapa; `resolver --id ID --prova "ID_CANONICO|ETAPA|REFERENCIA"` ou `dispensar --id ID --prova "ID_CANONICO|ETAPA|REFERENCIA"` libera somente com evidência. A ausência da vaga numa rodada não apaga o registro. O planejamento separa `pendenciasPessoais` de `ordemAplicacao`; outras vagas e retomadas técnicas continuam acionáveis. O gate de respostas e a liberação de envio recusam a vaga bloqueada.
+
+Antes de abrir o formulário ou preparar novamente uma candidatura, consultar esse arquivo e os registros atuais da vaga pelo ID canônico e pelos aliases já confirmados. Pendência conhecida sem fato novo permanece pendente: não reaplicar, não refazer o rascunho e não repetir a mesma pergunta. Seguir para a próxima vaga acionável. Reencontrar a mesma requisição em outra fonte ou no dia seguinte não cria uma nova tentativa nem outro registro de pendência. Retomar somente depois de resposta, ação pessoal concluída ou mudança comprovada que permita avançar, conferindo a mesma vaga e etapa. Não fundir vagas distintas apenas por empresa ou título.
+
+No fechamento, listar as vagas puladas por pendência com empresa/cargo, o que falta, próxima ação e referência ao registro; não contá-las como novas tentativas ou envios. O registro continua visível até resolução conferida ou dispensa com prova. Pendências técnicas ou de informação conservam suas fontes atuais e só são retomadas quando houver um passo disponível e autorizado; não reabrir repetidamente um bloqueio inalterado. Esta separação não cria um novo banco de respostas.
+
+Exemplo sintético de entrada: `{"id":"P-EXEMPLO-1","idCanonico":"ats:exemplo","empresa":"Empresa Exemplo","cargo":"Designer","tipo":"video","etapa":"questionario","urlCheckpoint":"https://example.invalid/vaga","exigencia":"Gravar vídeo","proximaAcao":"Pessoa gravar vídeo","fonte":"formulario:2026-11-16","data":"2026-11-16"}`. Não inclua resposta, credencial ou documento.
 
 ## Fontes locais e espelho Notion opcional
 
@@ -316,6 +328,8 @@ para o ensino médio de verdade.
 5. Guardar a resposta exata e a confirmação em `../vagas/data/respostas-enviadas/`, como
    define `RESPOSTAS.md`. Pergunta nova entra no banco antes de ser usada; aprovação
    posterior não é autorização retroativa para enviar um rascunho.
+
+6. No momento da aplicação, depois de observar o recibo da plataforma, salvar sua prova e concluir os registros acima, fechar somente a aba da candidatura recebida, antes de seguir para a próxima. Identificar a aba por ID e URL, usar o fechamento de aba do transporte vigente e conferir o inventário. Registrar o fechamento no checkpoint. Não encerrar o navegador ou a sessão para fechar uma aba. Clique em Enviar ou envio incerto não comprovam sucesso: preservar o formulário e reconciliar sem repetir o envio. Se houver vídeo, teste ou outra etapa pessoal adicional, registrar a pendência e preservar sua aba, mesmo quando o envio inicial já tenha recibo. As demais pendências conservam abas e checkpoint; abas descartadas podem fechar depois do motivo registrado. Não fechar abas pessoais ou de outro controlador por associação.
 
 ### O relatório final
 
