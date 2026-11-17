@@ -232,18 +232,13 @@ test('conclusão de melhorias reconsulta a fila e recusa trabalho surgido ou ret
   assert.equal(f.plano().melhorias.estado, 'concluida');
 });
 
-test('resumo da aplicação usa o mesmo formato e só se declara concluído sem pendência', () => {
-  assert.equal(resumoAplicacao({ total: 12, enviadas: 10, pendentes: 0, naoEnviadas: 2 }), [
-    'Aplicação concluída ✅', '',
-    '| Resultado | Vagas |', '|---|---:|',
-    '| 📨 Enviadas (recebimento confirmado) | 10 |',
-    '| ⏳ Pendentes (aguardando você/site, envio incerto ou impedimento com próxima ação) | 0 |',
-    '| 🚫 Não enviadas (encerradas, fora do perfil ou sem próxima ação viável) | 2 |',
-  ].join('\n'));
-  const comPendencia = resumoAplicacao({ total: 5, enviadas: 2, pendentes: 2, naoEnviadas: 1 });
-  assert.match(comPendencia, /^Aplicação encerrada com pendências ⏳/);
-  assert.doesNotMatch(comPendencia, /concluída|[—–]/);
-  assert.match(resumoAplicacao({ total: 0, enviadas: 0, pendentes: 0, naoEnviadas: 0 }), /📨 Enviadas \(recebimento confirmado\) \| 0/);
+test('resumo da aplicação preserva contagens internas sem exibi-las', () => {
+  const pronto = resumoAplicacao({ total: 12, enviadas: 10, pendentes: 0, naoEnviadas: 2 });
+  assert.equal(pronto, '✅ Terminei os envios para as vagas autorizadas. Os resultados estão registrados no quadro.');
+  const pendente = resumoAplicacao({ total: 5, enviadas: 2, pendentes: 2, naoEnviadas: 1, erros: 1 });
+  assert.match(pendente, /continuam salvas como pendentes/);
+  assert.doesNotMatch(pendente, /[0-9]|candidatura|Resultado|Com erro|[—–]/i);
+  assert.doesNotMatch(resumoAplicacao({ total: 0, enviadas: 0, pendentes: 0, naoEnviadas: 0 }), /[0-9]/);
 });
 
 test('resumo da aplicação recusa soma incorreta, números inválidos e campos fora do contrato', () => {
@@ -255,12 +250,12 @@ test('resumo da aplicação recusa soma incorreta, números inválidos e campos 
 });
 
 test('terminal mostra uma linha por vaga, numerada a partir de 1', () => {
-  assert.equal(linhaProgressoAplicacao({ numero: 1, vaga: 'Senior Product Designer' }), 'Aplicando na vaga 1: Senior Product Designer');
-  assert.equal(linhaProgressoAplicacao({ numero: 2, vaga: '  Analista   Financeiro ' }), 'Aplicando na vaga 2: Analista Financeiro');
+  assert.equal(linhaProgressoAplicacao({ numero: 1, vaga: 'Senior Product Designer' }), 'Preparando envio para Senior Product Designer');
+  assert.equal(linhaProgressoAplicacao({ numero: 2, vaga: '  Analista   Financeiro ' }), 'Preparando envio para Analista Financeiro');
   for (const numero of [0, -1, 1.5, '1']) assert.throws(() => linhaProgressoAplicacao({ numero, vaga: 'X' }), /NUMERO_VAGA_INVALIDO/);
   for (const vaga of ['', '  ', 'A\nB', null]) assert.throws(() => linhaProgressoAplicacao({ numero: 1, vaga }), /NOME_VAGA_INVALIDO/);
-  assert.equal(linhaProgressoAplicacao({ numero: 3, vaga: 'Product Designer', empresa: 'Acme' }), 'Aplicando na vaga 3: Product Designer · Acme');
-  for (const empresa of ['', null]) assert.equal(linhaProgressoAplicacao({ numero: 1, vaga: 'X', empresa }), 'Aplicando na vaga 1: X');
+  assert.equal(linhaProgressoAplicacao({ numero: 3, vaga: 'Product Designer', empresa: 'Acme' }), 'Preparando envio para Product Designer · Acme');
+  for (const empresa of ['', null]) assert.equal(linhaProgressoAplicacao({ numero: 1, vaga: 'X', empresa }), 'Preparando envio para X');
   for (const empresa of ['  ', 'A\nB', 7]) assert.throws(() => linhaProgressoAplicacao({ numero: 1, vaga: 'X', empresa }), /EMPRESA_INVALIDA/);
   assert.throws(() => linhaProgressoAplicacao({ numero: 1, vaga: 'A\u001b[31mB' }), /NOME_VAGA_INVALIDO/);
   assert.throws(() => linhaProgressoAplicacao({ numero: 1, vaga: 'X', etapa: 'upload' }), /CAMPO_DESCONHECIDO/);
@@ -279,8 +274,8 @@ test('CLI imprime resumos e progresso e devolve só o código de erro', () => {
   const cli = path.join(raiz, 'scripts', 'rodada-lote.mjs');
   const rodar = (acao, entrada) => spawnSync(process.execPath, [cli, acao], { input: JSON.stringify(entrada), encoding: 'utf8' });
   assert.match(rodar('resumo_coleta', { encontradas: 48, compativeis: 12, descartadas: 36 }).stdout, /^Coleta concluída ✅/);
-  assert.match(rodar('resumo_aplicacao', { total: 1, enviadas: 1, pendentes: 0, naoEnviadas: 0 }).stdout, /^Aplicação concluída ✅/);
-  assert.equal(rodar('progresso_aplicacao', { numero: 3, vaga: 'Product Designer' }).stdout, 'Aplicando na vaga 3: Product Designer\n');
+  assert.match(rodar('resumo_aplicacao', { total: 1, enviadas: 1, pendentes: 0, naoEnviadas: 0 }).stdout, /^✅ Terminei os envios/);
+  assert.equal(rodar('progresso_aplicacao', { numero: 3, vaga: 'Product Designer' }).stdout, 'Preparando envio para Product Designer\n');
   const e = rodar('progresso_aplicacao', { numero: 0, vaga: 'NAO-ECOAR-SEGREDO' });
   assert.notEqual(e.status, 0);
   assert.equal(e.stderr.trim(), '{"ok":false,"erro":"NUMERO_VAGA_INVALIDO"}');

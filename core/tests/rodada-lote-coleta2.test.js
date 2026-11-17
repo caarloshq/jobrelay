@@ -361,11 +361,11 @@ test('textos de resumo da coleta 2 e da segunda passagem, sem travessão', () =>
     'Coleta 2 (LinkedIn assistido) concluída ✅', '', '| Resultado | Vagas |', '|---|---:|', '| 🔎 Encontradas | 20 |',
     '| 🎯 Compatíveis (adicionadas à fila) | 5 |', '| 🗑️ Descartadas (fora do perfil, encerradas, duplicadas ou já conhecidas) | 15 |'].join('\n'));
   assert.match(resumoColeta({ fase: 'coleta2', encontradas: 3, compativeis: 1, descartadas: 0, pendentesGravacao: 2 }), /^Coleta 2 \(LinkedIn assistido\) com gravação pendente ⚠️/);
-  assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 2, pendentes: 0, naoEnviadas: 0 }), /^Aplicação das novas da coleta 2 concluída ✅/);
-  assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 1, pendentes: 1, naoEnviadas: 0 }), /^Aplicação das novas da coleta 2 encerrada com pendências ⏳/);
+  assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 2, pendentes: 0, naoEnviadas: 0 }), /^✅ Terminei os envios/);
+  assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 1, pendentes: 1, naoEnviadas: 0 }), /^✅ Terminei esta etapa de envio/);
   const resumo = resumoAplicacao({ total: 3, enviadas: 1, pendentes: 1, naoEnviadas: 1 });
-  assert.match(resumo, /⏳ Pendentes \(aguardando você\/site, envio incerto ou impedimento com próxima ação\)/);
-  assert.match(resumo, /🚫 Não enviadas \(encerradas, fora do perfil ou sem próxima ação viável\)/);
+  assert.match(resumo, /continuam salvas como pendentes/);
+  assert.doesNotMatch(resumo, /Resultado|Enviadas|Não enviadas|[0-9]/);
   assert.match(resumoColeta({ encontradas: 1, compativeis: 1, descartadas: 0 }), /^Coleta concluída ✅/);
   assert.throws(() => resumoColeta({ fase: 'outra', encontradas: 0, compativeis: 0, descartadas: 0 }), /FASE_INVALIDA/);
   assert.equal(resumoColeta2Fora({ motivo: 'recusada' }), 'Coleta 2 (LinkedIn assistido) ficou de fora ⏭️\n\nVocê escolheu fechar a rodada sem ela.');

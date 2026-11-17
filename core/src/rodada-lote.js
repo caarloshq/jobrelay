@@ -1,3 +1,4 @@
+import { formatarMensagemOperacao } from './mensagens-operacao.js';
 // Cobertura da rodada e aceite de pacotes. Não preenche formulários nem autoriza Submit.
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -310,7 +311,7 @@ export function resumoColeta(entrada) {
 
 // Rodapé opcional dos resumos (spec 016): erros e o que precisa de a pessoa candidata, em linguagem de gente.
 const MAX_PEDIDOS = 6;
-function rodape(campos) {
+function rodape(campos, semQuantidades = false) {
   const partes = [];
   if (campos.erros !== undefined) {
     if (!contagem(campos.erros)) erro('CONTAGENS_INCOMPATIVEIS');
@@ -322,7 +323,7 @@ function rodape(campos) {
     if (itens.some(t => /[—–]/.test(t))) erro('TRAVESSAO_NAO_PERMITIDO');
     if (itens.length) {
       const mostrados = itens.slice(0, MAX_PEDIDOS).map(t => `- ${t}`);
-      if (itens.length > MAX_PEDIDOS) mostrados.push(`- e mais ${itens.length - MAX_PEDIDOS}`);
+      if (itens.length > MAX_PEDIDOS) mostrados.push(semQuantidades ? '- Há outras pendências no quadro.' : `- e mais ${itens.length - MAX_PEDIDOS}`);
       partes.push(`Precisa de você\n${mostrados.join('\n')}`);
     }
   }
@@ -333,19 +334,18 @@ function rodape(campos) {
 export function resumoRodada(entrada) {
   const { mapeadas, aplicadas, comErro, precisaDeVoce = [] } = somenteCampos(entrada, ['mapeadas', 'aplicadas', 'comErro', 'precisaDeVoce']);
   if (![mapeadas, aplicadas, comErro].every(contagem)) erro('CONTAGENS_INCOMPATIVEIS');
-  const titulo = comErro ? 'Rodada concluída com erros ⚠️' : precisaDeVoce.length ? 'Rodada concluída, aguardando você ⏳' : 'Rodada concluída ✅';
-  const tabela = `| Resultado | Vagas |\n|---|---:|\n| 🔎 Mapeadas | ${mapeadas} |\n| 📨 Aplicadas | ${aplicadas} |\n| ⚠️ Com erro | ${comErro} |`;
-  return `${titulo}\n\n${tabela}${rodape({ precisaDeVoce })}`;
+  // As métricas continuam no estado; a mensagem humana de envio não repete quantidades.
+  return formatarMensagemOperacao('envios_fim', { pendentes: precisaDeVoce.length > 0 }) + rodape({ precisaDeVoce }, true);
 }
 
 // `enviadas` vem do chamador somente após recibos reais; o formatador não verifica portais.
 export function resumoAplicacao(entrada) {
   const campos = somenteCampos(entrada, ['total', 'enviadas', 'pendentes', 'naoEnviadas', 'fase', 'erros', 'precisaDeVoce']);
   const { total, enviadas, pendentes, naoEnviadas } = campos;
-  const nome = fase(campos.fase) === 'coleta2' ? 'Aplicação das novas da coleta 2' : 'Aplicação';
+  fase(campos.fase);
   if (![total, enviadas, pendentes, naoEnviadas].every(contagem) || enviadas + pendentes + naoEnviadas !== total) erro('CONTAGENS_INCOMPATIVEIS');
-  const titulo = pendentes ? `${nome} encerrada com pendências ⏳` : `${nome} concluída ✅`;
-  return `${titulo}\n\n| Resultado | Vagas |\n|---|---:|\n| 📨 Enviadas (recebimento confirmado) | ${enviadas} |\n| ⏳ Pendentes (aguardando você/site, envio incerto ou impedimento com próxima ação) | ${pendentes} |\n| 🚫 Não enviadas (encerradas, fora do perfil ou sem próxima ação viável) | ${naoEnviadas} |${rodape(campos)}`;
+  if (campos.erros !== undefined && !contagem(campos.erros)) erro('CONTAGENS_INCOMPATIVEIS');
+  return formatarMensagemOperacao('envios_fim', { pendentes: pendentes > 0 }) + rodape({ precisaDeVoce: campos.precisaDeVoce }, true);
 }
 
 // Coleta 2 que não rodou ou parou (spec 015). Sem travessão; motivos sem resumo são recusados.
@@ -373,7 +373,7 @@ export function linhaProgressoAplicacao(entrada) {
   const limpo = v => v.replace(/\s+/g, ' ');
   const nome = limpo(linhaUnica(vaga, 'NOME_VAGA_INVALIDO'));
   const daEmpresa = empresa === undefined || empresa === null || empresa === '' ? '' : ` · ${limpo(linhaUnica(empresa, 'EMPRESA_INVALIDA'))}`;
-  return `Aplicando na vaga ${numero}: ${nome}${daEmpresa}`;
+  return `Preparando envio para ${nome}${daEmpresa}`;
 }
 
 // Passes de melhorias (spec 010): a coleta registra achados sem perguntar nem alterar
