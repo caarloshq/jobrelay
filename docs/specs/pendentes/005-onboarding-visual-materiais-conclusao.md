@@ -32,7 +32,7 @@ Estender onboarding/index.html, vagas/scripts/onboarding.mjs, onboarding-autonom
 
 ## Estado
 
-Plano aprovado; implementação em andamento. Gate visual/review ainda não executado.
+Implementação local e verificação visual sintética realizadas. Conferência humana de login/dashboard e barra nativa do Notion continuam sem prova; esta spec permanece pendente nesses itens.
 
 ## Ampliação aprovada no chat
 
@@ -71,6 +71,12 @@ A pessoa usuária pediu retirar a frase técnica do cabeçalho e aplicar review-
 
 ## Pendências de revisão
 
-Conferência visual das etapas internas e login real no dashboard após confirmação humana. O modelo Notion consolidado contém 19 campos, quatro grupos e cinco visualizações. O JSON descreve a barra desejada, mas o source nativo confirma somente o formato percentual; o ajuste da barra continua manual e sem comprovação visual. Sem alegação de paridade nativa integral.
+A conferência visual sintética das etapas internas foi executada em 17 de Novembro, conforme registro abaixo. O login real no dashboard após confirmação humana permanece pendente. O modelo Notion consolidado contém 19 campos, quatro grupos e cinco visualizações. O JSON descreve a barra desejada, mas o source nativo confirma somente o formato percentual; o ajuste da barra continua manual e sem comprovação visual. Sem alegação de paridade nativa integral.
 
 Diagnóstico real: npm ci instalou a dependência local; wrapper recusou iniciar porque Chrome/Chromium não está instalado nos caminhos suportados. Nenhum browser foi baixado. O painel e os logins reais permanecem sem teste nesta máquina; informar esse limite na entrega.
+
+## Conferência visual sintética em 17 de Novembro de 2026
+
+Foram renderizados materiais, senioridade, salário, quadro/opções, resumo e sucesso em1280×900 e390×844, totalizando12estados. A fixture é somente leitura, sem endpoint de gravação, e identifica a prévia como fictícia. O estado de sucesso foi selecionado para inspeção visual; não houve confirmação humana, preenchimento da instalação da pessoa, upload de currículo real ou recibo de conclusão.
+
+As medições não apontaram overflow horizontal; botões principais de navegação têm44px de altura nos estados medidos. Console e erros da sessão de teste ficaram vazios; detector estático retornou lista vazia. Esses resultados não equivalem a auditoria WCAG integral, teste de todos os erros ou prova de login/painel e Notion reais. O navegador e servidor próprios de teste foram encerrados, preservando as sessões operacionais. A revisão independente aprovou este recorte visual por versão, sem bloqueios. Os itens externos acima permanecem abertos.
