@@ -4,12 +4,21 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag estável existente a publicar (vX.Y.Z)'
+        required: true
+        type: string
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -23,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -33,8 +42,6 @@ jobs:
         run: node --test .github/scripts/preparar-nota-release.test.mjs
       - name: Conferir tag estável, commit, versão e notas
         id: release
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
@@ -48,7 +55,9 @@ jobs:
           if (!fs.statSync(notes).isFile() || !fs.readFileSync(notes, 'utf8').trim()) throw new Error('As notas desta versão precisam existir e ter conteúdo.');
           NODE
           commit="$(git rev-parse HEAD)"
-          test "$commit" = "$(git rev-parse "${GITHUB_SHA}^{commit}")"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            test "$commit" = "$(git rev-parse "${GITHUB_SHA}^{commit}")"
+          fi
           test "$commit" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
           printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v5
@@ -64,8 +73,7 @@ jobs:
       - name: Testes do núcleo
         working-directory: core
         run: |
-          mkdir -p ../local/data
-          TMPDIR="$PWD/../local/data" npm test
+          TMPDIR="$RUNNER_TEMP" npm test
       - name: Verificar transição de layout e preservação da versão anterior
         working-directory: core
         env:
@@ -118,7 +126,6 @@ jobs:
       - name: Publicar nova release estável com o ZIP
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
