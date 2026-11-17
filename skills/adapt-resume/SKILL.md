@@ -66,6 +66,18 @@ python3 verificar_resume.py base_resume_pt.pdf base_content_pt.json
 9. A largura da coluna de datas é **medida do conteúdo**, nunca fixa. Data que não cabe quebra em duas linhas e empurra a descrição pra baixo. Se mexer em `largura_datas()`, rode o verificador nos dois idiomas.
 10. Máximo 2 páginas é **teto duro**. Toda adição pede uma subtração — verifique o número de páginas antes de entregar, não depois.
 
+## Avisos de fidelidade de empresas e ferramentas
+
+O verificador compara os campos declarados `experience[].company` e `tools_line` do JSON adaptado com as bases vigentes PT/EN da instalação. No layout público, lê somente `local/curriculo/base_content_*.json`; no layout privado legado, lê os arquivos vigentes ao lado do verificador. Não usa modelos, backups ou histórico como fonte alternativa. Base ausente/inválida e campo sem referência comparável geram `limitacao`, sem apresentar a checagem como aprovada.
+
+Em `tools_line`, separe os itens por `·`, `|`, ponto e vírgula, vírgula ou quebra de linha. Cada item deve ser uma ferramenta completa. A comparação ignora somente caixa e espaços; não divide `/`, `+` ou `&`, não resolve sinônimos nem infere experiência. Nomes em resumo, bullets e demais campos livres continuam sujeitos à revisão factual humana. Esse controle não detecta entidades arbitrárias na prosa.
+
+Gere o PDF e execute o verificador com o mesmo `content.json`. Empresa/ferramenta nova gera `AVISO` com tipo, campo e valor; isso não impede gerar o PDF, não altera nota e não libera envio. Falhas independentes de ATS, restrição factual e formato continuam bloqueando conforme seus contratos.
+
+A saída `AVISOS_FIDELIDADE_JSON: {...}` contém `avisosFidelidade` e a projeção textual `gaps`. O agente deve registrar a lista exata em `decisoes.json > avisosFidelidade`, preservando os outros campos, e incorporar cada linha de `gaps` aos Gaps da vaga identificada, pelo processo de registro já vigente na instalação. Preservar lacunas anteriores e não duplicar linhas em nova execução; quando o aviso desaparecer após correção, conferir e retirar somente o aviso correspondente, sem apagar outras lacunas. O Python não escreve decisões, quadro ou Notion. Conferir o registro local e, se configurado, o destino Notion antes de declarar sincronização concluída. Aviso numérico existente também exige registro nos Gaps; o payload novo cobre os campos declarados acima.
+
+Uma confirmação legítima fora da base exige campo, fonte, data e alcance em `decisoes.json`; o aviso continua como divergência da base até a revisão factual. Não promover a confirmação à base automaticamente nem ocultar o aviso como se já fosse conhecido. Sem base válida, registrar a limitação e resolver a fonte antes de declarar fidelidade conferida. Nenhum aviso, payload ou teste autoriza candidatura ou resolve pergunta pessoal.
+
 ## Processo (depois que a base já existe)
 
 1. **Olhar o currículo atual primeiro.** Carregar a base no idioma alvo e, se útil, abrir o PDF atual. Esse é o ponto de partida: adapta-se a partir dele, não se recria do zero.
