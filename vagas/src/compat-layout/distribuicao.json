@@ -1,6 +1,6 @@
 {
   "contrato": 1,
-  "payloadSha256": "605cdbf68cc948ddfb96f1ee4ea879f15a9265987ecc6283cd5753851a2ef356",
+  "payloadSha256": "bf67afd1e99d1e21323629317791f5ee40f0fa34b00e52ebaf0a0e9a0508881f",
   "arquivos": [
     {
       "path": ".agents/skills/aplicar/SKILL.md",
@@ -34,7 +34,7 @@
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "b63838250c6fafc023d7a34995265ce2f98bacd0ba3d4c7901973ac883f7e680",
+      "sha256": "df62653356663bb0e6d578ebf1fd85879fdeddf76089de537ce0055efbadc420",
       "mode": "0o644"
     },
     {
@@ -944,12 +944,12 @@
     },
     {
       "path": "vagas/src/compat-layout/conteudo.json",
-      "sha256": "605cdbf68cc948ddfb96f1ee4ea879f15a9265987ecc6283cd5753851a2ef356",
+      "sha256": "bf67afd1e99d1e21323629317791f5ee40f0fa34b00e52ebaf0a0e9a0508881f",
       "mode": "0o644"
     },
     {
       "path": "vagas/src/compat-layout/conteudo.sha256",
-      "sha256": "6d1cc5b4382240a95c0365013b78fa84aec1d7a92ce40cc8203ffbf9227b47ae",
+      "sha256": "44ebe87df9dce825e0fc1f7e044cbb57edebe8e3bba0e5ece7312864f77637ef",
       "mode": "0o644"
     },
     {
