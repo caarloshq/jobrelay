@@ -53,7 +53,7 @@ test('terminal conhecido no snapshot impede reoferta sem liberar preflight Notio
 });
 test('consulta pública lê 15 modelos e preserva a fonte', () => {
   const p = path.join(root, 'aplicacao/RESPOSTAS.md'); const antes = fs.readFileSync(p, 'utf8');
-  const r = spawnSync(process.execPath, [path.join(root, 'vagas/scripts/respostas.mjs'), '--consultar-base'], { encoding: 'utf8', env: { ...process.env, VAGAS_SEM_ENV: '1' } });
+  const r = spawnSync(process.execPath, [path.join(root, 'vagas/scripts/gerir-respostas.mjs'), '--consultar-base'], { encoding: 'utf8', env: { ...process.env, VAGAS_SEM_ENV: '1' } });
   assert.equal(r.status, 0, r.stderr); const consulta = JSON.parse(r.stdout); assert.equal(consulta.total, 15);
   for (const pergunta of consulta.perguntas) assert.match(pergunta.markdown, /Pendente de resposta da pessoa candidata/);
   assert.doesNotMatch(r.stdout, /"aprovada":true/); assert.equal(fs.readFileSync(p, 'utf8'), antes);

@@ -13,19 +13,21 @@ SEMPRE que a pessoa pedir algo sobre currículo neste projeto: montar a base pel
 
 ## Arquivos desta skill
 
-- `base_content_en.json` / `base_content_pt.json` — **currículo base editável** (fonte única de verdade). Chegam **vazios/placeholder** — a primeira coisa a fazer é montar a base de verdade, ver "Montando a base pela primeira vez" abaixo. É a partir daqui que se adapta depois. Não sobrescrever.
+Os caminhos de dados abaixo partem da raiz da instalação. O código fica em `skills/adapt-resume/`; as bases, materiais e cópias por vaga ficam em `local/curriculo/`. Não ler snapshots de compatibilidade em `Skills/adapt-resume/` como fonte pessoal atual.
+
+- `local/curriculo/base_content_en.json` / `local/curriculo/base_content_pt.json` — **currículo base editável** (fonte única de verdade). Chegam **vazios/placeholder** — a primeira coisa a fazer é montar a base de verdade, ver "Montando a base pela primeira vez" abaixo. É a partir daqui que se adapta depois. Não sobrescrever.
 - `generate_resume.py` — gerador. Lê um JSON e produz o PDF ou o DOCX, pela extensão da saída. O PDF sai pelo `render_pdf.py`, o modelo aprovado em 14 de Setembro de 2026: cabeçalho centralizado, coluna única, Helvetica, marcadores em hífen, contatos clicáveis, espaçamento compacto com corpo de 10 pt e texto corrido entre as duas páginas. **Não editar o estilo nem recriar o modelo:** adapte o JSON. O DOCX tem layout próprio e não é visualmente equivalente ao PDF. ⚠️ O modelo **não imprime** `core_skills`, `certifications` nem `award`: o resumo sai só em prosa, e certificação entra no texto do resumo ou de um bullet se for provada. Os campos continuam no JSON porque o radar e o DOCX os leem.
 - `verificar_resume.py` — confere o arquivo gerado contra as regras. É a prova, não a opinião.
 
 ## Montando a base pela primeira vez
 
-Antes de adaptar qualquer vaga, a base precisa existir de verdade. A pessoa coloca em `materiais-fonte/` (ver `materiais-fonte/README.md`):
+Antes de adaptar qualquer vaga, a base precisa existir de verdade. A pessoa coloca em `local/curriculo/materiais-fonte/` (ver `docs/materiais-onboarding.md`):
 
 1. O currículo atual dela, em PDF, `.md` ou `.txt`.
 2. O LinkedIn: perfil salvo como PDF, ou o export oficial em ZIP.
 3. Fatos verificados da empresa/cargo atual — métricas, datas, nome do cargo. É o que dá densidade ao bullet mais importante do currículo.
 
-PDF e ZIP viram texto com `npm run onboarding -- --extrair` (dentro de `vagas/`): leia os `*.extraido.*`, não o binário. **O idioma da primeira base vem do mercado escolhido no bloco 2 do onboarding** (`vagas/config/perfil.json` → `mercado`): nacional é `pt`, internacional é `en`, ambos monta os dois, começando pelo prioritário.
+PDF e ZIP viram texto com `npm run onboarding -- --extrair` (dentro de `vagas/`): leia os `*.extraido.*`, não o binário. **O idioma da primeira base vem do mercado escolhido no bloco 2 do onboarding** (`local/config/perfil.json` → `mercado`): nacional é `pt`, internacional é `en`, ambos monta os dois, começando pelo prioritário.
 
 **Isto não é um passo de "ler e transcrever".** Material bruto de currículo raramente já vem no formato de bullet com número verificável — vem em prosa, em lista solta, às vezes contraditório entre o currículo e o LinkedIn. **Antes de escrever uma linha do `base_content`, entreviste a pessoa:**
 
@@ -42,13 +44,13 @@ Dois campos merecem atenção:
 - **`numeros_travados`** — lista de números/resultados que nunca podem ser alterados nem arredondados em nenhuma adaptação futura (ex.: `"680% de crescimento"`, `"3x mais rápido"`). São os números que mais pesam no currículo dela.
 - **`nunca_citar`** — lista de expressões regulares de trechos que não podem aparecer em nenhum currículo gerado (uma métrica antiga, um cargo que você não usa mais). O verificador e o gerador de instrução do radar leem esta lista. Vazia é um estado válido.
 - **`regras_extra`** — frases curtas de regra fixa, tipo "Cargo atual = Engenheira de Dados Sênior" ou "o bullet de liderança de equipe é sempre o último da empresa X". Fica livre porque cada carreira tem uma regra própria.
-- **`experience[].bullets_temas`** — array paralelo a `bullets`, um array de temas por bullet (ex.: `["design-system", "zero-a-um"]`). É o que liga um bullet ao balde de ênfase certo quando uma vaga aciona aquele tema — ver `config/mapa-enfase.json` no radar de vagas para a lista de temas existentes. Bullet sem tema simplesmente não aparece destacado em nenhuma instrução — não é erro, só não tem gancho ainda.
+- **`experience[].bullets_temas`** — array paralelo a `bullets`, um array de temas por bullet (ex.: `["design-system", "zero-a-um"]`). É o que liga um bullet ao balde de ênfase certo quando uma vaga aciona aquele tema — ver `local/config/mapa-enfase.json` no radar de vagas para a lista de temas existentes. Bullet sem tema simplesmente não aparece destacado em nenhuma instrução — não é erro, só não tem gancho ainda.
 
 Gere o PDF base e rode o verificador para confirmar que a base está válida:
 
 ```bash
-python3 generate_resume.py base_content_pt.json base_resume_pt.pdf
-python3 verificar_resume.py base_resume_pt.pdf base_content_pt.json
+python3 skills/adapt-resume/generate_resume.py local/curriculo/base_content_pt.json local/curriculo/base_resume_pt.pdf
+python3 skills/adapt-resume/verificar_resume.py local/curriculo/base_resume_pt.pdf local/curriculo/base_content_pt.json
 ```
 
 ⚠️ **"número travado ausente" nem sempre é o número errado.** O verificador procura o texto exato de `numeros_travados` no PDF extraído, e o PDF quebra linha no meio de uma frase às vezes — se a quebra cair bem no meio do seu número, a checagem falha mesmo com o número lá. Antes de desconfiar do bullet, abra o PDF (ou extraia o texto) e veja se é isso. Se for, encurte a frase ao redor do número, ou encurte o próprio item de `numeros_travados` pra menos palavras — não invente um número diferente pra passar.
@@ -81,7 +83,7 @@ Uma confirmação legítima fora da base exige campo, fonte, data e alcance em `
 ## Processo (depois que a base já existe)
 
 1. **Olhar o currículo atual primeiro.** Carregar a base no idioma alvo e, se útil, abrir o PDF atual. Esse é o ponto de partida: adapta-se a partir dele, não se recria do zero.
-2. **Copiar** a base para `builds/<empresa>/content.json` e editar só essa cópia. Nunca mexer na base.
+2. **Copiar** a base para `local/curriculo/builds/<empresa>/content.json` e editar só essa cópia. Nunca mexer na base.
 3. **Só então olhar o contexto adicional** (descrição da vaga). Extrair: cargo e senioridade, domínio, skills obrigatórias, ferramentas citadas, palavras-chave repetidas, idioma.
 4. **Adaptar sem inventar** (só reordenar, realçar e reescrever com sinônimos verdadeiros, sempre em cima do conteúdo atual):
    - `core_skills` e `skills_line`: mover para frente as skills que a vaga mais pede.
@@ -90,23 +92,23 @@ Uma confirmação legítima fora da base exige campo, fonte, data e alcance em `
    - `headline`: pode reordenar a ênfase desde que todo termo seja verdadeiro e já presente no perfil.
    - `tools_line`: subir as ferramentas que a vaga cita, se a pessoa as tem.
    - Não mexer em datas, empresas, cargos, números, formação, certificações.
-   - Antes de gerar o arquivo, aplicar [`review-escrita`](../review-escrita/SKILL.md) às frases autorais alteradas na cópia por vaga. Extrair essas frases para um texto de revisão dentro de `builds/<empresa>/`; não varrer `content.json` bruto. Conferir fatos e voz manualmente; o verificador mecânico só aponta indícios.
+   - Antes de gerar o arquivo, aplicar [`review-escrita`](../review-escrita/SKILL.md) às frases autorais alteradas na cópia por vaga. Extrair essas frases para um texto de revisão dentro de `local/curriculo/builds/<empresa>/`; não varrer `content.json` bruto. Conferir fatos e voz manualmente; o verificador mecânico só aponta indícios.
 5. **Gerar** o PDF (tudo dentro do projeto):
    ```
-   python3 generate_resume.py builds/<empresa>/content.json "../../Curriculo/<Seu Nome> - <Seu Cargo> - <Empresa>.pdf"
+   python3 skills/adapt-resume/generate_resume.py local/curriculo/builds/<empresa>/content.json "local/curriculo/<Seu Nome> - <Seu Cargo> - <Empresa>.pdf"
    ```
 6. **Verificar** antes de entregar:
    ```
-   python3 verificar_resume.py "<saída.pdf>" builds/<empresa>/content.json
+   python3 skills/adapt-resume/verificar_resume.py "<saída.pdf>" local/curriculo/builds/<empresa>/content.json
    ```
    Ele checa páginas ≤ 2, texto extraível por ATS, zero travessão, os números de `numeros_travados`, e se alguma data é mais larga que a coluna. Exit 1 se falhar. **Cole a saída** ao entregar.
 
-   **Nota de ATS: gate obrigatório em todo currículo de vaga.** Salvar o anúncio em `builds/<empresa>/vaga.txt` e rodar:
+   **Nota de ATS: gate obrigatório em todo currículo de vaga.** Salvar o anúncio em `local/curriculo/builds/<empresa>/vaga.txt` e rodar:
    ```
-   python3 verificar_resume.py "<saída.pdf>" builds/<empresa>/content.json --vaga builds/<empresa>/vaga.txt
+   python3 skills/adapt-resume/verificar_resume.py "<saída.pdf>" local/curriculo/builds/<empresa>/content.json --vaga local/curriculo/builds/<empresa>/vaga.txt
    ```
    O verificador mede a nota (porcentagem dos termos do anúncio presentes no PDF), sem contar benefícios, apresentação da empresa e aviso legal. Reprova abaixo de 80% (a faixa que os scanners de mercado recomendam vai de 75% a 90%) ou quando sobra termo ausente sem justificativa. Termo que não é fato vai para `decisoes.json`, campo `ausentesJustificados` (`{"termo": "motivo"}`), e continua contando contra a nota. Termo que o medidor pegou mas não é requisito vai para `naoRequisito` (lista) e sai da conta. Anúncio sem termo medido reprova. Para subir a nota, seguir [Como subir a nota de ATS](#como-subir-a-nota-de-ats).
-7. **Nomear e salvar**: `<Seu Nome> - <Seu Cargo> - <Empresa>.pdf` dentro de `Curriculo/`. Apresentar antes de considerar pronto.
+7. **Nomear e salvar**: `<Seu Nome> - <Seu Cargo> - <Empresa>.pdf` dentro de `local/curriculo/`. Apresentar antes de considerar pronto.
 
 ## Como subir a nota de ATS
 
@@ -123,7 +125,7 @@ Acima de 95% tende a parecer texto entupido de palavra-chave. Os portais não pu
 
 ## Mapa de tema → o que costuma acionar
 
-Os temas abaixo espelham `config/mapa-enfase.json` do radar de vagas. Qual bullet aparece sob cada tema vem do `bullets_temas` de quem está usando, não daqui — esta lista é só pra ajudar a marcar os bullets certos ao montar a base.
+Os temas abaixo espelham `local/config/mapa-enfase.json` do radar de vagas. Qual bullet aparece sob cada tema vem do `bullets_temas` de quem está usando, não daqui — esta lista é só pra ajudar a marcar os bullets certos ao montar a base.
 
 - `design-system` — vagas que citam design system, component library, tokens.
 - `research` — research, discovery, usabilidade, testes com usuário.

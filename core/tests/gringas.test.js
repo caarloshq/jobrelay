@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { partesDoLocal, paraVaga, coletarDe } from '../src/fontes/gringas.js';
+import { DIR_CONFIG } from '../src/config.js';
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -90,7 +91,7 @@ test('fonte que quebra nao derruba as outras e conta como falha', async () => {
 });
 
 test('toda fonte ligada na config tem o arquivo da fonte copiado', () => {
-  const cfg = JSON.parse(readFileSync(join(RAIZ, 'config/fontes-gringas.json'), 'utf8'));
+  const cfg = JSON.parse(readFileSync(join(DIR_CONFIG, 'fontes-gringas.json'), 'utf8'));
   for (const f of cfg.fontes.filter((x) => x.enabled)) {
     const arq = join(RAIZ, 'src/fontes/careerops/providers', `${f.provider}.mjs`);
     assert.ok(existsSync(arq), `${f.name}: falta ${f.provider}.mjs`);

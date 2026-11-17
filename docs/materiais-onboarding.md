@@ -1,6 +1,6 @@
 # Materiais-fonte
 
-O formulário salva os materiais nesta pasta, sem enviá-los para serviços externos:
+O formulário salva os materiais em `local/curriculo/materiais-fonte/`, sem enviá-los para serviços externos:
 
 1. `curriculo.pdf` ou `curriculo.docx`: currículo obrigatório.
 2. `linkedin.pdf` ou `linkedin.docx`: perfil do LinkedIn, opcional.
@@ -14,4 +14,4 @@ Colocou à mão? Use os mesmos nomes e rode, dentro de `vagas/`:
 npm run onboarding -- --extrair
 ```
 
-Cada material vira `<nome>.extraido.txt`, que é o que o agente lê. A pasta `Skills/adapt-resume/materiais-fonte/` está no `.gitignore`, exceto seu README legado. Este guia descreve os formatos atuais sem alterar os materiais pessoais. Regra 1 do projeto vale aqui: nunca inventar. Cada frase do `base_content` tem que ser rastreável a um trecho destes materiais, ou a uma resposta sua na entrevista.
+Cada material vira `<nome>.extraido.txt`, que é o que o agente lê. A pasta `local/curriculo/materiais-fonte/` fica sob `local/`, ignorada pelo Git; este guia continua em `docs/`. Este guia descreve os formatos atuais sem alterar os materiais pessoais. Regra 1 do projeto vale aqui: nunca inventar. Cada frase do `base_content` tem que ser rastreável a um trecho destes materiais, ou a uma resposta sua na entrevista.

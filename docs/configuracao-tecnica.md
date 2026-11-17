@@ -51,7 +51,7 @@ Os testes têm que passar **antes** de mexer em qualquer coisa. Se falharem, inv
 
 ## Bloco 1: quem é você e o que busca
 
-O agente pergunta, e grava no `vagas/config/perfil.json`:
+O agente pergunta, e grava no `local/config/perfil.json`:
 
 - Qual cargo você está buscando, como aparece em anúncio (`cargo_alvo`).
 - Em que país você mora (`pais`). Importa no bloco 2: os portais "nacionais" são do Brasil.
@@ -78,7 +78,7 @@ Vai pra `perfil.json` → `mercado`. As fontes ligam e desligam sozinhas a parti
 
 ## Bloco 3: seu currículo e seu LinkedIn
 
-Dois PDFs, no formulário (ou direto em `Skills/adapt-resume/materiais-fonte/`, como `curriculo.pdf` e `linkedin.pdf`):
+Dois PDFs, no formulário (ou direto em `local/curriculo/materiais-fonte/`, como `curriculo.pdf` e `linkedin.pdf`):
 
 1. **Seu currículo atual** em PDF. Obrigatório: é dele que o agente monta a sua base.
 2. **Seu LinkedIn** em PDF, opcional. No seu perfil, "Mais" → "Salvar como PDF". Traz o histórico completo de experiências.
@@ -106,16 +106,16 @@ Três campos merecem sua atenção nessa hora:
 **Prova:**
 
 ```bash
-cd ../Skills/adapt-resume
-python3 generate_resume.py base_content_pt.json base_resume_pt.pdf
-python3 verificar_resume.py base_resume_pt.pdf base_content_pt.json
+cd ../skills/adapt-resume
+python3 generate_resume.py ../../local/curriculo/base_content_pt.json ../../local/curriculo/base_resume_pt.pdf
+python3 verificar_resume.py ../../local/curriculo/base_resume_pt.pdf ../../local/curriculo/base_content_pt.json
 ```
 
 Tem que sair `ok — dentro das regras` (é o texto que o verificador imprime). Troque `pt` por `en` se o seu base é em inglês. E abra o PDF: ele é o seu currículo daqui pra frente.
 
 ## Bloco 4: sua profissão e os termos de busca
 
-O sistema chega procurando design. O agente lê `vagas/config/palavras-chave.json` e reescreve **inteiro** pra sua área, mantendo o formato. Os campos que mais importam:
+O sistema chega procurando design. O agente lê `local/config/palavras-chave.json` e reescreve **inteiro** pra sua área, mantendo o formato. Os campos que mais importam:
 
 | Campo | O que é | Exemplo, design → front-end |
 |---|---|---|
@@ -128,7 +128,7 @@ O sistema chega procurando design. O agente lê `vagas/config/palavras-chave.jso
 
 ⚠️ **`cargo_excluido` é o campo que mais erra.** Excluir `marketing` barrava "Product Designer, Marketing Cloud", que era vaga boa. Exclua o cargo, não o assunto. Falso positivo custa vaga boa, e é o erro mais caro deste sistema.
 
-Quem não é de design fica sem a fonte `Vagas UX`, um board só de UX: o formulário decide isso pelo que você escreveu na área, e o agente confere. E escreve a **busca do LinkedIn** em `vagas/config/linkedin.json` (`busca.keywords`, com o país do bloco 1): é ela que a Apify roda no bloco 7.
+Quem não é de design fica sem a fonte `Vagas UX`, um board só de UX: o formulário decide isso pelo que você escreveu na área, e o agente confere. E escreve a **busca do LinkedIn** em `local/config/linkedin.json` (`busca.keywords`, com o país do bloco 1): é ela que a Apify roda no bloco 7.
 
 **Prova:** `npm test` continua verde, e `profissao_confirmada` vira `true` no `perfil.json` quando você aprovar a lista.
 
@@ -147,13 +147,13 @@ Os valores que estão lá são exemplo. O agente pergunta os seus e marca `salar
 
 ## Bloco 6: candidatura automática, desligada
 
-O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e só aplica quando os dois controles desta instalação estão ativos: `vagas/data/politica-autonomia.json#modoCandidatura` em `chrome_assistido` e `vagas/config/perfil-candidatura.json#autorizado: true`. Enquanto qualquer um estiver desligado, o agente prepara currículo e rascunho, e a candidatura é sua.
+O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e só aplica quando os dois controles desta instalação estão ativos: `local/data/politica-autonomia.json#modoCandidatura` em `chrome_assistido` e `local/config/perfil-candidatura.json#autorizado: true`. Enquanto qualquer um estiver desligado, o agente prepara currículo e rascunho, e a candidatura é sua.
 
 O agente explica o que é, e pergunta se você quer ligar agora. "Não" é a resposta padrão, e não tem prova: o bloco fecha sozinho.
 
 ## Fonte das respostas: local ou local + Notion
 
-Pergunte separadamente da escolha do quadro: a pessoa quer respostas só nos Markdown locais (padrão) ou também numa página Notion própria? Configure com `cd vagas && npm run fonte:respostas -- --fonte local` ou `--fonte local_notion --pagina <URL-ou-ID>`. Se a página ainda não estiver definida, registre local_notion sem página e mantenha a sincronização pendente. O Node não acessa Notion: o agente usa sua conexão. Antes de editar, marca `--pendente <ID>` e `--pendente configuracao`; atualiza o Markdown, espelha o campo alterado no Notion e compara o conteúdo e o escopo de **ambos** os Markdown com as páginas correspondentes. Só então marca `--conferida configuracao` e `--conferida <ID>`. Falha em Notion ou diferença entre os textos mantém as pendências; não reutilize aquela resposta até resolver. A preferência e os hashes ficam em `vagas/data/fonte-respostas.json` e não dependem da fonte do quadro.
+Pergunte separadamente da escolha do quadro: a pessoa quer respostas só nos Markdown locais (padrão) ou também numa página Notion própria? Configure com `cd vagas && npm run fonte:respostas -- --fonte local` ou `--fonte local_notion --pagina <URL-ou-ID>`. Se a página ainda não estiver definida, registre local_notion sem página e mantenha a sincronização pendente. O Node não acessa Notion: o agente usa sua conexão. Antes de editar, marca `--pendente <ID>` e `--pendente configuracao`; atualiza o Markdown, espelha o campo alterado no Notion e compara o conteúdo e o escopo de **ambos** os Markdown com as páginas correspondentes. Só então marca `--conferida configuracao` e `--conferida <ID>`. Falha em Notion ou diferença entre os textos mantém as pendências; não reutilize aquela resposta até resolver. A preferência e os hashes ficam em `local/data/fonte-respostas.json` e não dependem da fonte do quadro.
 
 ## Bloco 7: a Apify, por último
 
@@ -163,11 +163,11 @@ A integração com o LinkedIn usa um coletor na Apify. Consulte os valores e cr�
 2. Abra a página do Actor: [console.apify.com/actors/hKByXkMQaC5Qt9UMN/input](https://console.apify.com/actors/hKByXkMQaC5Qt9UMN/input).
 3. No canto superior direito, clique em **API** e depois em **API clients**.
 4. Abre uma janela com o campo **API token** no topo, já com "Default API token created on sign-up" selecionado. Clique no **ícone de copiar** ao lado do campo. Não precisa criar token novo, e não precisa do código que aparece embaixo.
-5. Copie `vagas/.env.example` para `vagas/.env` e cole o token em `APIFY_TOKEN`.
+5. Se `local/.env` ainda não existir, copie `core/env.example` para `local/.env` e cole o token em `APIFY_TOKEN`.
 
 Os três cliques, em imagem: [o botão API](img/apify/01-botao-api.webp), [o menu com API clients](img/apify/02-menu-api-clients.webp) e [a janela com o ícone de copiar](img/apify/03-api-clients-copiar-token.webp).
 
-Só isso. O caminho alternativo, se a janela mudar de lugar: Settings → API & Integrations → Personal API tokens. A busca já está em `vagas/config/linkedin.json`, escrita no bloco 4, e a rodada dispara o Actor com ela. O `.env` está no `.gitignore`: o token nunca vai pro git. Sem token, tudo o resto funciona; só o LinkedIn fica de fora.
+Só isso. O caminho alternativo, se a janela mudar de lugar: Settings → API & Integrations → Personal API tokens. A busca já está em `local/config/linkedin.json`, escrita no bloco 4, e a rodada dispara o Actor com ela. O `.env` está no `.gitignore`: o token nunca vai pro git. Sem token, tudo o resto funciona; só o LinkedIn fica de fora.
 
 Prefere mexer na busca pelo site da Apify? Abra o [Actor](https://console.apify.com/actors/hKByXkMQaC5Qt9UMN/input), configure, clique em **Save as new task** e cole o id (`usuario~task`) em `APIFY_TASK`. Com a Task, o `linkedin.json` é ignorado.
 
@@ -202,7 +202,7 @@ Abre no navegador as vagas por fase: Avaliar, Aplicar, Já apliquei, Entrevista,
 
 O que muda no sistema quando você move um card: `Já apliquei`, `Entrevista` e `Cancelada` tiram a vaga do radar, e a rodada seguinte não a oferece de novo. `Avaliar` e `Aplicar` continuam ativas.
 
-**Histórico local.** O quadro fica em `vagas/data/quadro.json`, que vai pro git, e guarda o histórico de cada vaga, inclusive das que já saíram da coleta. Antes da primeira gravação de cada dia, uma cópia vai pra `vagas/data/backups/`. Quem usa Notion pode continuar publicando lá pelo agente; o formato do arquivo é o mesmo.
+**Histórico local.** O quadro fica em `local/data/quadro.json`, ignorado pelo Git, e guarda o histórico de cada vaga, inclusive das que já saíram da coleta. Antes da primeira gravação de cada dia, uma cópia vai pra `local/data/backups/`. Quem usa Notion pode continuar publicando lá pelo agente; o formato do arquivo é o mesmo.
 
 ## Rodar sozinho
 

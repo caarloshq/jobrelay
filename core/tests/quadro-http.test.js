@@ -3,25 +3,29 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Modelos distribuídos são imutáveis; nunca ler escolhas em local/config.
 function modelo(nome) {
-  const atual = path.join(repo, 'core/config/modelos', nome);
-  if (fs.existsSync(atual)) return fs.readFileSync(atual);
-  const legado = nome.startsWith('config/') || nome.startsWith('data/') ? 'vagas/' + nome : nome;
-  const r = spawnSync('git', ['show', 'HEAD:' + legado], { cwd: repo });
-  assert.equal(r.status, 0, 'Modelo neutro não encontrado: ' + nome);
-  return r.stdout;
+  const modelos = path.join(repo, 'core/config/modelos');
+  const mapa = JSON.parse(fs.readFileSync(path.join(modelos, 'mapa.json'), 'utf8'));
+  const fontes = Object.keys(mapa).filter(fonte => mapa[fonte] === nome);
+  assert.ok(fontes.length <= 1, 'Destino de modelo ambíguo: ' + nome);
+  const arquivo = path.join(modelos, fontes[0] || nome);
+  assert.ok(fs.existsSync(arquivo), 'Modelo neutro não encontrado: ' + nome);
+  assert.equal(fs.lstatSync(arquivo).isFile(), true, 'Modelo precisa ser arquivo regular: ' + nome);
+  return fs.readFileSync(arquivo);
 }
 
 
 test('HTTP do quadro bloqueia CSRF e texto simples, preservando navegador local e proxy Node JSON', async t => {
-  const fixture = fs.mkdtempSync(path.join(repo, 'local/data/teste-quadro-http-'));
+  const base = path.join(repo, 'local/data');
+  fs.mkdirSync(base, { recursive: true });
+  const fixture = fs.mkdtempSync(path.join(base, 'teste-quadro-http-'));
   t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
-  for (const dir of ['vagas/src', 'vagas/scripts']) fs.cpSync(path.join(repo, dir), path.join(fixture, dir), { recursive: true });
+  for (const [origem, destino] of [['core/src', 'vagas/src'], ['core/scripts', 'vagas/scripts']]) fs.cpSync(path.join(repo, origem), path.join(fixture, destino), { recursive: true });
   for (const dir of ['vagas/config', 'vagas/data']) fs.mkdirSync(path.join(fixture, dir), { recursive: true });
   fs.writeFileSync(path.join(fixture, 'package.json'), '{"type":"module"}');
   for (const nome of ['perfil.json', 'palavras-chave.json', 'dorks.json', 'linkedin.json']) {

@@ -96,10 +96,10 @@ if (!problemas) console.log('  nenhum. ok');
 // Fontes de candidatura versionáveis precisam permanecer modelos neutros no
 // repositório público. O histórico literal começa vazio e não pode ser publicado.
 const MODELOS_NEUTROS = {
-  'core/config/modelos/aplicacao/RESPOSTAS.md': 'c69baca9c9184fee7f4b1738422f218113284e69f405bf78e312f10604ecfed2',
-  'core/config/modelos/aplicacao/PERFIL.md': 'af2ba3c0f4b02ad219b8f2377daab2c005ddd0d9c99d0405151cf7be49d110f2',
+  'core/config/modelos/aplicacao/modelo-RESPOSTAS.md': 'c69baca9c9184fee7f4b1738422f218113284e69f405bf78e312f10604ecfed2',
+  'core/config/modelos/aplicacao/modelo-PERFIL.md': 'af2ba3c0f4b02ad219b8f2377daab2c005ddd0d9c99d0405151cf7be49d110f2',
   'core/config/modelos/data/perguntas.json': '3b35f5b85d841fc195b01e9bb2ee0d1605a5dd2df9d154e7423ea67b02abe874',
-  'core/config/modelos/config/perfil-candidatura.json': 'b62c0c3108e464611ec19a66ef784466ff15b02bdc453a1560bd38fc818a6dbc',
+  'core/config/modelos/config/modelo-perfil-candidatura.json': 'b62c0c3108e464611ec19a66ef784466ff15b02bdc453a1560bd38fc818a6dbc',
 };
 for (const [nome, esperado] of Object.entries(MODELOS_NEUTROS)) {
   const alvo = join(REPO, nome);
@@ -110,7 +110,7 @@ for (const [nome, esperado] of Object.entries(MODELOS_NEUTROS)) {
     console.log('  ' + nome + ' contém edição local; publique somente o modelo neutro');
   }
 }
-const historico = join(REPO, 'core/config/modelos/aplicacao/RESPOSTAS-PREENCHIDAS.md');
+const historico = join(REPO, 'core/config/modelos/aplicacao/modelo-RESPOSTAS-PREENCHIDAS.md');
 if (existsSync(historico) && readFileSync(historico).length !== 0) {
   problemas++;
   console.log('  aplicacao/RESPOSTAS-PREENCHIDAS.md contém histórico; não publique respostas preenchidas');

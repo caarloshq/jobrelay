@@ -9,7 +9,7 @@ const falhar = codigo => { throw Object.assign(new Error(codigo), { codigo }); }
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export const MAX_ZIP = 32 * 1024 * 1024;
 export function permitidoZip(nome) {
-  return /^(core\/(src|scripts|tests|config\/modelos)\/|app\/|skills\/)/.test(nome) || /^(migrar-layout\.mjs|artefato\.manifest\.json|package\.json|core\/\.gitignore|core\/package(-lock)?\.json)$/.test(nome) || /^(vagas\/(src|scripts|test)\/|Skills\/|\.agents\/skills\/|\.claude\/skills\/|docs\/|aplicacao\/|coleta\/|quadro\/|onboarding\/|interface\/(src|public|scripts)\/)/.test(nome) ||
+  return /^(core\/(src|scripts|tests|config\/modelos)\/|app\/|skills\/)/.test(nome) || /^(migrar-layout\.mjs|artefato\.manifest\.json|package\.json|core\/\.gitignore|core\/package(-lock)?\.json|core\/env\.example|core\/config\/compat-153\.json)$/.test(nome) || /^(vagas\/(src|scripts|test)\/|Skills\/|\.agents\/skills\/|\.claude\/skills\/|docs\/|aplicacao\/|coleta\/|quadro\/|onboarding\/|interface\/(src|public|scripts)\/)/.test(nome) ||
     /^(README\.md|AGENTS\.md|CLAUDE\.md|ATUALIZAR\.md|ONBOARDING\.md|DESIGN\.md|PRODUCT\.md|LICENSE|LICENSE\.md|\.gitignore|interface\/(package\.json|pnpm-lock\.yaml|astro\.config\.mjs|tsconfig\.json|[^/]+\.md)|vagas\/(package(-lock)?\.json|\.gitignore|[^/]+\.md))$/.test(nome);
 }
 function crc32(bytes) {
@@ -59,6 +59,21 @@ export function lerZip(bytes) {
     pos += 46 + nn + extra + comentario;
   }
   if (pos !== fim) falhar('ZIP_INVALIDO');
+  const payload=entradas.find(e=>e.nome==='vagas/src/compat-layout/conteudo.json');
+  if(payload){
+    const digest=entradas.find(e=>e.nome==='vagas/src/compat-layout/conteudo.sha256');
+    if(!digest||hash(payload.conteudo)!==digest.conteudo.toString('utf8').trim())falhar('PONTE_PAYLOAD_INTEGRIDADE');
+    let p;try{p=JSON.parse(payload.conteudo);}catch{falhar('PONTE_PAYLOAD_INVALIDO');}
+    if(p.contrato!==1||!Array.isArray(p.arquivos)||p.arquivos.length>6000)falhar('PONTE_PAYLOAD_INVALIDO');
+    const vistos=new Set();
+    for(const e of p.arquivos){
+      if(typeof e.nome!=='string'||e.nome!==e.nome.normalize('NFKC')||e.nome.includes('\\')||/[\x00-\x1f:]/.test(e.nome)||e.nome.split('/').some(x=>!x||x==='.'||x==='..'||x==='.git'||x==='node_modules'||/[. ]$/.test(x))||e.nome.startsWith('local/')||!(/^(core|app|skills|docs)\//.test(e.nome)||/^(package\.json|migrar-layout\.mjs|[A-Z][A-Z0-9_.-]*\.md|\.gitignore|LICENSE)$/.test(e.nome)))falhar('PONTE_PAYLOAD_CAMINHO');
+      if(vistos.has(e.nome.toLowerCase()))falhar('PONTE_PAYLOAD_DUPLICADO');vistos.add(e.nome.toLowerCase());
+      const conteudo=Buffer.from(e.conteudo,'base64');if(conteudo.length>16*1024*1024||hash(conteudo)!==e.sha256||![0o644,0o755].includes(e.modo))falhar('PONTE_PAYLOAD_INTEGRIDADE');
+      const legadoSkills=entradas.findIndex(a=>a.nome.startsWith('Skills/')&&e.nome.startsWith('skills/')&&a.nome.toLowerCase()===e.nome.toLowerCase());if(legadoSkills!==-1)entradas.splice(legadoSkills,1);
+      const anterior=entradas.find(a=>a.nome===e.nome);if(anterior&&hash(anterior.conteudo)!==e.sha256)falhar('PONTE_PAYLOAD_DUPLICADO');if(!anterior)entradas.push({nome:e.nome,conteudo,modo:e.modo});
+    }
+  }
   return entradas;
 }
 export async function baixarZip(release, fetchImpl) {

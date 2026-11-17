@@ -196,6 +196,7 @@ async function atualizarInterno({ raiz, fetchImpl = globalThis.fetch, consultarR
   // e tag locais. A execução real sempre chama git merge --ff-only.
   if (aplicarMerge && (!consultarRelease || !obterTag || typeof aplicarMerge !== 'function')) throw new TypeError('aplicarMerge exige fixture offline');
   const projeto = path.resolve(raiz);
+  if(fs.existsSync(path.join(projeto,'vagas/src/compat-layout/conteudo.json'))) {try{const {bootstrap}=await import('../../vagas/src/compat-layout/bootstrap.mjs');bootstrap(projeto);}catch(e){return {status:'bloqueado',motivo:e.message};}}
   const locais = layout(projeto);
   const dados = locais.dados;
   const operacao = path.join(dados, 'operacao');

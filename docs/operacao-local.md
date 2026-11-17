@@ -1,6 +1,6 @@
 # Coordenação local de uma rodada
 
-O módulo `vagas/src/operacao.js` oferece uma base para coordenar trabalho de mais de um agente no **mesmo checkout e host**. Ele registra um dono, uma geração de posse, reservas por identidade de vaga, entregas versionadas e intenções de envio. O estado fica em `vagas/data/operacao/`; a geração fica em `vagas/data/controle-operacao.json` e as intenções duráveis em `vagas/data/tentativas-envio.json`. Faça cópia desses dois últimos arquivos junto com o quadro antes de migrar a instalação. Não apague uma intenção incerta para tentar enviar de novo.
+O módulo `vagas/src/operacao.js` oferece uma base para coordenar trabalho de mais de um agente no **mesmo checkout e host**. Ele registra um dono, uma geração de posse, reservas por identidade de vaga, entregas versionadas e intenções de envio. O estado fica em `local/data/operacao/`; a geração fica em `local/data/controle-operacao.json` e as intenções duráveis em `local/data/tentativas-envio.json`. Faça cópia desses dois últimos arquivos junto com o quadro antes de migrar a instalação. Não apague uma intenção incerta para tentar enviar de novo.
 
 Para inspecionar o estado sem iniciar uma rodada, dentro de `vagas/`:
 
@@ -24,7 +24,7 @@ Uma queda que deixa somente `.escrita.lock` vazio pode ser recuperada por `retom
 
 ## Quem registra respostas e perguntas abertas
 
-O maestro/aplicador consulta a preferência independente de respostas em `vagas/data/fonte-respostas.json`. No modo local + Notion, o agente atualiza Markdown e página em paralelo, compara os textos e mantém pendente qualquer campo divergente. O maestro/aplicador é o dono do registro antes de retomar ou enviar: banco de perguntas, histórico por vaga, fila de pendências e espelho de revisão seguem `aplicacao/README.md`. O preparador devolve rascunho com fonte e lacunas; não atesta preenchimento. O revisor confere consistência entre pacote, registros e fontes e devolve falhas ao principal. Se faltar registro, o principal bloqueia a candidatura e continua trabalho independente. Não há agente de registro autônomo nem captura automática do formulário; revisão por hash não comprova que todos os campos visíveis foram registrados.
+O maestro/aplicador consulta a preferência independente de respostas em `local/data/fonte-respostas.json`. No modo local + Notion, o agente atualiza Markdown e página em paralelo, compara os textos e mantém pendente qualquer campo divergente. O maestro/aplicador é o dono do registro antes de retomar ou enviar: banco de perguntas, histórico por vaga, fila de pendências e espelho de revisão seguem `aplicacao/README.md`. O preparador devolve rascunho com fonte e lacunas; não atesta preenchimento. O revisor confere consistência entre pacote, registros e fontes e devolve falhas ao principal. Se faltar registro, o principal bloqueia a candidatura e continua trabalho independente. Não há agente de registro autônomo nem captura automática do formulário; revisão por hash não comprova que todos os campos visíveis foram registrados.
 
 ## Autonomia e atualização
 

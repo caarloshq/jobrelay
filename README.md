@@ -63,11 +63,13 @@ Criado por [Carlos Henrique](https://www.linkedin.com/in/caarloshq), Product Des
 
 ## Requisitos e quadro experimental
 
-Use Node.js **22.23.4 ou mais recente** para o pacote completo. O núcleo de coleta e o onboarding continuam compatíveis com Node.js 20; o navegador assistido exige Node.js 22, Chrome ou Chromium instalado e as dependências locais de `vagas/`. O quadro Astro em `interface/` exige Node.js 22.23.4 e instalação própria de dependências.
+Use Node.js **22.23.4 ou mais recente** para o pacote completo. O núcleo de coleta e o onboarding continuam compatíveis com Node.js 20; o navegador assistido exige Node.js 22, Chrome ou Chromium instalado e as dependências locais de `vagas/`. O quadro Astro em `app/` exige Node.js 22.23.4 e instalação própria de dependências.
 
 `npm run quadro`, dentro de `vagas/`, continua abrindo o quadro operacional existente. O quadro Astro é experimental e tem execução separada; consulte [suas instruções](app/README.md). Exemplos, cópias privadas e testes locais não comprovam sincronização operacional com Notion nem login real. Os formatos de materiais estão em [materiais do onboarding](docs/materiais-onboarding.md).
 
 
 ## Estrutura e compatibilidade da instalação
 
-O motor fica em `core/`, a interface em `app/`, os procedimentos em `skills/` e os guias em `docs/`. Execute `node migrar-layout.mjs .` na raiz antes do primeiro comando: ele cria `local/` a partir dos modelos neutros e mantém adaptadores dos caminhos antigos. O migrador não conclui o onboarding humano nem ativa candidaturas. Depois, execute os comandos npm em `core/` ou use a fachada npm da raiz. Instalações Git anteriores exigem migração assistida e alinhamento ao commit de transição; o atualizador continua recusando código local modificado.
+O motor fica em `core/`, a interface em `app/`, os procedimentos em `skills/` e os guias em `docs/`. Seus dados, configurações, respostas e materiais ficam em `local/`. As entradas usuais preparam essa estrutura automaticamente antes de operar; não é preciso executar um migrador manualmente no fluxo normal.
+
+Quem atualiza da 1.5.3 confirma a release pelo comando que já usa. A conversão termina na próxima entrada normal, com preservação e conferência dos dados. As verificações de atualização e onboarding continuam obrigatórias. Pastas antigas mantidas por compatibilidade não são a fonte pessoal atual; use os caminhos em `local/`. `cd vagas` continua como fachada de comandos. Consulte [o procedimento e os bloqueios](ATUALIZAR.md) antes de declarar a instalação atualizada.

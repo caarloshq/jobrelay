@@ -68,7 +68,13 @@ __pycache__/
 /core/*.md
 /core/config/*
 !/core/config/modelos/
+!/core/config/compat-153.json
 /skills/adapt-resume/base_content_*.json
 /skills/adapt-resume/base_resume_*.pdf
 /skills/adapt-resume/materiais-fonte
 /skills/adapt-resume/builds
+
+# Metadata privada da transação de migração.
+/.ponte-layout.lock
+/.ponte-layout.owner-*
+/.ponte-layout.orfao-*

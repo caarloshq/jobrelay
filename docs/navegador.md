@@ -11,7 +11,7 @@ cd vagas
 npm run navegador -- diagnostico
 ```
 
-O arquivo de configuração é opcional e não acompanha atualizações: sem ele, o comando usa os padrões internos. Para personalizar, copie `docs/navegador-config.exemplo.json` para `vagas/config/navegador.json`; configurações locais existentes permanecem. Se o diagnóstico não encontrar o Chrome, configure o caminho absoluto em `vagas/config/navegador.json`, campo `executavelChrome`, ou na variável `JOBRELAY_CHROME_EXECUTAVEL`. O diagnóstico confere versões e caminhos; não comprova autenticação em nenhum portal.
+O arquivo de configuração é opcional e não acompanha atualizações: sem ele, o comando usa os padrões internos. Para personalizar, copie `docs/navegador-config.exemplo.json` para `local/config/navegador.json`; configurações locais existentes permanecem. Se o diagnóstico não encontrar o Chrome, configure o caminho absoluto em `local/config/navegador.json`, campo `executavelChrome`, ou na variável `JOBRELAY_CHROME_EXECUTAVEL`. O diagnóstico confere versões e caminhos; não comprova autenticação em nenhum portal.
 
 ## A pessoa faz o login, o assistente aguarda
 
@@ -73,7 +73,7 @@ O comando recebe um array JSON pela entrada padrão, por exemplo `["fill", "#nom
 
 O modo `mapear` continua impedindo ações de escrita; `chrome_assistido` é o nome legado da autorização assistida, independente do transporte. Perfil aprovado, respostas revisadas, currículo pela skill, conferência dos anexos, consentimentos e recibo do portal continuam exigidos pelo procedimento de aplicação.
 
-O runtime não expõe JavaScript arbitrário, cookies, troca de perfil, conexão externa ou flags de evasão. `campos` é uma leitura fixa de metadados, sem exportar os valores pessoais. Capturas ficam em `vagas/data/navegador/capturas/` e exigem nome novo, sem sobrescrever evidência anterior. O perfil e os demais dados do runtime ficam em `vagas/data/navegador/`, ignorados pelo Git. Não publique esses arquivos.
+O runtime não expõe JavaScript arbitrário, cookies, troca de perfil, conexão externa ou flags de evasão. `campos` é uma leitura fixa de metadados, sem exportar os valores pessoais. Capturas ficam em `local/data/navegador/capturas/` e exigem nome novo, sem sobrescrever evidência anterior. O perfil e os demais dados do runtime ficam em `local/data/navegador/`, ignorados pelo Git. Não publique esses arquivos.
 
 ## O que foi comprovado nesta integração
 
@@ -83,9 +83,9 @@ A sessão não expira por inatividade. Isso não garante restaurar rascunhos dep
 
 ## Confira o checkpoint antes de recuperar a sessão
 
-A atualização e o navegador não operam ao mesmo tempo. A presença de `vagas/data/operacao/.atualizacao.lock` bloqueia o comando antes da pré-checagem, novamente após adquirir a trava e antes de sondar ou agir. O atualizador também deve recusar os registros de posse e atividade do navegador. Preserve a sessão e aguarde uma fronteira segura.
+A atualização e o navegador não operam ao mesmo tempo. A presença de `local/data/operacao/.atualizacao.lock` bloqueia o comando antes da pré-checagem, novamente após adquirir a trava e antes de sondar ou agir. O atualizador também deve recusar os registros de posse e atividade do navegador. Preserve a sessão e aguarde uma fronteira segura.
 
-Cada comando mantém uma trava de controlador e grava checkpoints antes e depois da ação em `vagas/data/navegador/controle/`. O registro conserva PIDs do Chrome e do daemon, identidade das abas, URL saneada e etapa. Valores de campos, credenciais, query strings, fragmentos e endpoints de depuração não entram nos registros. O diagnóstico registra somente classes fixas de falha e duração da etapa.
+Cada comando mantém uma trava de controlador e grava checkpoints antes e depois da ação em `local/data/navegador/controle/`. O registro conserva PIDs do Chrome e do daemon, identidade das abas, URL saneada e etapa. Valores de campos, credenciais, query strings, fragmentos e endpoints de depuração não entram nos registros. O diagnóstico registra somente classes fixas de falha e duração da etapa.
 
 Com navegador existente, o comando remove opções de lançamento antes de agir. Troca de PID, alvo ou URL, falha de transporte ou checkpoint incompleto suspende a operação. O comando não repete o clique nem reinicia o navegador como recuperação. Preserve o rascunho e confira o estado antes de escolher:
 

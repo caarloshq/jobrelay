@@ -1,0 +1,9 @@
+{
+  "aplicacao/modelo-RESPOSTAS-PREENCHIDAS.md": "aplicacao/RESPOSTAS-PREENCHIDAS.md",
+  "aplicacao/modelo-PERFIL.md": "aplicacao/PERFIL.md",
+  "aplicacao/modelo-RESPOSTAS.md": "aplicacao/RESPOSTAS.md",
+  "config/modelo-perfil.json": "config/perfil.json",
+  "config/modelo-perfil-candidatura.json": "config/perfil-candidatura.json",
+  "curriculo/modelo-base-content_en.json": "curriculo/base_content_en.json",
+  "curriculo/modelo-base-content_pt.json": "curriculo/base_content_pt.json"
+}
