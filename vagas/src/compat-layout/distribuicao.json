@@ -1,6 +1,6 @@
 {
   "contrato": 1,
-  "payloadSha256": "a72b31f7e16b4bea23916a534183ebd433162f8e4baf451f88b360a1c28ad303",
+  "payloadSha256": "2bacc7983e8279d61814938a2296587ab4f7ddb1984d08bface2ffe6a7e24548",
   "arquivos": [
     {
       "path": ".agents/skills/aplicar/SKILL.md",
@@ -309,7 +309,7 @@
     },
     {
       "path": "docs/revisor-respostas.md",
-      "sha256": "de2bec3b0fc74d902f1607b8a3ab2ea1220c8cb85c42d93a369a0b462aa5b8bb",
+      "sha256": "dacc36bee1a80c2a1f59e425e4e7657ea792dc6f841de3b820ca5c5d626e1d85",
       "mode": "0o644"
     },
     {
@@ -944,12 +944,12 @@
     },
     {
       "path": "vagas/src/compat-layout/conteudo.json",
-      "sha256": "a72b31f7e16b4bea23916a534183ebd433162f8e4baf451f88b360a1c28ad303",
+      "sha256": "2bacc7983e8279d61814938a2296587ab4f7ddb1984d08bface2ffe6a7e24548",
       "mode": "0o644"
     },
     {
       "path": "vagas/src/compat-layout/conteudo.sha256",
-      "sha256": "f3c9805f77d4bd183260c5360a86b774c9be45c7ec579d984670727e3b791c61",
+      "sha256": "a0bb601d8795f3bd0fc7665c7f46401f9de75a84fc82830ecddc88fccfbd8e95",
       "mode": "0o644"
     },
     {

@@ -25,6 +25,16 @@ Não analise como texto autoral a descrição copiada do empregador, código, JS
 4. **Reescreva a unidade de sentido.** Trocar um adjetivo por outro não resolve uma afirmação vazia. Preserve o que a fonte comprova e deixe a lacuna visível. Um achado mecânico pode ser legítimo em nome próprio, citação ou termo técnico; registre a justificativa quando o mantiver.
 5. **Revise de novo.** Rode a varredura após a edição e confira manualmente prova, voz, ritmo e sentido. Um resultado sem achados do script não aprova o texto por si. Em resposta de candidatura, conclua esta passada antes de apresentar a sugestão, preencher o campo ou salvar o texto como resposta final.
 
+## Exemplos de projeto precisam responder à pergunta
+
+Conte uma experiência concreta com contexto, ação e decisão pessoal comprovados. Não repetir aberturas como “At [company]” ou substituí-las por outra fórmula fixa como “Em um projeto…”. Compare os campos entre si e confronte cada resposta com a pergunta literal. Primeira pessoa e fatos corretos não bastam para aprovar uma voz genérica. Use a fala aprovada da instalação; não acrescente gíria, entusiasmo ou experiência para parecer pessoal.
+
+Separe ideias em parágrafos curtos com linha em branco, quando o campo permitir. Confira os parágrafos efetivamente observados no formulário. Uma resposta curta pode caber em um único parágrafo; não fragmentar a mesma ideia por rotina.
+
+Inclua link de projeto somente quando pertinente, autorizado e com acesso e destino conferidos no uso externo. O rótulo deve corresponder ao destino; portfólio geral não comprova um case específico. Sem link nessas condições, deixe o exemplo sem link. Não invente ação ou resultado para completar a narrativa.
+
+Um exemplo pode servir para avaliar voz e ainda não responder à pergunta. Nesse caso, não liberar envio nem preencher o detalhe ausente por inferência. Exemplo editorial não equivale a aprovação pessoal ou de transmissão. Preserve históricos efetivamente enviados.
+
 ## Saída para revisão
 
 | Onde | Trecho atual | Reescrita | Prova ou lacuna |

@@ -95,7 +95,7 @@ Uma confirmação legítima fora da base exige campo, fonte, data e alcance em `
    - Antes de gerar o arquivo, aplicar [`review-escrita`](../review-escrita/SKILL.md) às frases autorais alteradas na cópia por vaga. Extrair essas frases para um texto de revisão dentro de `local/curriculo/builds/<empresa>/`; não varrer `content.json` bruto. Conferir fatos e voz manualmente; o verificador mecânico só aponta indícios.
 5. **Gerar** o PDF (tudo dentro do projeto):
    ```
-   python3 skills/adapt-resume/generate_resume.py local/curriculo/builds/<empresa>/content.json "local/curriculo/<Seu Nome> - <Seu Cargo> - <Empresa>.pdf"
+   python3 skills/adapt-resume/generate_resume.py local/curriculo/builds/<empresa>/content.json "local/curriculo/<Seu Nome> - <Cargo da Vaga> - <Empresa>.pdf"
    ```
 6. **Verificar** antes de entregar:
    ```
@@ -108,7 +108,7 @@ Uma confirmação legítima fora da base exige campo, fonte, data e alcance em `
    python3 skills/adapt-resume/verificar_resume.py "<saída.pdf>" local/curriculo/builds/<empresa>/content.json --vaga local/curriculo/builds/<empresa>/vaga.txt
    ```
    O verificador mede a nota (porcentagem dos termos do anúncio presentes no PDF), sem contar benefícios, apresentação da empresa e aviso legal. Reprova abaixo de 80% (a faixa que os scanners de mercado recomendam vai de 75% a 90%) ou quando sobra termo ausente sem justificativa. Termo que não é fato vai para `decisoes.json`, campo `ausentesJustificados` (`{"termo": "motivo"}`), e continua contando contra a nota. Termo que o medidor pegou mas não é requisito vai para `naoRequisito` (lista) e sai da conta. Anúncio sem termo medido reprova. Para subir a nota, seguir [Como subir a nota de ATS](#como-subir-a-nota-de-ats).
-7. **Nomear e salvar**: `<Seu Nome> - <Seu Cargo> - <Empresa>.pdf` dentro de `local/curriculo/`. Apresentar antes de considerar pronto.
+7. **Nomear e salvar**: `<Seu Nome> - <Cargo da Vaga> - <Empresa>.pdf` dentro de `local/curriculo/`. Usar o nome da pessoa configurado na instalação, o título do anúncio e o nome correto da empresa; não usar o cargo atual como substituto. Não acrescentar numeral de versão, data, ID, idioma ou outro sufixo ao nome. A mesma regra vale para DOCX. Se o nome já existir, preservar o arquivo existente e gerar o novo em `local/curriculo/<id-da-vaga>/` com o mesmo nome limpo; se essa pasta já contiver outra versão, usar uma subpasta de revisão, mantendo o nome do arquivo. Reutilizar um arquivo somente depois de conferir que corresponde à adaptação aprovada para aquela vaga. Não renomear históricos nem sobrescrever arquivos anteriores. Apresentar antes de considerar pronto.
 
 ## Como subir a nota de ATS
 
