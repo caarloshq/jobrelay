@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configuracaoFeed } from '../src/linkedin-feed-config.js';
 import { operarLote, resumoColeta, resumoAplicacao, resumoColeta2Fora, linhaProgressoAplicacao, resumoRodada } from '../src/rodada-lote.js';
+import { aplicacaoAutorizada } from '../src/autorizacao-aplicacao.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 
 try {
@@ -26,14 +27,13 @@ try {
     if (!dados) throw new Error('DADOS_OBRIGATORIOS');
     const raizVagas = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
     const locais = layout(path.resolve(raizVagas, '..'));
-    const perfilCandidatura = lerJsonSeguro(path.join(locais.config, 'perfil-candidatura.json'), { autorizado: false });
     const politicaAutonomia = lerJsonSeguro(path.join(locais.dados, 'politica-autonomia.json'), { modoCandidatura: 'mapear' });
     // A coleta 2 existe só onde o LinkedIn assistido está ligado (config/linkedin-feed.json).
     if (acao === 'iniciar' && args.coleta2Habilitada === undefined) {
       args.coleta2Habilitada = configuracaoFeed().habilitado === true;
     }
     const resultado = operarLote(dados, acao, args, { modoCandidatura: politicaAutonomia.modoCandidatura,
-      autorizadoCandidatura: perfilCandidatura.autorizado === true, consultarFila: () => args.filaAtual,
+      autorizadoCandidatura: aplicacaoAutorizada(locais.dados, locais.config), consultarFila: () => args.filaAtual,
       gateEnvio: () => args.gateEnvio });
     // O gate atestado na entrada não comprova navegador, status externo ou Submit.
     const saida = acao === 'planejar' ? resultado : { rodadaId: resultado.rodadaId,

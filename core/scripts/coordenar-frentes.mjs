@@ -3,6 +3,7 @@
 import { join } from 'node:path';
 import { DIR_DADOS } from '../src/config.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
+import { aplicacaoAutorizada } from '../src/autorizacao-aplicacao.js';
 import { planejarFrentes } from '../src/coordenacao-frentes.js';
 
 try {
@@ -10,9 +11,8 @@ try {
   const capacidade = args.length === 2 && args[0] === '--capacidade' ? Number(args[1]) : 4;
   if (args.length && !(args.length === 2 && args[0] === '--capacidade')) throw new Error('USO: coordenar-frentes.mjs [--capacidade 1..4]');
   const politica = lerJsonSeguro(join(DIR_DADOS, 'politica-autonomia.json'), { modoCandidatura: 'mapear' });
-  const perfilCandidatura = lerJsonSeguro(join(DIR_DADOS, '..', 'config', 'perfil-candidatura.json'), { autorizado: false });
   const plano = planejarFrentes({ frentes: politica.frentes, modoCandidatura: politica.modoCandidatura,
-    autorizadoCandidatura: perfilCandidatura.autorizado === true, capacidade });
+    autorizadoCandidatura: aplicacaoAutorizada(DIR_DADOS), capacidade });
   console.log(JSON.stringify({ ...plano, somentePlanejamento: true, procedimento: 'vagas/COORDENACAO-FRENTES.md' }, null, 2));
 } catch (erro) {
   console.error(erro.message);

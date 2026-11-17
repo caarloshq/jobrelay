@@ -1,6 +1,6 @@
 {
   "contrato": 1,
-  "payloadSha256": "2bacc7983e8279d61814938a2296587ab4f7ddb1984d08bface2ffe6a7e24548",
+  "payloadSha256": "f496a831b28421b75b18b0ac14fa388b2c26ae118058eb24392cefb364d148ee",
   "arquivos": [
     {
       "path": ".agents/skills/aplicar/SKILL.md",
@@ -944,12 +944,12 @@
     },
     {
       "path": "vagas/src/compat-layout/conteudo.json",
-      "sha256": "2bacc7983e8279d61814938a2296587ab4f7ddb1984d08bface2ffe6a7e24548",
+      "sha256": "f496a831b28421b75b18b0ac14fa388b2c26ae118058eb24392cefb364d148ee",
       "mode": "0o644"
     },
     {
       "path": "vagas/src/compat-layout/conteudo.sha256",
-      "sha256": "a0bb601d8795f3bd0fc7665c7f46401f9de75a84fc82830ecddc88fccfbd8e95",
+      "sha256": "53c2f6b26479efab561ce4bb2e777ce7d1af1c08f39486fde2be4ef3ba0543e9",
       "mode": "0o644"
     },
     {
