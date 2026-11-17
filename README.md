@@ -41,7 +41,7 @@ Se a candidatura exigir, entre no LinkedIn ou no portal da vaga nesse navegador.
 
 A captura de Vagas, Postagens e Feed do LinkedIn é um **teste beta opcional**, usando sua profissão e seus cargos. Se quiser testar, o login no LinkedIn é obrigatório: entre pelo painel do navegador e avise o assistente quando terminar. As outras fontes continuam disponíveis sem ativar esse teste.
 
-Vídeos, testes e outras ações pessoais ficam no [arquivo de pendências](aplicacao/PENDENCIAS-CANDIDATURAS.md). Enquanto a pendência não for resolvida, o assistente segue para outras vagas. Reencontrar o mesmo anúncio não inicia outra candidatura. Depois de confirmar e registrar um envio concluído, fecha somente a aba correspondente, preservando os rascunhos pendentes.
+Vídeos, testes e outras ações pessoais ficam no [arquivo de pendências](local/aplicacao/PENDENCIAS-CANDIDATURAS.md). Enquanto a pendência não for resolvida, o assistente segue para outras vagas. Reencontrar o mesmo anúncio não inicia outra candidatura. Depois de confirmar e registrar um envio concluído, fecha somente a aba correspondente, preservando os rascunhos pendentes.
 
 ## Receba e instale atualizações
 
@@ -65,7 +65,7 @@ Criado por [Carlos Henrique](https://www.linkedin.com/in/caarloshq), Product Des
 
 Use Node.js **22.23.4 ou mais recente** para o pacote completo. O núcleo de coleta e o onboarding continuam compatíveis com Node.js 20; o navegador assistido exige Node.js 22, Chrome ou Chromium instalado e as dependências locais de `vagas/`. O quadro Astro em `interface/` exige Node.js 22.23.4 e instalação própria de dependências.
 
-`npm run quadro`, dentro de `vagas/`, continua abrindo o quadro operacional existente. O quadro Astro é experimental e tem execução separada; consulte [suas instruções](interface/README.md). Exemplos, cópias privadas e testes locais não comprovam sincronização operacional com Notion nem login real. Os formatos de materiais estão em [materiais do onboarding](docs/materiais-onboarding.md).
+`npm run quadro`, dentro de `vagas/`, continua abrindo o quadro operacional existente. O quadro Astro é experimental e tem execução separada; consulte [suas instruções](app/README.md). Exemplos, cópias privadas e testes locais não comprovam sincronização operacional com Notion nem login real. Os formatos de materiais estão em [materiais do onboarding](docs/materiais-onboarding.md).
 
 
 ## Estrutura e compatibilidade da instalação
