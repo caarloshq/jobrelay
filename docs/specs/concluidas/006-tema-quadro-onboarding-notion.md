@@ -65,7 +65,7 @@ Frontend em interface/, com componentes reais Base UI/shadcn base-vega e Phospho
 
 Review de escrita + Impeccable audit/polish + revisão de código/interação executados sob pedido explícito. Achados corrigidos e evidências em revisoes/tema-2026-11-11/review-astro.md. Build, tipos, lint e cinco testes passaram. Preview final: http://127.0.0.1:4186 . Movimentos de exemplos ficam em memória, não no disco. Não foi criado botão de rodada; O usuário perguntou apenas sobre viabilidade.
 
-Permanecem pendentes: conexão operacional real de persistência, limitações nativas do Notion e integração do scaffold Git ao repositório pai antes de publicar. Não mover esta spec para concluídas enquanto essas frentes continuarem no escopo. Nenhum push/release nesta rodada.
+Estado daquela etapa: conexão operacional real de persistência, limitações nativas do Notion e integração do scaffold permaneciam pendentes. A decisão posterior em “Vinte vagas reais no protótipo visual” restringiu o escopo ao teste visual e pediu não avançar detalhes de integração. Essa decisão substitui a condição anterior de não encerrar enquanto a integração permanecesse no escopo. Não representa aceite de integração operacional.
 
 ### Continuação: arraste pelo card inteiro
 
@@ -105,3 +105,7 @@ locationLabel usa modelo explícito primeiro e, se ausente, mostra Remoto quando
 A pessoa usuária pediu divisória entre empresa e atributos, respiro nas logos e remoção da sobra inferior. O ajuste vigente usa padding interno de 4 px em todas as logos, distância de 2 px entre título e empresa e 16 px de respiro acima e abaixo da divisória. Cards uniformes de 148 px, com hover cinza e clique em toda a superfície. Conferência no navegador cobriu imagens PNG e ICO, clique na logo, no título e no espaço vazio, além de arraste sem abrir detalhes. Build/lint/detector passaram. Captura: revisoes/tema-2026-11-11/cards-hover-clique.png.
 
 A prévia voltou a falhar porque uma cópia externa passou a compartilhar o inode do JSON de teste. Corrigido exclusivamente no store do protótipo: leitura aceita arquivo regular com hardlink, ainda com realpath/O_NOFOLLOW/inode/dev; toda escrita usa novo temporário e rename, preservando a cópia vinculada. Teste confirma backup intacto e destino novo com um link após mover. Oito testes passaram; revisão independente sem bloqueios. A proteção do backend operacional permanece intacta.
+
+## Encerramento do marco visual em 17 de Novembro de 2026
+
+Concluída no escopo final aprovado de protótipo visual com persistência isolada. A revisão documental independente conferiu a decisão posterior e as evidências existentes; a reorganização atual versiona o frontend regularmente em `app/`. Nenhuma integração real com Notion, implantação ou publicação é certificada por este encerramento. Os ensaios históricos conservam seus limites; não se repetiu a operação com dados reais.
