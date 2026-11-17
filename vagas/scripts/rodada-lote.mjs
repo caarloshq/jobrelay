@@ -2,6 +2,7 @@
 // JSON somente por arquivo/stdin. Não imprime conteúdo de pacotes nem respostas.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { configuracaoFeed } from '../src/linkedin-feed-config.js';
 import { operarLote, resumoColeta, resumoAplicacao, resumoColeta2Fora, linhaProgressoAplicacao } from '../src/rodada-lote.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
@@ -22,14 +23,19 @@ try {
     process.stdout.write(`${textos[acao](args)}\n`);
   } else {
     if (!dados) throw new Error('DADOS_OBRIGATORIOS');
+    const raizVagas = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const perfilCandidatura = lerJsonSeguro(path.join(raizVagas, 'config', 'perfil-candidatura.json'), { autorizado: false });
+    const politicaAutonomia = lerJsonSeguro(path.join(raizVagas, 'data', 'politica-autonomia.json'), { modoCandidatura: 'mapear' });
     // A coleta 2 existe só onde o LinkedIn assistido está ligado (config/linkedin-feed.json).
     if (acao === 'iniciar' && args.coleta2Habilitada === undefined) {
       args.coleta2Habilitada = configuracaoFeed().habilitado === true;
     }
-    const resultado = operarLote(dados, acao, args, { consultarFila: () => args.filaAtual,
+    const resultado = operarLote(dados, acao, args, { modoCandidatura: politicaAutonomia.modoCandidatura,
+      autorizadoCandidatura: perfilCandidatura.autorizado === true, consultarFila: () => args.filaAtual,
       gateEnvio: () => args.gateEnvio });
     // O gate atestado na entrada não comprova navegador, status externo ou Submit.
     const saida = acao === 'planejar' ? resultado : { rodadaId: resultado.rodadaId,
+      ...(acao === 'coleta2_captura' && resultado.coleta2 ? { coleta2: resultado.coleta2 } : {}),
       ...(resultado.vaga ? { estado: resultado.vaga.estado, versao: resultado.vaga.versao, pacoteHash: resultado.vaga.pacote?.hash || null } : {}), liberadoSubmit: false };
     process.stdout.write(`${JSON.stringify({ ok: true, resultado: saida })}\n`);
   }

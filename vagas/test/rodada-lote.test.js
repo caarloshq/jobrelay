@@ -13,7 +13,7 @@ function fixture(t, ids = ['ats:1', 'ats:2', 'ats:3', 'ats:4', 'ats:5'], frentes
   const dados = fs.mkdtempSync(path.join(raiz, 'data', 'rodada-lote-test-'));
   t.after(() => fs.rmSync(dados, { force: true, recursive: true }));
   let atual = [...ids];
-  const deps = { consultarFila: () => ({ ids: atual, provaRef: 'fixture:consulta-atual' }), gateEnvio: () => ({ aceito: true, provaRef: 'fixture:gate-sem-browser' }) };
+  const deps = { modoCandidatura: 'chrome_assistido', autorizadoCandidatura: true, consultarFila: () => ({ ids: atual, provaRef: 'fixture:consulta-atual' }), gateEnvio: () => ({ aceito: true, provaRef: 'fixture:gate-sem-browser' }) };
   const inicial = operarLote(dados, 'iniciar', { frentes, leituraRegrasRef: 'fixture:regras-lidas', filaInicial: { ids, provaRef: 'fixture:fila-inicial' } });
   const fazer = (acao, args = {}, extras = {}) => operarLote(dados, acao, { rodadaId: inicial.rodadaId, ...args }, { ...deps, ...extras });
   return { dados, deps, fazer, rodadaId: inicial.rodadaId, fila: ids => { atual = ids; }, plano: () => planejarLote(dados, deps) };
@@ -197,7 +197,7 @@ test('coleta isolada encerra após integração sem exigir percorrer formulário
   assert.equal(f.plano().podeAplicar, false);
   assert.equal(f.plano().podeOferecerMelhorias, false);
   assert.throws(() => f.fazer('melhorias', { aceite: true, provaRef: 'fixture:nao-oferecer' }), /MELHORIAS_SOMENTE_APLICACAO/);
-  assert.throws(() => f.fazer('atualizar', { id: 'ats:A', estado: 'preparando', provaRef: 'fixture:nao-aplicar' }), /APLICACAO_NAO_SELECIONADA/);
+  assert.throws(() => f.fazer('atualizar', { id: 'ats:A', estado: 'preparando', provaRef: 'fixture:nao-aplicar' }), /APLICACAO_NAO_AUTORIZADA/);
   f.fazer('encerrar', { provaRef: 'fixture:fim-coleta' });
   assert.equal(f.plano().estado, 'encerrada');
 });
@@ -237,8 +237,8 @@ test('resumo da aplicação usa o mesmo formato e só se declara concluído sem 
     'Aplicação concluída ✅', '',
     '| Resultado | Vagas |', '|---|---:|',
     '| 📨 Enviadas (recebimento confirmado) | 10 |',
-    '| ⏳ Pendentes (aguardando você ou o site) | 0 |',
-    '| 🚫 Não enviadas (encerradas, fora do perfil ou impedidas) | 2 |',
+    '| ⏳ Pendentes (aguardando você/site, envio incerto ou impedimento com próxima ação) | 0 |',
+    '| 🚫 Não enviadas (encerradas, fora do perfil ou sem próxima ação viável) | 2 |',
   ].join('\n'));
   const comPendencia = resumoAplicacao({ total: 5, enviadas: 2, pendentes: 2, naoEnviadas: 1 });
   assert.match(comPendencia, /^Aplicação encerrada com pendências ⏳/);

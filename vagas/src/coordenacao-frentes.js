@@ -11,12 +11,13 @@ export function normalizarFrentes(frentes = FRENTES) {
   return FRENTES.filter(f => frentes.includes(f));
 }
 
-export function planejarFrentes({ frentes, modoCandidatura = 'mapear', capacidade = 4, origem = 'manual' } = {}) {
+export function planejarFrentes({ frentes, modoCandidatura = 'mapear', autorizadoCandidatura = false, capacidade = 4, origem = 'manual' } = {}) {
   if (!Number.isInteger(capacidade) || capacidade < 1 || capacidade > 4) throw new Error('CAPACIDADE_INVALIDA: informe de 1 a 4 posições operacionais disponíveis.');
   if (!['mapear', 'chrome_assistido'].includes(modoCandidatura)) throw new Error('MODO_CANDIDATURA_INVALIDO');
   if (!['manual', 'agendada'].includes(origem)) throw new Error('ORIGEM_INVALIDA');
   const selecionadas = normalizarFrentes(frentes);
-  const ativas = selecionadas.filter(f => f !== 'aplicacao' || modoCandidatura === 'chrome_assistido');
+  const aplicacaoAutorizada = modoCandidatura === 'chrome_assistido' && autorizadoCandidatura === true;
+  const ativas = selecionadas.filter(f => f !== 'aplicacao' || aplicacaoAutorizada);
   return {
     selecionadas, ativas, capacidadeTotal: capacidade, maximoPorFrente: Math.min(2, capacidade),
     paralelo: false,
@@ -27,7 +28,8 @@ export function planejarFrentes({ frentes, modoCandidatura = 'mapear', capacidad
     priorizaRetomadas: ativas.includes('aplicacao'),
     exigeConfirmacaoPorVaga: ativas.includes('aplicacao'),
     exigeFechamentoColeta: false,
-    aplicacaoBloqueada: selecionadas.includes('aplicacao') && modoCandidatura === 'mapear',
+    aplicacaoBloqueada: selecionadas.includes('aplicacao') && !aplicacaoAutorizada,
+    aplicacaoAutorizada,
     navegador: { compartilhado: true, controladoresSimultaneos: 1, exigePosseExterna: true },
     papeis: {
       coleta: ['captura e integração', 'triagem sem navegador'],
@@ -127,17 +129,16 @@ export class CoordenadorFrentes {
   }
 }
 
-/** Ordem da rodada (spec 015): coleta principal, aplicação (retomadas antes das novas), pergunta,
- * coleta 2 e, se a pessoa quiser, segunda passagem da aplicação só nas vagas da coleta 2.
+/** Ordem da rodada (spec 017): coleta principal, aplicação (retomadas antes das novas), perguntas,
+ * coleta 2 e, se houver opt-in de aplicação nesta instalação, aplicação das novas elegíveis.
  * Callbacks da coleta 2, todos opcionais:
  *  - coleta2Dispensada(ctx): motivo ('linkedin_desligado', 'ja_feita_hoje') ou null. Vem antes de qualquer pergunta.
  *  - perguntarColeta2(ctx): { decisao: 'sim' | 'nao', provaRef }. Ausente, ou rodada agendada: sem resposta.
  *  - coletar2(ctx): mesmo recibo de `coletar`.
- *  - perguntarAplicarNovas(ctx, n): { decisao, provaRef }. Só com `novasCompativeis` >= 1 no recibo da coleta 2, `aplicarNovasColeta2` e aplicação ativa.
- *  - aplicarNovasColeta2(ctx): trabalha somente nas vagas da coleta 2.
+ *  - aplicarNovasColeta2(ctx): trabalha somente nas vagas da coleta 2, quando modo e perfil autorizam candidatura.
  * A coleta 2 nunca roda sem decisão 'sim' com provaRef. Não recebe token principal nem autoriza UI ou Submit.
  */
-export async function executarFrentes(opcoes, { coletar, aplicar, coleta2Dispensada, perguntarColeta2, coletar2, perguntarAplicarNovas, aplicarNovasColeta2 } = {}) {
+export async function executarFrentes(opcoes, { coletar, aplicar, coleta2Dispensada, perguntarColeta2, coletar2, aplicarNovasColeta2 } = {}) {
   const coordenador = new CoordenadorFrentes(opcoes);
   for (const frente of coordenador.plano.ativas) {
     if (typeof ({ coleta: coletar, aplicacao: aplicar })[frente] !== 'function') throw new Error('EXECUTOR_AUSENTE:' + frente);
@@ -186,11 +187,11 @@ export async function executarFrentes(opcoes, { coletar, aplicar, coleta2Dispens
         coleta2 = { estado: ok ? 'encerrada' : 'impedida', aceiteRef: resposta.provaRef };
         // O recibo da coleta 2 informa quantas vagas compatíveis foram gravadas; sem nenhuma, não há o que perguntar.
         const n = ok ? resultados.at(-1).value?.novasCompativeis : 0;
-        if (ok && Number.isSafeInteger(n) && n >= 1 && plano.ativas.includes('aplicacao') && typeof aplicarNovasColeta2 === 'function' && typeof perguntarAplicarNovas === 'function') {
-          let segunda = null;
-          try { segunda = await perguntarAplicarNovas(contexto('pergunta_aplicar_novas'), n); } catch { segunda = null; }
-          if (respostaSim(segunda)) await rodar('aplicacao', 'novas_da_coleta2', aplicarNovasColeta2);
-          else coleta2.novasAdiadas = true;
+        if (ok && Number.isSafeInteger(n) && n >= 1 && plano.aplicacaoAutorizada && typeof aplicarNovasColeta2 === 'function') {
+          await rodar('aplicacao', 'novas_da_coleta2', aplicarNovasColeta2);
+          coleta2.aplicacaoIniciada = resultados.at(-1)?.status === 'fulfilled';
+        } else if (ok && Number.isSafeInteger(n) && n >= 1 && !plano.aplicacaoAutorizada) {
+          coleta2.novasMantidasNaFila = true;
         }
       }
     }
