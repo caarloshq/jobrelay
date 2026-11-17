@@ -1,8 +1,8 @@
 # JobRelay: instruções para o agente
 
-Rode `cd vagas && npm run regras` para consultar (ou iniciar) o registro local. Leia o [fluxo vigente da rodada](vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+Rode `cd vagas && npm run regras` para consultar (ou iniciar) o registro local. Leia o [fluxo vigente da rodada](docs/core/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
-Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. As duas entradas operacionais estão em [coleta](coleta/README.md) e [aplicação](aplicacao/README.md).
+Você está na raiz de um projeto que procura vaga remota, pontua contra o currículo de quem usa, e adapta o currículo. Claude Code e Codex leem este arquivo. As duas entradas operacionais estão em [coleta](docs/coleta/README.md) e [aplicação](docs/aplicacao/README.md).
 
 ## Pedido de atualização: antes do onboarding
 
@@ -16,9 +16,9 @@ Na instalação pelo prompt do README que autoriza a tarefa, siga [a checagem a 
 
 | Pedido ou skill | Entrada dona |
 |---|---|
-| `/onboarding`, `$onboarding` ou configurar a instalação | [Skills/onboarding/SKILL.md](Skills/onboarding/SKILL.md) |
-| `/coletar`, `$coletar` ou buscar vagas | [Skills/coletar/SKILL.md](Skills/coletar/SKILL.md) |
-| `/aplicar`, `$aplicar` ou retomar candidaturas | [Skills/aplicar/SKILL.md](Skills/aplicar/SKILL.md) |
+| `/onboarding`, `$onboarding` ou configurar a instalação | [Skills/onboarding/SKILL.md](skills/onboarding/SKILL.md) |
+| `/coletar`, `$coletar` ou buscar vagas | [Skills/coletar/SKILL.md](skills/coletar/SKILL.md) |
+| `/aplicar`, `$aplicar` ou retomar candidaturas | [Skills/aplicar/SKILL.md](skills/aplicar/SKILL.md) |
 
 As entradas locais do Claude Code ficam em `.claude/skills/`; as do Codex, em `.agents/skills/`. Os adaptadores leem a fonte em `Skills/`. Seleção pelo menu depende do ambiente; um atalho não substitui autorização, onboarding ou conexão disponível. Coletar não preenche candidaturas, e aplicar não inicia uma nova coleta.
 
@@ -48,7 +48,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 
 1. **Um bloco de cada vez**, na ordem do `ONBOARDING.md`: quem é → mercado → currículo e LinkedIn → profissão e termos → salário → candidatura automática → Apify. A Apify é a última de propósito: ela só faz sentido com perfil e currículo prontos.
 2. **Mercado antes do currículo.** A resposta de nacional, internacional ou ambos (e qual prioriza) decide o idioma do currículo base, as fontes e a moeda. Sem ela, não monte o `base_content`.
-3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `Skills/adapt-resume/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
+3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `Skills/adapt-resume/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`Skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
 4. **Nunca peça o token da Apify.** Diga onde pegar e onde colar (`vagas/.env.example`). Token não passa pelo chat.
 5. **Candidatura automática fica desligada** até a pessoa selecionar `modoCandidatura: "chrome_assistido"` em `vagas/data/politica-autonomia.json` e marcar `autorizado: true` em `vagas/config/perfil-candidatura.json`. Ambos são necessários. Enquanto qualquer um estiver desligado, você não abre navegador para preencher nem enviar formulário. Sem exceção.
 6. **Feche com `npm run onboarding -- --concluir`.** Ele recusa se faltar bloco.
@@ -57,22 +57,22 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 
 | Preciso de | Está em |
 |---|---|
-| Como a rodada funciona, o que o código faz sozinho e o que é seu | [`vagas/AGENTS.md`](vagas/AGENTS.md) |
-| Buscar, avaliar e preparar vagas | [`coleta/README.md`](coleta/README.md) |
-| Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](aplicacao/README.md) |
-| Porta curta para percorrer a fila de candidaturas | [`Skills/apply-jobs/SKILL.md`](Skills/apply-jobs/SKILL.md); o procedimento dono continua em `aplicacao/README.md` |
-| O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](vagas/RODADA-DIARIA.md) |
+| Como a rodada funciona, o que o código faz sozinho e o que é seu | [`vagas/AGENTS.md`](docs/core/AGENTS.md) |
+| Buscar, avaliar e preparar vagas | [`coleta/README.md`](docs/coleta/README.md) |
+| Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](docs/aplicacao/README.md) |
+| Porta curta para percorrer a fila de candidaturas | [`Skills/apply-jobs/SKILL.md`](skills/apply-jobs/SKILL.md); o procedimento dono continua em `aplicacao/README.md` |
+| O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](docs/core/RODADA-DIARIA.md) |
 | O quadro: estado e histórico de cada vaga | `vagas/data/quadro.json`, escrito só por `vagas/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
-| Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md) |
-| Escrita de resumo, currículo e resposta aberta | [`Skills/review-escrita/SKILL.md`](Skills/review-escrita/SKILL.md) |
-| Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](aplicacao/RESPOSTAS.md) |
-| Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](aplicacao/PERFIL.md) |
+| Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md) |
+| Escrita de resumo, currículo e resposta aberta | [`Skills/review-escrita/SKILL.md`](skills/review-escrita/SKILL.md) |
+| Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](local/aplicacao/RESPOSTAS.md) |
+| Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](local/aplicacao/PERFIL.md) |
 
 ## Consultar Respostas e pendências antes de candidatar
 
 Perguntas abertas usam somente a seção enxuta de `aplicacao/RESPOSTAS.md#arsenal-de-entrevista`, consultada por `npm run respostas -- --consultar-base` em `vagas/`. O banco técnico antigo permanece vazio; não recuperar respostas de backups ou históricos. Os modelos públicos chegam pendentes e não comprovam experiência ou aprovação. Fatos e escolhas continuam no Perfil, e a resposta final exige adaptação e revisão da vaga real.
 
-Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Aplicação](aplicacao/README.md#ações-pessoais-por-vaga). Consultar antes de abrir/preparar novamente; pendência conhecida sem fato novo é pulada e informada no fechamento. O Markdown é a fonte e o comando `npm run pendencias:candidaturas` mantém a projeção. Nenhuma instalação pública recebe os registros do mantenedor.
+Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Aplicação](docs/aplicacao/README.md#ações-pessoais-por-vaga). Consultar antes de abrir/preparar novamente; pendência conhecida sem fato novo é pulada e informada no fechamento. O Markdown é a fonte e o comando `npm run pendencias:candidaturas` mantém a projeção. Nenhuma instalação pública recebe os registros do mantenedor.
 
 ## Duas regras que valem sempre
 

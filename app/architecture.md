@@ -24,7 +24,7 @@ Com `JOBRELAY_API_URL=http://127.0.0.1:4182`, as duas rotas fazem proxy somente 
 
 ## Estado de versionamento
 
-A pasta interface/ está integrada como código normal no repositório pai, sem repositório Git aninhado ou submódulo. Antes da integração, o histórico do scaffold foi preservado em cópia e bundle privados de revisão. O commit e o push desta entrega seguem o fechamento autorizado e precisam de verificação própria.
+A pasta `app/` está integrada como código normal no repositório pai, sem repositório Git aninhado ou submódulo. Antes da integração, o histórico do scaffold foi preservado em cópia e bundle privados de revisão. O commit e o push desta entrega seguem o fechamento autorizado e precisam de verificação própria.
 
 ## Protótipo com cópia privada
 

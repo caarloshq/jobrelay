@@ -9,7 +9,7 @@ pnpm dev --host 127.0.0.1 --port 4185
 
 A configuração padrão usa cinco vagas fictícias. Movimentos ficam na memória do servidor e não alteram candidaturas reais. Modos, contrato de dados e verificação em [architecture.md](architecture.md).
 
-A avaliação visual está vinculada à [spec 006](../specs/pendentes/006-tema-quadro-onboarding-notion.md). A migração do onboarding para Astro não foi realizada nesta rodada; o formulário existente foi preservado.
+A avaliação visual está vinculada à [spec 006](../docs/specs/pendentes/006-tema-quadro-onboarding-notion.md). A migração do onboarding para Astro não foi realizada nesta rodada; o formulário existente foi preservado.
 
 ## Testar uma cópia persistente
 
