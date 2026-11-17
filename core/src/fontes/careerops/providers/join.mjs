@@ -38,6 +38,13 @@ export function extractNextData(html) {
   try { return JSON.parse(match[1]); } catch { return null; }
 }
 
+// Both public Next.js envelopes exist. Pick a complete jobs container, so an
+// unrelated/incomplete initialState does not hide a valid pageData payload.
+function pageState(data) {
+  const props = data?.props?.pageProps;
+  return [props?.initialState, props?.pageData].find(state => Array.isArray(state?.jobs?.items)) || null;
+}
+
 /** @type {Provider} */
 export default {
   id: 'join',
@@ -58,7 +65,7 @@ export default {
     // regardless of the original careers_url.
     const firstHtml = await ctx.fetchText(baseUrl, { redirect: 'error' });
     const firstData = extractNextData(firstHtml);
-    const state = firstData?.props?.pageProps?.initialState;
+    const state = pageState(firstData);
     if (!state) throw new Error('join: __NEXT_DATA__ not found or unexpected structure');
 
     const firstJobs = state.jobs?.items;
@@ -79,9 +86,9 @@ export default {
     for (let page = 2; page <= pageCount; page++) {
       const html = await ctx.fetchText(`${baseUrl}?page=${page}`, { redirect: 'error' });
       const data = extractNextData(html);
-      const pageState = data?.props?.pageProps?.initialState;
-      if (!pageState) throw new Error('join: __NEXT_DATA__ not found or unexpected structure');
-      const pageItems = pageState.jobs?.items;
+      const nextState = pageState(data);
+      if (!nextState) throw new Error('join: __NEXT_DATA__ not found or unexpected structure');
+      const pageItems = nextState.jobs?.items;
       if (!Array.isArray(pageItems)) throw new Error('join: __NEXT_DATA__ not found or unexpected structure');
       allItems.push(...pageItems);
     }

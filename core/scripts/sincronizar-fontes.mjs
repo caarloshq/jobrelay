@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
 
 export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
+  'test/providers-positive.test.js',
   'src/layout.js',
   'src/intermediario.js', 'test/intermediario.test.js',
   'src/historico.js', 'test/historico.test.js',

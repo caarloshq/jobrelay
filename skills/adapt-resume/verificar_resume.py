@@ -302,6 +302,98 @@ def restricoes_candidatura(texto, dados=None):
     return falhas
 
 
+def _chave_declarada(valor):
+    # Nomes completos: C, C++, A/B e AB continuam distintos.
+    return " ".join(valor.split()).casefold()
+
+
+def _itens_declarados(dados):
+    empresas, ferramentas, limites = [], [], []
+    if not isinstance(dados, dict):
+        return empresas, ferramentas, ["conteúdo não é objeto JSON"]
+    experiencia = dados.get("experience", [])
+    if not isinstance(experiencia, list):
+        limites.append("experience não é lista")
+    else:
+        for i, item in enumerate(experiencia):
+            valor = item.get("company") if isinstance(item, dict) else None
+            if not isinstance(valor, str) or not valor.strip():
+                limites.append(f"experience[{i}].company ausente ou inválido")
+            else:
+                empresas.append((f"experience[{i}].company", valor.strip()))
+    linha = dados.get("tools_line", "")
+    if not isinstance(linha, str):
+        limites.append("tools_line não é texto com itens separados")
+    else:
+        for i, valor in enumerate(re.split(r"[·|;,\n]", linha)):
+            if valor.strip():
+                ferramentas.append((f"tools_line[{i}]", valor.strip()))
+    return empresas, ferramentas, limites
+
+
+def carregar_bases_declaradas(diretorio=None):
+    """Somente bases vigentes da instalação; sem backup, histórico ou modelos."""
+    if diretorio is None:
+        aqui = os.path.dirname(os.path.abspath(__file__))
+        raiz = os.path.dirname(os.path.dirname(aqui))
+        diretorio = (os.path.join(raiz, "local", "curriculo")
+                     if os.path.isfile(os.path.join(raiz, "core", "package.json")) else aqui)
+    bases, limites = [], []
+    for nome in ("base_content_pt.json", "base_content_en.json"):
+        caminho = os.path.join(diretorio, nome)
+        try:
+            with open(caminho, encoding="utf-8") as f:
+                dados = json.load(f)
+            empresas, ferramentas, erros = _itens_declarados(dados)
+            if erros or not (empresas or ferramentas):
+                raise ValueError("campos declarados ausentes ou inválidos")
+            bases.append(dados)
+        except (OSError, ValueError, TypeError) as erro:
+            limites.append({"tipo": "limitacao", "campo": nome,
+                            "valor": "base vigente indisponível ou inválida: " + type(erro).__name__})
+    return bases, limites
+
+
+def avisos_declarados(dados, bases):
+    """Compara somente company e tools_line declarados, nunca entidades em prosa."""
+    empresas, ferramentas, erros = _itens_declarados(dados)
+    avisos = [{"tipo": "limitacao", "campo": "content.json", "valor": e} for e in erros]
+    conhecidas, conhecidas_tools = set(), set()
+    for base in bases:
+        es, ts, limites = _itens_declarados(base)
+        if limites:
+            continue
+        conhecidas.update(_chave_declarada(v) for _, v in es)
+        conhecidas_tools.update(_chave_declarada(v) for _, v in ts)
+    vistos = set()
+    for itens, conhecidos, tipo, campo in (
+        (empresas, conhecidas, "empresa_fora_da_base", "experience[].company"),
+        (ferramentas, conhecidas_tools, "ferramenta_fora_da_base", "tools_line"),
+    ):
+        if not conhecidos:
+            avisos.append({"tipo": "limitacao", "campo": campo,
+                           "valor": "sem base válida para comparar estes campos declarados"})
+            continue
+        for caminho, valor in itens:
+            chave = _chave_declarada(valor)
+            if chave not in conhecidos and (tipo, chave) not in vistos:
+                vistos.add((tipo, chave))
+                avisos.append({"tipo": tipo, "campo": caminho, "valor": valor})
+    return avisos
+
+
+def registro_avisos_fidelidade(avisos):
+    """Projeção para o agente registrar em decisões/Gaps; não escreve estado."""
+    unicos, vistos = [], set()
+    for aviso in avisos:
+        chave = (aviso["tipo"], aviso["campo"], aviso["valor"])
+        if chave not in vistos:
+            vistos.add(chave)
+            unicos.append(dict(aviso))
+    return {"avisosFidelidade": unicos,
+            "gaps": [f"Fidelidade ({a['tipo']}) em {a['campo']}: {a['valor']}" for a in unicos]}
+
+
 def _decisoes(decisoes_arq, conteudo):
     caminho = decisoes_arq or (os.path.join(os.path.dirname(os.path.abspath(conteudo)), "decisoes.json") if conteudo else None)
     if not caminho or not os.path.exists(caminho):
@@ -413,6 +505,13 @@ def main():
             falhas.append(f"nota de ATS {nota}%, abaixo do minimo de {NOTA_MINIMA}%: usar a palavra exata "
                           "do anuncio para tudo que e fato; se o que falta nao e fato, a vaga nao encaixa")
         print()
+
+    bases_declaradas, limites_base = carregar_bases_declaradas()
+    avisos_fidelidade = avisos_declarados(dados, bases_declaradas) + limites_base
+    registro = registro_avisos_fidelidade(avisos_fidelidade)
+    for aviso in registro["avisosFidelidade"]:
+        print(f"  AVISO: {aviso['tipo']} em {aviso['campo']}: {aviso['valor']}")
+    print("AVISOS_FIDELIDADE_JSON: " + json.dumps(registro, ensure_ascii=False))
 
     print(f"{pdf}: {len(r.pages)} pagina(s)")
     if falhas:
