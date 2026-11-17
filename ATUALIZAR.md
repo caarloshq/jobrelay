@@ -44,3 +44,13 @@ O assistente pode recuperar as instruções atuais pelo repositório original id
 > Atualiza esta instalação pela última release estável de https://github.com/caarloshq/jobrelay. Leia ATUALIZAR.md no repositório original e as notas da release, preserve meus dados e configurações e faça as migrações necessárias. Mantenha os créditos e me informe a versão instalada ao terminar.
 
 Instalações antigas não recebem este arquivo retroativamente. Depois da primeira atualização compatível, o pedido curto “atualiza aí” encontra esta orientação na raiz.
+
+## Mudança assistida para app/core/skills/docs/local
+
+A reorganização mantém o motor em `core/`, a interface em `app/`, procedimentos em `skills/` e guias em `docs/`. Configuração, respostas, pendências, histórico e currículo da instalação ficam em `local/`, que não integra o pacote público. Os modelos neutros distribuídos ficam em `core/config/modelos/`.
+
+O ZIP contém somente arquivos regulares. Execute `node migrar-layout.mjs .` antes do primeiro uso: o bootstrap cria `local/` a partir dos modelos ausentes e os aliases locais explícitos necessários aos comandos antigos. Esses aliases são symlinks gerados na instalação, não conteúdo distribuído. O alcance comprovado nesta mudança é o ambiente de teste macOS/Node e os jobs Linux definidos; não há comprovação de instalação no Windows. Os documentos legados da raiz permanecem como entradas transitórias, com um único arquivo dono.
+
+O migrador não conclui onboarding humano, não ativa candidatura e não altera opt-ins. Ele verifica ancestrais e recusa links inesperados antes de escrever journal ou modelos. O journal local registra checkpoints e hashes. Uma interrupção em checkpoint pode ser retomada; se o estado divergir, a migração recusa sobrescrita e exige reconciliação ou restauração do backup. Não há promessa de retomada automática após qualquer interrupção entre uma escrita e a gravação do checkpoint.
+
+Uma instalação Git antiga exige migração assistida e alinhamento explícito ao commit de transição. O atualizador continua recusando código local modificado e pacotes incompatíveis; essa recusa segura não é uma atualização automática concluída. Depois da conversão, o updater suporta o layout novo e preserva `local/`. Não execute checkout ou substituição ampla sobre dados, dependências ou aliases. Confira backup integral, mapa da instalação e estado Git antes de migrar.
