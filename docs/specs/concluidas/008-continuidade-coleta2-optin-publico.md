@@ -1,6 +1,6 @@
 # Continuidade da coleta 2 e opt-in de candidatura
 
-**Data:** 16 de Novembro de 2026  ·  **Escopo:** distribuição pública JobRelay 1.6.x  ·  **Estado:** implementação local em revisão; sem publicação.
+**Data:** 16 de Novembro de 2026  ·  **Escopo:** distribuição pública JobRelay 1.6.x  ·  **Estado:** concluída no recorte de implementação local; sem publicação.
 
 ## Propósito
 
@@ -10,7 +10,7 @@ Fechar a continuidade entre coleta e aplicação sem pedir uma segunda autoriza�
 
 1. A coleta 2 continua desligada por padrão e exige aceite explícito da pessoa para iniciar a janela assistida.
 2. O aceite da coleta 2 também autoriza aplicar as novas vagas confirmadas daquele lote, sem uma segunda pergunta, desde que a aplicação esteja configurada nesta instalação.
-3. A aplicação pública exige simultaneamente `vagas/data/politica-autonomia.json#modoCandidatura === "chrome_assistido"` e `vagas/config/perfil-candidatura.json#autorizado === true`. O modo isolado, perfil isolado ou aceite da coleta 2 nunca substituem o outro controle.
+3. A aplicação pública exige simultaneamente `local/data/politica-autonomia.json#modoCandidatura === "chrome_assistido"` e `local/config/perfil-candidatura.json#autorizado === true`. Os caminhos físicos pertencem a `local/`; aliases legados não criam outra base. O modo isolado, perfil isolado ou aceite da coleta 2 nunca substituem o outro controle.
 4. Antes de iniciar ou retomar a passagem, reler os dois controles e confirmar que cada vaga está integrada, elegível e presente na fila atual. A revisão da candidatura e a confirmação por vaga mantêm o contrato existente.
 5. Sem opt-in válido, concluir a rodada e manter as vagas novas visíveis na fila em `nao_percorrida`. Não abrir formulário, preencher ou transmitir candidatura. Quando a pessoa configurar a aplicação em uma rodada futura, a leitura confirmada da fila as recoloca como trabalho inicial, sem inferir candidatura enviada.
 6. A autorização durável da passagem referencia o mesmo `aceiteRef` que iniciou a coleta 2 e só cobre vagas novas confirmadas por ela. Estado legado sem essa referência não ganha autorização inferida. Mensagens para recrutadores continuam sujeitas à revisão e confirmação individual já previstas nos runbooks.
@@ -27,10 +27,10 @@ Fechar a continuidade entre coleta e aplicação sem pedir uma segunda autoriza�
 
 ## Arquivos donos
 
-- Sequência da rodada: [`vagas/FLUXO-DA-RODADA.md`](../../vagas/FLUXO-DA-RODADA.md)
-- Coordenação: [`vagas/COORDENACAO-FRENTES.md`](../../vagas/COORDENACAO-FRENTES.md)
+- Sequência da rodada: [`docs/core/FLUXO-DA-RODADA.md`](../../core/FLUXO-DA-RODADA.md)
+- Coordenação: [`docs/core/COORDENACAO-FRENTES.md`](../../core/COORDENACAO-FRENTES.md)
 - Coleta 2: [`coleta/LINKEDIN-FEED.md`](../../coleta/LINKEDIN-FEED.md)
-- Configuração: [`docs/configuracao-tecnica.md`](../../docs/configuracao-tecnica.md)
+- Configuração: [`docs/configuracao-tecnica.md`](../../configuracao-tecnica.md)
 
 ## Limites desta entrega
 
@@ -40,3 +40,7 @@ A implementação local não prova login real, captura real do LinkedIn, candida
 ## Conferência de 16 de Novembro de 2026
 
 Revisão independente aprovou o recorte técnico para commit sem push. Testes focados de controle, coleta 2 e quadro: 61/61, zero falhas. Checagem pública: nenhum dado pessoal encontrado e todos os scripts resolvem. Contratos agora obtêm o runId real antes de persistir a decisão e antes da captura. Fixtures declaram explicitamente o opt-in sintético, sem alterar a configuração padrão da instalação. Operação real e publicação não foram executadas.
+
+## Encerramento em 17 de Novembro de 2026
+
+A revisão independente reconferiu os critérios no código e nos testes atuais e liberou o encerramento local. Os links e os caminhos físicos foram reconciliados após a migração de layout. Os limites de operação real e publicação acima permanecem.
