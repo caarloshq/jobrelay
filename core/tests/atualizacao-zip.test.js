@@ -37,7 +37,8 @@ test('ZIP só baixa após aceite e preserva dados, configuração, regras e hist
   assert.equal(pendente.mensagem,'Você está na versão 1.4.0. A atualização leva para a versão 1.5.0.');
   const r = await atualizarAutomaticamente({ ...f.opcoes, confirmacao: f.aceite });
   assert.equal(r.status,'atualizado', JSON.stringify(r)); assert.equal(f.downloads(),1);
-  assert.equal(r.mensagem,'Atualizado: da versão 1.4.0 para a versão 1.5.0.');
+  assert.match(r.mensagem,/verificação final ainda está pendente/);
+  assert.doesNotMatch(r.mensagem,/Atualização concluída/);
   assert.equal(fs.readFileSync(path.join(f.raiz,'vagas/src/atualizacao.js'),'utf8'),'novo');
   for (const [n,v] of Object.entries(pessoais)) assert.equal(fs.readFileSync(path.join(f.raiz,n),'utf8'),v,n);
   assert.equal(fs.readFileSync(path.join(f.raiz,r.backup,'arquivos/vagas/src/atualizacao.js'),'utf8'),'original');

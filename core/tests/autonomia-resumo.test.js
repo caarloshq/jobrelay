@@ -22,20 +22,20 @@ function pasta(t) {
   return { dados, arquivos: { ocorrencias: arq('ocorrencias-rodada.json'), fila: arq('fila-notion.json'), contatos: arq('contatos-posts.json') }, espelho: arq('notion.json') };
 }
 
-test('fechamento: título, tabela de três linhas e, só se houver, a lista', () => {
-  assert.equal(resumoRodada({ mapeadas: 42, aplicadas: 7, comErro: 0 }),
-    'Rodada concluída ✅\n\n| Resultado | Vagas |\n|---|---:|\n| 🔎 Mapeadas | 42 |\n| 📨 Aplicadas | 7 |\n| ⚠️ Com erro | 0 |');
-  const t = resumoRodada({ mapeadas: 42, aplicadas: 7, comErro: 1, precisaDeVoce: ['Responder uma pergunta pessoal da vaga Product Designer (Acme)', 'Autorizar uma mensagem para Fulana'] });
-  assert.match(t, /^Rodada concluída com erros ⚠️/);
-  assert.match(t, /\| ⚠️ Com erro \| 1 \|\n\nPrecisa de você\n- Responder uma pergunta pessoal da vaga Product Designer \(Acme\)\n- Autorizar uma mensagem para Fulana$/);
-  assert.match(resumoRodada({ mapeadas: 1, aplicadas: 0, comErro: 0, precisaDeVoce: ['Fazer um teste'] }), /^Rodada concluída, aguardando você ⏳/);
-  assert.ok(!/[—–]/.test(t));
+test('fechamento mantém métricas internas e apresenta próximos passos sem números', () => {
+  assert.equal(resumoRodada({ mapeadas: 42, aplicadas: 7, comErro: 0 }), '✅ Terminei os envios para as vagas autorizadas. Os resultados estão registrados no quadro.');
+  const t = resumoRodada({ mapeadas: 42, aplicadas: 7, comErro: 1, precisaDeVoce: ['Responder uma pergunta pessoal'] });
+  assert.match(t, /continuam salvas como pendentes/);
+  assert.match(t, /Precisa de você\n- Responder uma pergunta pessoal$/);
+  assert.doesNotMatch(t, /[0-9]|candidatura|[—–]/i);
 });
 
-test('a lista é curta: mostra seis e conta o resto', () => {
-  const itens = Array.from({ length: 9 }, (_, i) => `Item ${i + 1}`);
+test('a lista permanece curta sem rodapé de quantidades', () => {
+  const itens = Array.from({ length: 9 }, () => 'Ação pessoal');
   const t = resumoRodada({ mapeadas: 1, aplicadas: 1, comErro: 0, precisaDeVoce: itens });
-  assert.equal((t.match(/^- /gm) || []).length, 7); assert.match(t, /- e mais 3$/);
+  assert.equal((t.match(/^- /gm) || []).length, 7);
+  assert.match(t, /Há outras pendências/);
+  assert.doesNotMatch(t, /[0-9]/);
 });
 
 test('entradas inválidas são recusadas: travessão, multilinha, contagem negativa, campo extra', () => {
@@ -51,12 +51,12 @@ test('os resumos de coleta e aplicação ganham erros e pedidos sem mudar quando
   const com = resumoColeta({ encontradas: 10, compativeis: 4, descartadas: 6, erros: 2, precisaDeVoce: ['Entrar de novo na conta do LinkedIn'] });
   assert.ok(com.startsWith(sem)); assert.match(com, /\n\n⚠️ Com erro: 2\n\nPrecisa de você\n- Entrar de novo na conta do LinkedIn$/);
   const ap = resumoAplicacao({ total: 5, enviadas: 3, pendentes: 1, naoEnviadas: 1, erros: 0 });
-  assert.match(ap, /\n\n⚠️ Com erro: 0$/);
+  assert.doesNotMatch(ap, /Com erro|[0-9]/);
 });
 
 test('o comando de fechamento usa o mesmo texto', () => {
   const r = spawnSync(process.execPath, [path.join(raiz, 'scripts/rodada-lote.mjs'), 'resumo_rodada'], { input: JSON.stringify({ mapeadas: 3, aplicadas: 2, comErro: 0 }), encoding: 'utf8', cwd: raiz });
-  assert.equal(r.status, 0, r.stderr); assert.match(r.stdout, /Mapeadas \| 3 \|/);
+  assert.equal(r.status, 0, r.stderr); assert.match(r.stdout, /Terminei os envios/);
 });
 
 test('ocorrências: o que se resolveu sozinho não é erro; ato pessoal não é erro, é pedido', t => {
@@ -114,7 +114,7 @@ test('prepara a rodada sozinho: operação órfã, lote antigo, fila parada, men
   assert.equal(r.informacoes.filaNotion.pendentes, 1);
   // E o fechamento junta tudo, sem pedir nada a a pessoa candidata além do que é dele.
   const f = fecharRodada({ mapeadas: 30, aplicadas: 5, arquivos });
-  assert.match(f.texto, /Mapeadas \| 30 \|/); assert.match(f.texto, /Aplicadas \| 5 \|/); assert.match(f.texto, /Com erro \| 1 \|/);
+  assert.doesNotMatch(f.texto, /Mapeadas|Aplicadas|Com erro/);
   assert.match(f.texto, /Precisa de você\n- Autorizar uma mensagem para Marina/);
   assert.ok(!/[—–]/.test(f.texto));
   // Segunda preparação não duplica nada.
@@ -148,5 +148,5 @@ test('o que se resolveu durante a rodada sai da conta no fechamento: fila gravad
   assert.equal(r.comErro, 1);
   marcarGravado('a:1', 'pagina-1', { arquivo: arquivos.fila, espelho: path.join(dados, 'notion.json'), provaRef: 'a:1|pagina-1|fixture:releitura' });
   const f = fecharRodada({ mapeadas: 4, aplicadas: 1, arquivos });
-  assert.equal(f.comErro, 0); assert.match(f.texto, /^Rodada concluída ✅/); assert.equal(f.resolvidasSozinhas, 1);
+  assert.equal(f.comErro, 0); assert.match(f.texto, /^✅ Terminei os envios/); assert.equal(f.resolvidasSozinhas, 1);
 });

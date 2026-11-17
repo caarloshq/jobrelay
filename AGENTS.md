@@ -97,3 +97,7 @@ O resumo serve somente à conferência. Após confirmação humana bem-sucedida,
 Se a pessoa escolheu Notion, siga docs/modelo-notion/README.md para criar a página Puxa Vagas e seu quadro na conta dela. O bundle saneado é a fonte padrão e não depende do Notion do mantenedor. Crie somente o exemplo fictício indicado, excluído do ciclo operacional. Confira campos, quatro grupos, cinco views e Confiança percentual com barra; declare qualquer ajuste manual pendente. Não peça ID de database no formulário. Preserve os dados da instalação. Para o navegador headless público e a intervenção humana de login, siga docs/navegador.md. Nunca reutilize o perfil, cookies ou configuração privada do mantenedor. O transporte não altera opt-in, revisão ou autorizações.
 
 Respeite os dois switches independentes: recorrência solicita tarefa nativa a cada quatro horas; atualização automática controla a verificação de release antes da operação. Salvar o formulário não cria tarefas nem comprova login.
+
+## Mensagens das etapas
+
+Nas mensagens ao usuário, seguir [Mensagens do fluxo](docs/mensagens-do-fluxo.md) e renderizar os eventos do formatador nos pontos reais de download, instalação, configuração, coleta, envios e fechamento. O resumo dos envios não mostra quantidades; os números da coleta e os registros internos permanecem. Depois de uma atualização conferida, mostrar a nota integral da release correta em bloco. Esta regra não muda autorização, confirmação humana, prova de recebimento ou política de atualização.

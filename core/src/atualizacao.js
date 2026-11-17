@@ -1,3 +1,4 @@
+import { formatarMensagemOperacao } from './mensagens-operacao.js';
 import { layout } from './layout.js';
 const REPO_PUBLICO = 'https://github.com/caarloshq/jobrelay';
 // Atualização conservadora: somente release estável deste repositório, por avanço linear.
@@ -96,7 +97,7 @@ async function releaseEstavel(fetchImpl) {
   const ref = await respostaJson(`${API}/git/ref/tags/${encodeURIComponent(release.tag_name)}`, fetchImpl);
   if (ref.ref !== `refs/tags/${release.tag_name}` || !['tag', 'commit'].includes(ref.object?.type) || !SHA.test(ref.object?.sha)) falhar('TAG_INVALIDA');
   const asset = release.assets?.find(a => a.name === 'jobrelay.zip');
-  return { tag: release.tag_name, tagSha: ref.object.sha,
+  return { tag: release.tag_name, tagSha: ref.object.sha, notaRelease: typeof release.body === 'string' ? release.body : null, publicadaEm: release.published_at || null,
     assetUrl: asset?.browser_download_url, assetSha256: /^sha256:[a-f0-9]{64}$/.test(asset?.digest || '') ? asset.digest.slice(7) : undefined };
 }
 
@@ -249,7 +250,7 @@ async function atualizarInterno({ raiz, fetchImpl = globalThis.fetch, consultarR
       const bytes = await baixarZip(release, fetchImpl);
       const aplicado = instalarZip({ raiz: projeto, dados, bytes, release, proteger, seguroNoDisco,
         conferir: () => { conferirTrava(); estadoOperacao(dados); }, antesGravar: consultarRelease ? antesGravarZip : null });
-      resultado = { status: 'atualizado', tipoInstalacao, tag: release.tag, ...aplicado }; return resultado;
+      resultado = { status: 'atualizado', tipoInstalacao, tag: release.tag, tagSha: release.tagSha, notaRelease: release.notaRelease, publicadaEm: release.publicadaEm, ...aplicado }; return resultado;
     }
     seguroNoDisco(path.join(projeto, '.git'));
     if (await git(projeto, 'rev-parse', '--show-toplevel') !== projeto) falhar('RAIZ_GIT_INVALIDA');
@@ -309,7 +310,7 @@ async function atualizarInterno({ raiz, fetchImpl = globalThis.fetch, consultarR
     else await git(projeto, 'merge', '--ff-only', '--no-stat', destino);
     if (await git(projeto, 'rev-parse', 'HEAD') !== destino) falhar('ATUALIZACAO_APLICACAO_INCERTA');
     mergeConfirmado = true;
-    resultado = { status: 'atualizado', tag: release.tag, tagSha: release.tagSha, commit: destino };
+    resultado = { status: 'atualizado', tag: release.tag, tagSha: release.tagSha, commit: destino, notaRelease: release.notaRelease, publicadaEm: release.publicadaEm };
     return resultado;
   } catch (erro) {
     resultado = { status: erro.codigo === 'MIGRACAO_LAYOUT_NECESSARIA' ? 'migracao_layout_necessaria' : 'bloqueado', motivo: mergeTentado && !mergeConfirmado ? 'ATUALIZACAO_APLICACAO_INCERTA' : (erro.codigo || 'ATUALIZACAO_FALHOU') };
@@ -339,7 +340,7 @@ function comVersao(resultado, antes) {
   const destino = String(resultado.tag).replace(/^v/, '').split('+')[0];
   const evidencia = resultado.status === 'sem_atualizacao' ? 'sem_atualizacao' : resultado.status === 'bloqueado' ? 'bloqueado' : null;
   const { texto } = mensagemVersao({ instalada: antes, destino, evidencia, motivo: resultado.motivo, depois: resultado.status === 'atualizado' });
-  return { ...resultado, versao_instalada: antes, versao_destino: destino, mensagem: texto };
+  return { ...resultado, versao_instalada: antes, versao_destino: destino, mensagem: resultado.status === 'atualizado' ? formatarMensagemOperacao('update_pendente') : texto };
 }
 
 export async function atualizarAutomaticamente(opcoes = {}) {

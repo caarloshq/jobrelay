@@ -168,3 +168,5 @@ Antes de registrar resumo e gaps, aplicar [review-escrita](../../skills/review-e
 ## Conferir títulos descartados por área
 
 A partir desta implementação, o relatório diário guarda a frequência dos títulos rejeitados pelo motivo `titulo fora da area`. Em `vagas/`, execute `npm run descartes` para ver os mais frequentes, `npm run descartes -- --limite 40` para ampliar a lista ou `npm run descartes -- --json` para consultar os dados. A leitura usa os relatórios diários existentes e não muda filtros, notas, quadro ou candidaturas. Rodadas antigas sem esse campo aparecem como sem títulos registrados; seus totais de descarte não permitem reconstruir os nomes.
+
+Comunicação com a pessoa: seguir [Mensagens do fluxo](../mensagens-do-fluxo.md). O resumo da coleta mantém seus números; o encerramento dos envios não apresenta quantidades.

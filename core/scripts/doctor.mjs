@@ -1,3 +1,4 @@
+import { apresentarAtualizacaoConferida } from '../src/mensagem-atualizacao.js';
 // Uma linha por dependencia e por fonte. Verde ou vermelho, e sai != 0 se faltar
 // algo essencial. E o primeiro comando a rodar quando algo estiver estranho:
 // acaba com o "na minha maquina funciona".
@@ -5,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { RAIZ, DIR_CONFIG } from '../src/config.js';
+import { layout } from '../src/layout.js';
 
 const OK = '  ok  ';
 const RUIM = ' FALHA';
@@ -68,18 +70,17 @@ checar(
 );
 
 console.log('\nArquivos');
-for (const f of [
-  'config/perfil.json',
-  'config/palavras-chave.json',
-  'config/dorks.json',
-  'config/inhire-tenants.json',
-  'AGENTS.md',
-  '../Skills/adapt-resume/base_content_pt.json',
-  '../Skills/adapt-resume/base_content_en.json',
-  '../Skills/adapt-resume/generate_resume.py',
-]) {
-  checar(f, () => {
-    if (!existsSync(join(RAIZ, f))) throw new Error('nao encontrado');
+const caminhos = layout(join(RAIZ, '..'));
+const curriculo = join(caminhos.aplicacao, '..', 'curriculo');
+const arquivosEssenciais = [
+  ...['perfil.json', 'palavras-chave.json', 'dorks.json', 'inhire-tenants.json'].map(nome => [`config/${nome}`, join(DIR_CONFIG, nome)]),
+  ['AGENTS.md', join(caminhos.raiz, 'AGENTS.md')],
+  ...['base_content_pt.json', 'base_content_en.json'].map(nome => [`curriculo/${nome}`, join(curriculo, nome)]),
+  ['skills/adapt-resume/generate_resume.py', join(caminhos.skills, 'adapt-resume/generate_resume.py')],
+];
+for (const [nome, arquivo] of arquivosEssenciais) {
+  checar(nome, () => {
+    if (!existsSync(arquivo)) throw new Error('nao encontrado');
     return '';
   });
 }
@@ -112,3 +113,5 @@ if (essencialFaltando) {
   process.exit(1);
 }
 console.log('\nTudo essencial no lugar.\n');
+
+if (!essencialFaltando) await apresentarAtualizacaoConferida({ raiz: join(RAIZ, '..') });

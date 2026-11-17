@@ -1,6 +1,6 @@
 {
   "contrato": 1,
-  "payloadSha256": "a0727f29b0780db219f039b23d129c56615b52d7d6ce40425a2846a7178f96bb",
+  "payloadSha256": "74275ab70dd30896839cfc024eebcf95342ca66179e6ce46eb05ebb32f90c623",
   "arquivos": [
     {
       "path": ".agents/skills/aplicar/SKILL.md",
@@ -54,12 +54,12 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "8295b538f392cd659bec29e81ac64491300f43b1c82b0fd09044e54bd5575fd1",
+      "sha256": "c963071f145e543a5b016f3f8884deb72c33c82df90284462c07115210a8f040",
       "mode": "0o644"
     },
     {
       "path": "ATUALIZAR.md",
-      "sha256": "3a9494ff41140e5c371159cfddd61230ec5ac1290a651b9b59758ef6e7940cb7",
+      "sha256": "b2a38a86daa5fbc7d83af00891c82012e5fb4d3921d88f760953193f86eb5d0a",
       "mode": "0o644"
     },
     {
@@ -808,6 +808,11 @@
       "mode": "0o644"
     },
     {
+      "path": "vagas/scripts/mensagem-operacao.mjs",
+      "sha256": "6728f219842024c18319ed71fdae04c398a315dd7b5dee1531c25115b97cdad8",
+      "mode": "0o644"
+    },
+    {
       "path": "vagas/scripts/navegador.mjs",
       "sha256": "b6c968dcd91ff61c7eeef6a65a8476409b52555807baf6ddff18271626a83a49",
       "mode": "0o644"
@@ -939,12 +944,12 @@
     },
     {
       "path": "vagas/src/compat-layout/conteudo.json",
-      "sha256": "a0727f29b0780db219f039b23d129c56615b52d7d6ce40425a2846a7178f96bb",
+      "sha256": "74275ab70dd30896839cfc024eebcf95342ca66179e6ce46eb05ebb32f90c623",
       "mode": "0o644"
     },
     {
       "path": "vagas/src/compat-layout/conteudo.sha256",
-      "sha256": "8f884b40f9aab43ece3a3db024da0a1c226e5cab77faa8f113cea8ffbe06e9f7",
+      "sha256": "c1d62c37356d3624ec2e72dc0ade2a15fc2f35e84fec666a3331dff46797fd9b",
       "mode": "0o644"
     },
     {

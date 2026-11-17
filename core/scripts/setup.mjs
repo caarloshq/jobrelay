@@ -1,3 +1,4 @@
+import { formatarMensagemOperacao } from '../src/mensagens-operacao.js';
 import { verificarVersaoGit, formatarVersaoGit } from '../src/versao-git.js';
 // Setup de maquina nova. Objetivo: `git pull && npm run setup` e nada mais.
 // Nao instala dependencia Node porque nao ha nenhuma: fetch e nativo e o cache e JSON.
@@ -49,11 +50,13 @@ try {
   process.exit(1);
 }
 
+console.log(formatarMensagemOperacao('instalacao_concluida'));
+
 // Primeiro uso: o perfil ainda e o de exemplo, entao o formulario de onboarding
 // abre sozinho no navegador. Quem ja configurou nao ve isto.
 if (!concluido(DIR_DADOS)) console.log('Onboarding humano obrigatório. --sem-navegador só evita abrir a aba; não dispensa o HTML. Rode npm start.');
 if ((perfil._configurado !== true || !concluido(DIR_DADOS)) && !process.argv.includes('--sem-navegador')) {
-  console.log('\nPerfil ainda nao configurado: abrindo o formulario de onboarding no navegador...\n');
+  console.log(formatarMensagemOperacao('onboarding_inicio'));
   execFileSync(process.execPath, [join(RAIZ, 'scripts', 'onboarding.mjs'), '--abrir'], { stdio: 'inherit' });
 }
 

@@ -1,4 +1,5 @@
-// Execução consultiva: não altera o repositório e não bloqueia o primeiro uso.
+import { apresentarAtualizacaoConferida } from '../src/mensagem-atualizacao.js';
+// Não instala nem troca código; pode registrar que a nota foi apresentada após a pós-checagem.
 // Imprime primeiro a versão do produto (spec 015) e depois a comparação de commits Git.
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
@@ -17,4 +18,7 @@ export async function main({ cwd = padrao, fetch, saida = console.log, verificar
   return msg;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main();
+  await apresentarAtualizacaoConferida({ raiz: resolve(padrao, '..') });
+}

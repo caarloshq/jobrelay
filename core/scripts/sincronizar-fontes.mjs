@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
 
 export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
+  'src/mensagens-operacao.js', 'scripts/mensagem-operacao.mjs', 'test/mensagens-operacao.test.js',
   'test/providers-positive.test.js',
   'src/layout.js',
   'src/intermediario.js', 'test/intermediario.test.js',
@@ -36,14 +37,15 @@ export const ARQUIVOS_COMPARTILHADOS = Object.freeze([
   'src/fontes/uxjobs.js', 'src/fontes/portais.js', 'src/fontes/importadas.js', 'src/versao-git.js',
   'config/catalogo-fontes.json', 'config/fontes-portais.json',
   'config/fontes-importadas.json', 'config/fontes-gringas.json',
-  'scripts/fontes.mjs', 'scripts/verificar-fontes.mjs', 'scripts/verificar-versao.mjs', 'src/versao-produto.js', 'test/versao-produto.test.js',
+  'scripts/fontes.mjs', 'scripts/verificar-fontes.mjs', 'src/versao-produto.js', 'test/versao-produto.test.js',
   'scripts/sincronizar-fontes.mjs', 'test/fontes-novas.test.js', 'test/importadas.test.js',
   'test/gringas.test.js', 'test/uxjobs.test.js', 'test/uxjobs-security.test.js', 'test/providers-unknown.test.js',
   'test/versao-git.test.js', 'test/sincronizar-fontes.test.js', 'docs-fontes.md', 'docs-importadas.md',
   'src/fontes/careerops/LICENSE', 'src/fontes/careerops/CREDITO.md', 'src/fontes/careerops/user-agent.mjs',
 ]);
 // Adaptadores possuem contratos próprios; integração exige diff e testes nos dois lados.
-export const ADAPTADORES_PRESERVADOS = Object.freeze(["test/linkedin-feed-cli.test.js", "src/rodada-lote.js", "scripts/rodada-lote.mjs", "test/rodada-lote.test.js", "test/rodada-lote-coleta2.test.js", "scripts/linkedin-feed.mjs", "src/fontes-respostas.js", "test/fontes-respostas.test.js", "src/fila-notion.js", "scripts/fila-notion.mjs", "scripts/autonomia.mjs", "test/autonomia-resumo.test.js", "src/contatos-posts.js", "src/coletar.js", "src/entrada-operacao.js", "test/coleta2-fronteiras.test.js"]);
+// A entrada pública de versão também confere a ponte; a privada conserva seu núcleo instalado.
+export const ADAPTADORES_PRESERVADOS = Object.freeze(["scripts/verificar-versao.mjs", "test/linkedin-feed-cli.test.js", "src/rodada-lote.js", "scripts/rodada-lote.mjs", "test/rodada-lote.test.js", "test/rodada-lote-coleta2.test.js", "scripts/linkedin-feed.mjs", "src/fontes-respostas.js", "test/fontes-respostas.test.js", "src/fila-notion.js", "scripts/fila-notion.mjs", "scripts/autonomia.mjs", "test/autonomia-resumo.test.js", "src/contatos-posts.js", "src/coletar.js", "src/entrada-operacao.js", "test/coleta2-fronteiras.test.js"]);
 const PROVIDERS = 'src/fontes/careerops/providers';
 const CAMINHO_PROVIDER = /^src\/fontes\/careerops\/providers\/[a-z0-9_-]+\.(mjs|js)$/;
 const NOMES = Object.freeze({
