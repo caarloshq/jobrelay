@@ -10,7 +10,7 @@ Antes de abrir um anúncio, consultar o quadro, os IDs alternativos, o históric
 
 Somente um controlador pode navegar no LinkedIn por instalação. Auxiliares trabalham com as evidências salvas; não abrem páginas em paralelo. Todas as frentes compartilham a mesma cadência, inclusive leitura e candidatura.
 
-Como limite operacional conservador do projeto, deixar no mínimo 30 segundos entre aberturas de anúncios e, após cinco anúncios, pausar a navegação no LinkedIn por no mínimo cinco minutos. Usar esse tempo para ler, registrar e revisar o material obtido ou trabalhar em fontes independentes. Não usar loops que abrem o próximo anúncio assim que a página anterior responde.
+Como cadência operacional definida para o projeto, abrir um anúncio por vez, sem abas em lote ou em paralelo, e deixar no mínimo 1 segundo entre aberturas de anúncios e, após cinco anúncios, pausar a navegação no LinkedIn por no mínimo cinco minutos. Usar esse tempo para ler, registrar e revisar o material obtido ou trabalhar em fontes independentes. Não usar loops que abrem o próximo anúncio assim que a página anterior responde.
 
 Esses tempos são uma escolha local para reduzir consultas repetidas, sem medição de eficácia. Não são uma cota oficial, uma autorização da plataforma nem garantia de evitar restrições. A leitura e a conferência da página continuam obrigatórias; esperar não comprova carregamento nem validade.
 

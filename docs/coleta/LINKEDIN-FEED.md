@@ -4,6 +4,8 @@
 
 Fonte opcional, desligada por padrão em `local/config/linkedin-feed.json`. A pessoa pode ativá-la no onboarding, separadamente da Apify. Exige navegador autorizado e login feito pela pessoa no próprio site. Não pedir senha, importar cookies ou contornar bloqueios. A seleção de aplicação isolada não inicia captura.
 
+Na coleta 2, abrir os anúncios um por vez, sem disparar todas as abas juntas. Seguir a [cadência e a interrupção por limites](../core/LINKEDIN-LIMITES.md), inclusive na conferência dos links depois da captura. Ao surgir limite, interromper a navegação e salvar as vagas restantes no checkpoint.
+
 ## A pergunta antes da coleta 2
 
 A captura é a **coleta 2**: vem depois da coleta principal e da aplicação, e só começa com o sim da pessoa. Antes de abrir o LinkedIn, o assistente faz uma pergunta clicável com o texto exato "Quer continuar com a coleta 2 (LinkedIn assistido)?" e duas opções, "Sim, continuar" e "Não, fechar sem a coleta 2". O sim vale só para a janela assistida: não autoriza Apify, preenchimento nem envio.
