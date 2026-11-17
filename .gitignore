@@ -52,3 +52,23 @@ __pycache__/
 # Regras pertencem à pessoa que instalou.
 /REGRAS-DO-PROJETO.md
 /vagas/config/linkedin-feed.json
+
+/local/
+
+# Aliases locais criados pelo bootstrap; modelos canônicos continuam rastreáveis.
+/vagas
+/aplicacao
+/coleta
+/interface
+/onboarding
+/quadro
+/specs
+/core/data
+/core/test
+/core/*.md
+/core/config/*
+!/core/config/modelos/
+/skills/adapt-resume/base_content_*.json
+/skills/adapt-resume/base_resume_*.pdf
+/skills/adapt-resume/materiais-fonte
+/skills/adapt-resume/builds

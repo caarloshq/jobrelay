@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: vagas
+        working-directory: core
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +23,8 @@ jobs:
           python-version: "3.11"
       - name: Dependências dos testes de materiais
         run: pip install reportlab pypdf python-docx
+      - name: Criar estado local neutro sem concluir onboarding
+        run: node ../migrar-layout.mjs ..
       - name: Conferir lockfile Node
         run: npm ci --ignore-scripts
       - name: Testes do radar, sem rede
@@ -37,28 +39,35 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.4"
+      - name: Criar estado local neutro sem concluir onboarding
+        run: node migrar-layout.mjs .
       - name: Dependências do gerador de PDF
         run: pip install reportlab pypdf python-docx
       - name: Testes do currículo
-        run: python3 -m unittest discover -s Skills/adapt-resume/tests -p "test_*.py"
+        run: python3 -m unittest discover -s skills/adapt-resume/tests -p "test_*.py"
       - name: O exemplo gera e passa no verificador, nos dois idiomas
-        working-directory: Skills/adapt-resume
+        working-directory: skills/adapt-resume
         run: |
-          python3 generate_resume.py base_content_pt.json /tmp/pt.pdf
-          python3 verificar_resume.py /tmp/pt.pdf base_content_pt.json
-          python3 generate_resume.py base_content_en.json /tmp/en.pdf
-          python3 verificar_resume.py /tmp/en.pdf base_content_en.json
+          python3 generate_resume.py ../../local/curriculo/base_content_pt.json /tmp/pt.pdf
+          python3 verificar_resume.py /tmp/pt.pdf ../../local/curriculo/base_content_pt.json
+          python3 generate_resume.py ../../local/curriculo/base_content_en.json /tmp/en.pdf
+          python3 verificar_resume.py /tmp/en.pdf ../../local/curriculo/base_content_en.json
 
   interface:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: interface
+        working-directory: app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22.23.4"
+      - name: Criar estado local neutro sem concluir onboarding
+        run: node ../migrar-layout.mjs ..
       - uses: pnpm/action-setup@v4
         with:
           version: "11.25.0"
@@ -72,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: vagas
+        working-directory: core
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,7 +89,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22.23.4"
-      - name: Upgrade da release anterior para o commit exato, sem rede
+      - name: Criar estado local neutro sem concluir onboarding
+        run: node ../migrar-layout.mjs ..
+      - name: Verificar transição de layout e preservação da versão anterior
         env:
           JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ github.sha }}
-        run: node --test test/upgrade-release.test.js
+        run: node --test tests/upgrade-release.test.js

@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { planoFontes, aplicarPlano } from '../scripts/sincronizar-fontes.mjs';
+const origem=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+test('018 sincronizador real usa modelos, testes e docs canônicos sem seguir aliases',t=>{
+ const raiz=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'jobrelay018-sync-'));t.after(()=>fs.rmSync(raiz,{recursive:true,force:true}));
+ const destino=path.join(raiz,'core');fs.mkdirSync(path.join(destino,'src'),{recursive:true});fs.writeFileSync(path.join(destino,'package.json'),'{"name":"jobrelay"}');
+ const adaptador="import { criarFontes } from './fontes-registro.js'; // adaptador fixture\n";fs.writeFileSync(path.join(destino,'src/coletar.js'),adaptador);
+ fs.mkdirSync(path.join(raiz,'local/config'),{recursive:true});const opcao='{ "fontes": [], "sentinela": "preservar" }';fs.writeFileSync(path.join(raiz,'local/config/fontes-importadas.json'),opcao);
+ const plano=planoFontes(origem,destino);assert.equal(plano.some(f=>f.caminho==='src/layout.js'),true);
+ assert.equal(plano.find(f=>f.caminho==='test/operacao.test.js').destino,path.join(destino,'tests/operacao.test.js'));
+ assert.equal(plano.find(f=>f.caminho==='COORDENACAO-FRENTES.md').destino,path.join(raiz,'docs/core/COORDENACAO-FRENTES.md'));
+ assert.equal(plano.find(f=>f.caminho==='config/catalogo-fontes.json').destino,path.join(raiz,'local/config/catalogo-fontes.json'));
+ aplicarPlano(plano,destino);assert.equal(fs.readFileSync(path.join(destino,'src/coletar.js'),'utf8'),adaptador);assert.equal(fs.readFileSync(path.join(raiz,'local/config/fontes-importadas.json'),'utf8'),opcao);
+ assert.equal(planoFontes(origem,destino).some(f=>f.alterado),false);
+ fs.writeFileSync(path.join(destino,'src/layout.js'),'edição concorrente');assert.throws(()=>aplicarPlano(plano,destino),/destino mudou/);
+ fs.unlinkSync(path.join(destino,'src/layout.js'));fs.symlinkSync(path.join(destino,'src/coletar.js'),path.join(destino,'src/layout.js'));assert.throws(()=>planoFontes(origem,destino),/simbólicos/);
+});

@@ -39,8 +39,8 @@ jobs:
           import fs from 'node:fs';
           const tag = process.env.RELEASE_TAG;
           if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(tag || '')) throw new Error('A publicação exige uma tag estável vX.Y.Z, sem RC ou prerelease.');
-          const pkg = JSON.parse(fs.readFileSync('vagas/package.json', 'utf8'));
-          const lock = JSON.parse(fs.readFileSync('vagas/package-lock.json', 'utf8'));
+          const pkg = JSON.parse(fs.readFileSync('core/package.json', 'utf8'));
+          const lock = JSON.parse(fs.readFileSync('core/package-lock.json', 'utf8'));
           if (tag !== `v${pkg.version}` || lock.version !== pkg.version || lock.packages?.['']?.version !== pkg.version) throw new Error('A tag e as versões do pacote/lockfile precisam ser idênticas.');
           const notes = `docs/releases/${tag}.md`;
           if (!fs.statSync(notes).isFile() || !fs.readFileSync(notes, 'utf8').trim()) throw new Error('As notas desta versão precisam existir e ter conteúdo.');
@@ -54,53 +54,57 @@ jobs:
           python-version: '3.11'
       - name: Dependências dos materiais e currículo
         run: pip install reportlab pypdf python-docx
+      - name: Criar estado local neutro sem concluir onboarding
+        run: node migrar-layout.mjs .
       - name: Instalar dependências locais do núcleo
-        working-directory: vagas
+        working-directory: core
         run: npm ci --ignore-scripts
       - name: Testes do núcleo
-        working-directory: vagas
+        working-directory: core
         run: |
-          mkdir -p data
-          TMPDIR="$PWD/data" npm test
-      - name: Upgrade real da release anterior para o commit da tag
-        working-directory: vagas
+          mkdir -p ../local/data
+          TMPDIR="$PWD/../local/data" npm test
+      - name: Verificar transição de layout e preservação da versão anterior
+        working-directory: core
         env:
           JOBRELAY_TEST_UPGRADE_CANDIDATE: ${{ steps.release.outputs.commit }}
-        run: node --test test/upgrade-release.test.js
+        run: node --test tests/upgrade-release.test.js
       - name: Conferir ausência de dados pessoais no pacote
-        working-directory: vagas
+        working-directory: core
         run: npm run checar:publico
       - name: Testes do currículo
-        run: python3 -m unittest discover -s Skills/adapt-resume/tests -p 'test_*.py'
+        run: python3 -m unittest discover -s skills/adapt-resume/tests -p 'test_*.py'
       - name: Gerar e conferir os currículos nos dois idiomas
-        working-directory: Skills/adapt-resume
+        working-directory: skills/adapt-resume
         run: |
-          python3 generate_resume.py base_content_pt.json "$RUNNER_TEMP/jobrelay-pt.pdf"
-          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-pt.pdf" base_content_pt.json
-          python3 generate_resume.py base_content_en.json "$RUNNER_TEMP/jobrelay-en.pdf"
-          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-en.pdf" base_content_en.json
+          python3 generate_resume.py ../../local/curriculo/base_content_pt.json "$RUNNER_TEMP/jobrelay-pt.pdf"
+          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-pt.pdf" ../../local/curriculo/base_content_pt.json
+          python3 generate_resume.py ../../local/curriculo/base_content_en.json "$RUNNER_TEMP/jobrelay-en.pdf"
+          python3 verificar_resume.py "$RUNNER_TEMP/jobrelay-en.pdf" ../../local/curriculo/base_content_en.json
       - uses: pnpm/action-setup@v4
         with:
           version: '11.25.0'
       - name: Instalar interface pelo lockfile
-        working-directory: interface
+        working-directory: app
         run: pnpm install --frozen-lockfile
       - name: Tipos e lint da interface
-        working-directory: interface
+        working-directory: app
         run: |
           pnpm typecheck
           pnpm exec eslint src/components/job-board.tsx src/lib src/pages/api
       - name: Testes da interface
-        working-directory: interface
+        working-directory: app
         run: node --test src/lib/*.test.ts
       - name: Build da interface
-        working-directory: interface
+        working-directory: app
         run: pnpm build
       - name: Gerar ZIP somente dos arquivos rastreados no commit
         env:
           RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
         run: |
-          git archive --format=zip --prefix=jobrelay/ --output="$RUNNER_TEMP/jobrelay.zip" "$RELEASE_COMMIT"
+          mkdir "$RUNNER_TEMP/jobrelay-source"
+          git archive --format=tar "$RELEASE_COMMIT" | tar -x -C "$RUNNER_TEMP/jobrelay-source"
+          python3 "$RUNNER_TEMP/jobrelay-source/core/scripts/materializar-distribuicao.py" "$RUNNER_TEMP/jobrelay-source" "$RUNNER_TEMP/jobrelay-pacote" "$RUNNER_TEMP/jobrelay.zip"
           test -s "$RUNNER_TEMP/jobrelay.zip"
           unzip -t "$RUNNER_TEMP/jobrelay.zip"
       - name: Publicar nova release estável com o ZIP
