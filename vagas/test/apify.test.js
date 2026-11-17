@@ -171,3 +171,82 @@ test('o caminho da coleta: só o token basta com linkedin.json; a Task, quando e
   assert.equal(modo({ token: 't' }), 'desligado');
   assert.equal(modo({ task: 'eu~task', linkedin }), 'desligado', 'sem token nada roda');
 });
+
+
+// Runs da Task e avulsos do mesmo Actor competem pelo último dataset real.
+import { ultimoRun } from '../src/fontes/apify.js';
+
+const runApify = (id, hora, actId = 'actor-a', extras = {}) => ({
+  id, status: 'SUCCEEDED', defaultDatasetId: 'dataset-' + id, finishedAt: hora, actId, ...extras,
+});
+
+async function comApiApify(respostas, executar) {
+  const original = globalThis.fetch;
+  const chamadas = [];
+  globalThis.fetch = async (url, opcoes = {}) => {
+    const caminho = new URL(url).pathname;
+    chamadas.push({ caminho, metodo: opcoes.method || 'GET' });
+    if (!(caminho in respostas)) throw new Error('GET inesperado: ' + caminho);
+    const resposta = respostas[caminho];
+    if (resposta instanceof Error) throw resposta;
+    return { ok: true, json: async () => ({ data: resposta }) };
+  };
+  try { await executar(chamadas); } finally { globalThis.fetch = original; }
+}
+
+test('último run inclui avulso mais recente do mesmo Actor, sem POST', async () => {
+  const antigo = runApify('task', '2026-11-16T13:55:59Z');
+  const novo = runApify('avulso', '2026-11-17T01:58:47Z');
+  await comApiApify({
+    '/v2/actor-tasks/task-a/runs': { items: [antigo] },
+    '/v2/acts/actor-a/runs': { items: [novo, antigo] },
+  }, async (chamadas) => {
+    assert.equal((await ultimoRun({ task: 'task-a' }, 'token-falso')).id, 'avulso');
+    assert.ok(chamadas.every((c) => c.metodo === 'GET'));
+  });
+});
+
+test('Task mais nova vence; outro Actor e runs sem dataset válido não vencem', async () => {
+  const novo = runApify('task', '2026-11-17T02:00:00Z');
+  await comApiApify({
+    '/v2/actor-tasks/task-a/runs': { items: [novo] },
+    '/v2/acts/actor-a/runs': { items: [
+      runApify('outro', '2026-11-17T04:00:00Z', 'actor-b'),
+      runApify('sem-dataset', '2026-11-17T03:00:00Z', 'actor-a', { defaultDatasetId: null }),
+      runApify('running', '2026-11-17T02:30:00Z', 'actor-a', { status: 'RUNNING' }),
+      runApify('failed', '2026-11-17T02:15:00Z', 'actor-a', { status: 'FAILED' }),
+      runApify('avulso', '2026-11-17T01:58:47Z'),
+    ] },
+  }, async () => {
+    assert.equal((await ultimoRun({ task: 'task-a' }, 'token-falso')).id, 'task');
+  });
+});
+
+test('falha na consulta do Actor não declara a Task como última', async () => {
+  await comApiApify({
+    '/v2/actor-tasks/task-a/runs': { items: [runApify('task', '2026-11-16T13:55:59Z')] },
+    '/v2/acts/actor-a/runs': new Error('Actor indisponível'),
+  }, async () => {
+    await assert.rejects(ultimoRun({ task: 'task-a' }, 'token-falso'), /Actor indisponível/);
+  });
+});
+
+
+test('sem Task, Actor configurado continua suficiente para reimportar', async () => {
+  await comApiApify({ '/v2/acts/actor-a/runs': { items: [runApify('direto', '2026-11-17T01:58:47Z')] } }, async (chamadas) => {
+    assert.equal((await ultimoRun({ actor: 'actor-a' }, 'token-falso')).id, 'direto');
+    assert.deepEqual(chamadas.map((c) => c.caminho), ['/v2/acts/actor-a/runs']);
+  });
+});
+
+
+test('Task sem runs descobre Actor pelo metadata e preserva resultado vazio', async () => {
+  await comApiApify({
+    '/v2/actor-tasks/task-a/runs': { items: [] },
+    '/v2/actor-tasks/task-a': { actId: 'actor-a' },
+    '/v2/acts/actor-a/runs': { items: [runApify('sem-dataset', '2026-11-17T03:00:00Z', 'actor-a', { defaultDatasetId: null })] },
+  }, async (chamadas) => {
+    assert.equal(await ultimoRun({ task: 'task-a' }, 'token-falso'), null);
+    assert.equal(chamadas.length, 3);
+  });
+});

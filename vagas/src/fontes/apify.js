@@ -299,9 +299,21 @@ export async function baixarDataset(datasetId, token) {
  * guardam os runs em lugares diferentes da API, por isso os dois caminhos.
  */
 export async function ultimoRun({ task, actor }, token) {
-  const caminho = task ? `/actor-tasks/${task}/runs` : `/acts/${actor}/runs`;
-  const j = await api(`${caminho}?limit=10&desc=1`, token);
-  return (j.data.items || []).find((r) => r.status === 'SUCCEEDED') || null;
+  let runsTask = [];
+  let actorDaTask = null;
+  if (task) {
+    const j = await api(`/actor-tasks/${task}/runs?limit=10&desc=1`, token);
+    runsTask = j.data.items || [];
+    actorDaTask = runsTask.find((r) => r.actId)?.actId
+      || (await api(`/actor-tasks/${task}`, token)).data?.actId;
+    if (!actorDaTask) throw new Error('Apify: não foi possível identificar o Actor da Task');
+  }
+  const actorConsultado = actorDaTask || actor;
+  const j = await api(`/acts/${actorConsultado}/runs?limit=10&desc=1`, token);
+  const candidatos = [...runsTask, ...(j.data.items || []).filter((r) => !actorDaTask || !r.actId || r.actId === actorDaTask)];
+  return candidatos
+    .filter((r) => r.status === 'SUCCEEDED' && r.defaultDatasetId && Number.isFinite(Date.parse(r.finishedAt)))
+    .sort((a, b) => Date.parse(b.finishedAt) - Date.parse(a.finishedAt))[0] || null;
 }
 
 /** Qual caminho a coleta vai usar, pelo que existe. Puro, para teste. */

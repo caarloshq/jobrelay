@@ -2,6 +2,12 @@
 
 Antes de navegar no LinkedIn, seguir [a cadência e a interrupção por limites](../vagas/LINKEDIN-LIMITES.md). O procedimento vale para todas as frentes e não comprova liberação de acesso.
 
+## Conferir a captura da Apify antes de contar novidades
+
+Consultar as execuções bem-sucedidas da Task configurada e do mesmo Actor, incluindo execuções avulsas. Comparar horário e dataset antes de selecionar a captura mais recente; uma consulta limitada à Task não comprova o último resultado do Actor. Reimportar o dataset existente, sem disparar nova coleta paga para corrigir uma importação. Registrar run, horário com fuso e cobertura consultada. Falha de consulta fica explícita.
+
+Passar no filtro automático é apenas a primeira triagem. Ler a descrição, retirar incompatibilidades comprovadas e cruzar IDs, aliases e requisição com o histórico. Separar vagas novas, já enviadas, descartadas, duplicatas e pendentes de conferência. Não contar cache como envio nem ausência de registro como prova de nunca ter aplicado. Validade ou identidade incerta permanece pendente, fora da contagem de vagas prontas.
+
 Leia o [fluxo vigente da rodada](../vagas/FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura e melhorias opcionais somente após a aplicação. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
 Esta é a entrada independente para buscar, avaliar e preparar vagas. Execute os comandos dentro de `vagas/`. A aplicação tem [runbook próprio](../aplicacao/README.md); o [ciclo completo](../vagas/RODADA-DIARIA.md) encadeia ambos quando autorizado. Leia também [as regras do subsistema](../vagas/AGENTS.md).

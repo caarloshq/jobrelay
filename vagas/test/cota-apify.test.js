@@ -86,9 +86,11 @@ test('POST Task reserva antes da rede, segundo alvo pago bloqueia e GET continua
   await ambiente(dados, async () => {
     let posts = 0; let gets = 0;
     const original = globalThis.fetch;
-    globalThis.fetch = async (_url, opcoes = {}) => {
+    globalThis.fetch = async (url, opcoes = {}) => {
       if (opcoes.method === 'POST') { posts++; return { ok: true, json: async () => ({ data: { id: 'run-primeiro' } }) }; }
-      gets++; return { ok: true, json: async () => ({ data: { items: [{ id: 'run-primeiro', status: 'SUCCEEDED' }] } }) };
+      gets++;
+      const run = { id: 'run-primeiro', status: 'SUCCEEDED', actId: 'actor-a', defaultDatasetId: 'dataset-a', finishedAt: '2026-11-05T12:00:00Z' };
+      return { ok: true, json: async () => ({ data: { items: [run] } }) };
     };
     try {
       const run = await apify.dispararTask('task-a', 'token-sintetico');
@@ -102,7 +104,7 @@ test('POST Task reserva antes da rede, segundo alvo pago bloqueia e GET continua
       assert.equal(posts, 1);
       const ultimo = await apify.ultimoRun(typeof apify.dispararActor === 'function' ? { task: 'task-a' } : 'task-a', 'token-sintetico');
       assert.equal(ultimo.id, 'run-primeiro');
-      assert.equal(gets, 1);
+      assert.equal(gets, 2);
       assert.ok(!fs.readFileSync(path.join(dados, 'cota-apify.json'), 'utf8').includes('token-sintetico'));
     } finally { globalThis.fetch = original; }
   });
