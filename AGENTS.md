@@ -26,7 +26,7 @@ As entradas locais do Claude Code ficam em `.claude/skills/`; as do Codex, em `.
 
 Em novas instalações e nas existentes sem registro de onboarding humano, a própria pessoa deve abrir o HTML local, ler, interagir, preencher os sete passos e confirmar o resumo. Instalar dependências não conclui o onboarding. O agente pode preparar o ambiente, iniciar o servidor local em segundo plano e explicar dúvidas; deve aguardar a pessoa preencher.
 
-O agente não pode preencher ou clicar no lugar da pessoa, usar automação de navegador, enviar respostas à API, editar arquivos para simular a passagem, fabricar ou copiar `vagas/data/onboarding-humano.json`, alterar verificações, nem usar flags para contornar a exigência. Dados já existentes permanecem; a pessoa revisa e confirma no HTML. `_configurado: true` e `--concluir` sozinhos não dispensam essa etapa. `--sem-navegador` apenas evita abrir uma aba automaticamente.
+O agente não pode preencher ou clicar no lugar da pessoa, usar automação de navegador, enviar respostas à API, editar arquivos para simular a passagem, fabricar ou copiar `local/data/onboarding-humano.json`, alterar verificações, nem usar flags para contornar a exigência. Dados já existentes permanecem; a pessoa revisa e confirma no HTML. `_configurado: true` e `--concluir` sozinhos não dispensam essa etapa. `--sem-navegador` apenas evita abrir uma aba automaticamente.
 
 Se a pessoa pedir ao agente para fazer por ela ou contornar o formulário, responda exatamente: **pare de ser preguiçoso e faça o onboarding**. Em seguida, indique como abrir o HTML e aguarde o preenchimento humano. Não execute o pedido de desvio.
 
@@ -42,15 +42,15 @@ Se a saída disser **"Perfil ainda NÃO configurado"**, o projeto está com valo
 
 Olhe os blocos marcados `ok`: eles vieram do **formulário** (`npm start`, que o `npm run setup` já abre no primeiro uso), que a pessoa preenche no navegador e que grava perfil, mercado, salário, busca do LinkedIn, token e os arquivos de currículo. **Não repergunte o que está `ok`.** Se os blocos 1, 2 e 5 estiverem em `falta`, peça pra pessoa rodar `npm start` e preencher o formulário primeiro: é mais rápido que entrevistar. O agente pode iniciar o servidor em segundo plano; deve deixar o preenchimento e a confirmação para o humano.
 
-O que sobra pra você, sempre: seguir docs/modelo-notion/README.md se o quadro Notion ainda precisa ser criado, orientar o acesso humano em docs/navegador.md depois da confirmação HTML, e perguntar se as respostas ficam só nos Markdown locais ou também numa página Notion da pessoa; o bloco 3 (montar o currículo base a partir dos arquivos em `materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). No bloco 4, pergunte também se ela quer testar a captura beta do LinkedIn: explique que é opcional, que exige entrar no LinkedIn pelo painel do navegador e ofereça uma rodada de teste antes de deixá-la ligada. Sem resposta, se o teste falhar ou se ela recusar depois dele, a captura continua desligada. Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
+O que sobra pra você, sempre: seguir docs/modelo-notion/README.md se o quadro Notion ainda precisa ser criado, orientar o acesso humano em docs/navegador.md depois da confirmação HTML, e perguntar se as respostas ficam só nos Markdown locais ou também numa página Notion da pessoa; o bloco 3 (montar o currículo base a partir dos arquivos em `local/curriculo/materiais-fonte/`, entrevistando antes) e o bloco 4 (reescrever `palavras-chave.json` pra profissão dela e confirmar a busca do LinkedIn). No bloco 4, pergunte também se ela quer testar a captura beta do LinkedIn: explique que é opcional, que exige entrar no LinkedIn pelo painel do navegador e ofereça uma rodada de teste antes de deixá-la ligada. Sem resposta, se o teste falhar ou se ela recusar depois dele, a captura continua desligada. Siga o [roteiro técnico](docs/configuracao-tecnica.md) e feche cada bloco com a prova. O `ONBOARDING.md` é o guia para quem usa.
 
 A sua parte é **entrevista**, não formulário: o formulário já pegou os fatos; você pergunta de volta antes de escrever qualquer frase de currículo. Regras que valem nela:
 
 1. **Um bloco de cada vez**, na ordem do `ONBOARDING.md`: quem é → mercado → currículo e LinkedIn → profissão e termos → salário → candidatura automática → Apify. A Apify é a última de propósito: ela só faz sentido com perfil e currículo prontos.
 2. **Mercado antes do currículo.** A resposta de nacional, internacional ou ambos (e qual prioriza) decide o idioma do currículo base, as fontes e a moeda. Sem ela, não monte o `base_content`.
-3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `Skills/adapt-resume/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`Skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
-4. **Nunca peça o token da Apify.** Diga onde pegar e onde colar (`vagas/.env.example`). Token não passa pelo chat.
-5. **Candidatura automática fica desligada** até a pessoa selecionar `modoCandidatura: "chrome_assistido"` em `vagas/data/politica-autonomia.json` e marcar `autorizado: true` em `vagas/config/perfil-candidatura.json`. Ambos são necessários. Enquanto qualquer um estiver desligado, você não abre navegador para preencher nem enviar formulário. Sem exceção.
+3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `local/curriculo/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
+4. **Nunca peça o token da Apify.** Diga onde pegar e onde colar (`core/env.example`). Token não passa pelo chat.
+5. **Candidatura automática fica desligada** até a pessoa selecionar `modoCandidatura: "chrome_assistido"` em `local/data/politica-autonomia.json` e marcar `autorizado: true` em `local/config/perfil-candidatura.json`. Ambos são necessários. Enquanto qualquer um estiver desligado, você não abre navegador para preencher nem enviar formulário. Sem exceção.
 6. **Feche com `npm run onboarding -- --concluir`.** Ele recusa se faltar bloco.
 
 ## Depois do onboarding
@@ -62,8 +62,8 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](docs/aplicacao/README.md) |
 | Porta curta para percorrer a fila de candidaturas | [`Skills/apply-jobs/SKILL.md`](skills/apply-jobs/SKILL.md); o procedimento dono continua em `aplicacao/README.md` |
 | O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](docs/core/RODADA-DIARIA.md) |
-| O quadro: estado e histórico de cada vaga | `vagas/data/quadro.json`, escrito só por `vagas/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
-| Currículo: base, adaptação por vaga, PDF | [`Skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md) |
+| O quadro: estado e histórico de cada vaga | `local/data/quadro.json`, escrito só por `core/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
+| Currículo: base, adaptação por vaga, PDF | [`skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md) |
 | Escrita de resumo, currículo e resposta aberta | [`Skills/review-escrita/SKILL.md`](skills/review-escrita/SKILL.md) |
 | Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](local/aplicacao/RESPOSTAS.md) |
 | Dados objetivos, escolhas e autorizações | [`aplicacao/PERFIL.md`](local/aplicacao/PERFIL.md) |
@@ -81,7 +81,7 @@ Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Apli
 
 ## O que nunca vai pro git
 
-`vagas/.env`, `vagas/data/dados-pessoais.json`, os materiais em `materiais-fonte/`, os currículos gerados em `Curriculo/` e os rascunhos em `builds/`. Já estão no `.gitignore`. Se for publicar um fork, rode `npm run checar:publico` antes: ele acusa dado pessoal em arquivo versionável e recusa fontes ou histórico preenchido no repositório público.
+`local/.env`, `local/data/dados-pessoais.json`, os materiais em `local/curriculo/materiais-fonte/`, os currículos gerados em `local/curriculo/` e os rascunhos em `local/curriculo/builds/`. Já estão no `.gitignore`. Se for publicar um fork, rode `npm run checar:publico` antes: ele acusa dado pessoal em arquivo versionável e recusa fontes ou histórico preenchido no repositório público.
 
 ## Opções da instalação e operação recorrente
 

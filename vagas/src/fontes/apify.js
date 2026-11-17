@@ -1,0 +1,22 @@
+// Fachada transitória gerada; fonte canônica: core/src/fontes/apify.js
+import {bootstrap} from "../compat-layout/bootstrap.mjs";
+import {fileURLToPath,pathToFileURL} from 'node:url';import path from 'node:path';
+const raiz=fileURLToPath(new URL("../../../",import.meta.url));await bootstrap(raiz);
+const alvo=path.join(raiz,"core/src/fontes/apify.js");
+const modulo=await import(pathToFileURL(alvo).href);
+export const NOME=modulo.NOME;
+export const aguardar=modulo.aguardar;
+export const baixarDataset=modulo.baixarDataset;
+export const coletar=modulo.coletar;
+export const dataRelativa=modulo.dataRelativa;
+export const dispararActor=modulo.dispararActor;
+export const dispararTask=modulo.dispararTask;
+export const doCuriousCoder=modulo.doCuriousCoder;
+export const modo=modulo.modo;
+export const montarInput=modulo.montarInput;
+export const montarUrlBusca=modulo.montarUrlBusca;
+export const nivelDoLinkedIn=modulo.nivelDoLinkedIn;
+export const normalizar=modulo.normalizar;
+export const remotoPelaBusca=modulo.remotoPelaBusca;
+export const salarioDoTexto=modulo.salarioDoTexto;
+export const ultimoRun=modulo.ultimoRun;

@@ -6,7 +6,7 @@ As duas entradas em `config/fontes-importadas.json` começam com `habilitada: fa
 
 ### Opção 1: JSON local
 
-1. Exporte dados obtidos por um meio que você esteja autorizado a usar e salve uma lista JSON em `vagas/data/importacoes/indeed.json` (ou `glassdoor.json`). Esses arquivos são dados locais, não exemplos para publicar.
+1. Exporte dados obtidos por um meio que você esteja autorizado a usar e salve uma lista JSON em `local/data/importacoes/indeed.json` (ou `glassdoor.json`). Esses arquivos são dados locais, não exemplos para publicar.
 2. Na entrada da fonte, mantenha `tipo: "local-json"` e configure `arquivo` relativo à pasta `data`, por exemplo `importacoes/indeed.json`.
 3. Ajuste `campos` ao seu arquivo e só então marque `habilitada: true`.
 

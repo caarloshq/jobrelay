@@ -3,7 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 const raiz = path.resolve(process.argv[2] || '.');
+if(fs.existsSync(path.join(raiz,'vagas/src/compat-layout/conteudo.json'))) { const {bootstrap,recuperar}=await import('./vagas/src/compat-layout/bootstrap.mjs');console.log(JSON.stringify(process.argv[3]==='--recuperar'?recuperar(raiz):bootstrap(raiz)));process.exit(0); }
 const diario = path.join(raiz, 'local/migracao-layout.json');
+const mapaModelos=fs.existsSync(path.join(raiz,'core/config/modelos/mapa.json'))?JSON.parse(fs.readFileSync(path.join(raiz,'core/config/modelos/mapa.json'))):{};
+const nomeModelo=(g,n)=>(mapaModelos[g+'/'+n]||g+'/'+n.replace(/^modelo-/, '').replace(/^base-content_/, 'base_content_')).split('/').slice(1).join('/');
 const hash = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 const existe = p => { try { fs.lstatSync(p); return true; } catch(e) { if(e.code==='ENOENT') return false; throw e; } };
 // Nenhuma gravação, leitura de journal ou semente precede estes guards.
@@ -56,7 +59,7 @@ for(const grupo of ['config','aplicacao','data','curriculo']) {
  for(const n of fs.readdirSync(dir)) {
   const a=path.join(dir,n);validarAlvo(a);
   if(fs.lstatSync(a).isDirectory())continue;
-  validarAlvo(a,'arquivo');validarAlvo(path.join(raiz,'local',grupo,n),'arquivo');
+  validarAlvo(a,'arquivo');validarAlvo(path.join(raiz,'local',grupo,nomeModelo(grupo,n)),'arquivo');
  }
 }
 // Preflight: uma colisão conhecida não inicia movimentos parciais.
@@ -116,7 +119,7 @@ const semente=path.join(raiz,'core/config/modelos');
 for(const grupo of ['config','aplicacao','data','curriculo']) {
  const dir=path.join(semente,grupo);if(!existe(dir))continue;
  for(const n of fs.readdirSync(dir)) {
-  const a=path.join(dir,n),b=path.join(raiz,'local',grupo,n);
+  const a=path.join(dir,n),b=path.join(raiz,'local',grupo,nomeModelo(grupo,n));
   if(fs.statSync(a).isDirectory())continue;
   if(!existe(b)){fs.mkdirSync(path.dirname(b),{recursive:true});fs.copyFileSync(a,b,fs.constants.COPYFILE_EXCL);}
  }

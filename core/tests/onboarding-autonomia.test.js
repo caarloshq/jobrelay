@@ -37,7 +37,7 @@ test('rejeita fonte, database e modos inválidos', () => {
 });
 
 test('script embutido do formulário tem sintaxe válida', () => {
-  const html = fs.readFileSync(path.join(vagas, '../onboarding/index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(vagas, '../app/onboarding/index.html'), 'utf8');
   const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script);
   assert.doesNotThrow(() => new vm.Script(script));

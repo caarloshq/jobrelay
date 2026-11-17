@@ -1,10 +1,10 @@
 # JobRelay — instruções do subsistema
 
-> O radar do JobRelay. As regras do projeto valem aqui, em especial a **Regra 1** (nunca inventar). O roteiro de primeiro uso está em [`../ONBOARDING.md`](../ONBOARDING.md).
+> O radar do JobRelay. As regras do projeto valem aqui, em especial a **Regra 1** (nunca inventar). O roteiro de primeiro uso está em [`../ONBOARDING.md`](../../ONBOARDING.md).
 >
 > **A rodada recorrente é opcional e depende da escolha de autonomia no onboarding.** Quando a pessoa a ativa, o assistente cria uma tarefa nativa a cada quatro horas apontando para [`RODADA-DIARIA.md`](RODADA-DIARIA.md). O formulário só entrega o prompt; não cria a tarefa. O runbook define a execução e as candidaturas dependem das autorizações da própria instalação.
 
-Na etapa de candidatura, use a porta [`apply-jobs`](../Skills/apply-jobs/SKILL.md) e siga a seção **Objetivo e encerramento da fila** de [`aplicacao/README.md`](../aplicacao/README.md#objetivo-e-encerramento-da-fila). Ela define o percurso completo dos IDs em `Avaliar`, sem alterar o opt-in ou o quadro escolhido pela instalação.
+Na etapa de candidatura, use a porta [`apply-jobs`](../../skills/apply-jobs/SKILL.md) e siga a seção **Objetivo e encerramento da fila** de [`aplicacao/README.md`](../aplicacao/README.md#objetivo-e-encerramento-da-fila). Ela define o percurso completo dos IDs em `Avaliar`, sem alterar o opt-in ou o quadro escolhido pela instalação.
 
 ## Estado real, em 2026-07-30
 
@@ -17,17 +17,17 @@ Leia isto antes de confiar em qualquer promessa deste arquivo. O `critic` pegou 
 | **Arc** (`arc.dev`) | ✅ `src/fontes/arc.js`. Pequena e boa: ~5 vagas por rodada, com descrição, faixa salarial e portão de vida nativo |
 | **UX Remote Talent** | ✅ `src/fontes/uxremotetalent.js`. Board só de UX/UI remoto. Lê a restrição de país, que barra a maioria |
 | **Índice final = determinístico + semântico** | ✅ o número que aparece já é o completo |
-| **Julgamento semântico durável** | ✅ `data/semantico.json`, versionado no git |
+| **Julgamento semântico durável** | ✅ `local/data/semantico.json`, preservado localmente |
 | Filtro, score, dedupe, piso de salário | ✅ funciona |
 | Portão de vida | ✅ funciona, com teste de integração contra HTML real |
 | Camada 2 (`site:`) | ⚠️ **só com `WebSearch`**, ver abaixo |
 | Filtro de disciplina e de marketing | ✅ título, empresa e abertura da descrição |
-| **Quadro local** | ✅ `data/quadro.json`, escrito por `src/quadro.js`. A rodada registra as aprovadas; `npm run quadro` abre no navegador. Notion virou caso particular: `espelhar()` no mesmo arquivo |
+| **Quadro local** | ✅ `local/data/quadro.json`, escrito por `src/quadro.js`. A rodada registra as aprovadas; `npm run quadro` abre no navegador. Notion conserva seu snapshot e preflight próprios, conforme o runbook de coleta |
 | Rodada recorrente | ⚠️ opt-in no onboarding; o assistente confirma a criação da tarefa nativa que executa [`RODADA-DIARIA.md`](RODADA-DIARIA.md) |
 | Gerar currículo PDF **e DOCX** | ✅ `generate_resume.py`, formato pela extensão. `reportlab` e `python-docx` instalados |
-| Modelo de e-mail para enviar o currículo | ✅ `../Skills/adapt-resume/modelos-email.md`, seis modelos. **Texto pronto, envio na mão** |
-| Currículo automático acima de 75% | ✅ corte em `config/perfil.json`, executado na rodada |
-| Currículo no card | ⚠️ o card do quadro mostra resumo, gaps e link; o PDF fica em `../Skills/adapt-resume/builds/<empresa>/` |
+| Modelo de e-mail para enviar o currículo | ✅ `skills/adapt-resume/modelos-email.md`, seis modelos. **Texto pronto, envio na mão** |
+| Currículo automático acima de 75% | ✅ corte em `local/config/perfil.json`, executado na rodada |
+| Currículo no card | ⚠️ o card do quadro mostra resumo, gaps e link; o PDF fica em `local/curriculo/builds/<empresa>/` |
 | **Candidatar-se pelo navegador** | ⚠️ **manual, conduzido pelo Claude no Chrome dele.** Não há código: segue `../aplicacao/README.md` mais o Chrome logado. Gupy, InHire e LinkedIn são permitidos; conferir comportamento atual no navegador |
 | Perfil de respostas de formulário | ✅ `../aplicacao/PERFIL.md`. Fatos e autorizações; composição e conferência em `../aplicacao/README.md` |
 | Banco de perguntas de formulário | ✅ `../aplicacao/RESPOSTAS.md`, editável em Markdown. Aprovação tem escopo; reutilização conforme `../aplicacao/README.md` |
@@ -49,7 +49,7 @@ npm run descobrir     # empresa de ATS que o dork achou e ainda nao esta na list
 
 `Confiança` no quadro é o **índice final**: `60 determinísticos + 40 semânticos`. Você vê o número pronto; a composição é problema meu.
 
-Os 60 o Node recalcula toda rodada. Os 40 custam **ler a vaga inteira** contra o currículo, e por isso moram em **`data/semantico.json`**, indexado por `ID externo` — o único arquivo de `data/` que **vai pro git** e que a reconstrução do cache **nunca apaga**.
+Os 60 o Node recalcula toda rodada. Os 40 custam **ler a vaga inteira** contra o currículo, e por isso moram em **`local/data/semantico.json`**, indexado por `ID externo` — um registro local ignorado pelo Git que a reconstrução do cache **nunca apaga**.
 
 Guardamos a **parcela** semântica, não o total. Assim o frescor continua decaindo sozinho e a nota não envelhece mentindo.
 
@@ -70,7 +70,7 @@ registrar('inhire:0d1db9fd-...', { nota: 30, resumo: '...', gaps: '...' });
 | 4 | LinkedIn pela Task do Apify. Sem scraping próprio: dispara, espera, baixa o dataset, normaliza |
 | 5 | **Arc** e **UX Remote Talent**, as duas em dois passos: listagem e depois a página de detalhe, porque a descrição só existe lá |
 
-Saída: `data/vagas.json` (cache) e `data/rodada-YYYY-MM-DD.json`.
+Saída: `local/data/vagas.json` (cache) e `local/data/rodada-YYYY-MM-DD.json`.
 
 ## A camada 2 na prática
 
@@ -79,23 +79,23 @@ Saída: `data/vagas.json` (cache) e `data/rodada-YYYY-MM-DD.json`.
 **O caminho confiável é o `WebSearch`, que é meu, não do Node:**
 
 ```bash
-# 1. rodar os dorks de config/dorks.json com WebSearch
+# 1. rodar os dorks de local/config/dorks.json com WebSearch
 # 2. jogar as URLs num arquivo, uma por linha
-npm run enriquecer -- --arquivo data/urls-camada2.txt
+npm run enriquecer -- --arquivo ../local/data/urls-camada2.txt
 ```
 
-**O mesmo arquivo de URLs serve para descobrir empresa nova.** `config/empresas-ats.json`
+**O mesmo arquivo de URLs serve para descobrir empresa nova.** `local/config/empresas-ats.json`
 é lista escrita à mão, e empresa que não está lá nunca é consultada, por mais vaga aberta
 que tenha. O dork devolve o slug dentro da própria URL (`jobs.ashbyhq.com/<slug>/...`):
 
 ```bash
-npm run descobrir -- --arquivo data/urls-camada2.txt
+npm run descobrir -- --arquivo ../local/data/urls-camada2.txt
 ```
 
 Ele **bate na API do provedor antes de sugerir** e descarta quadro vazio, porque slug
 errado e quadro vazio são indistinguíveis (está escrito no próprio `empresas-ats.json`).
-A saída vai para `data/empresas-descobertas.json`, ordenada por vaga de design. **Não
-grava em `config/`:** quem copia a linha para `empresas-ats.json` é você. Primeira
+A saída vai para `local/data/empresas-descobertas.json`, ordenada por vaga de design. **Não
+grava em `local/config/`:** quem copia a linha para `empresas-ats.json` é você. Primeira
 execução, em 2026-08-28, achou `ashby/openai` com 18 vagas de design em 755, e
 `greenhouse/stone` com 3 em 415.
 
@@ -126,24 +126,24 @@ O script extrai o id da URL, dedupa contra o cache, aplica o portão de vida e g
 
 O Node deixa tudo pronto e para. O que resta:
 
-1. **Camada 2 com `WebSearch`** — os dorks de `config/dorks.json`, resultado para o `enriquecer`.
-2. **Score semântico (0–40)** — ler a descrição contra `../Skills/adapt-resume/base_content_pt.json`.
+1. **Camada 2 com `WebSearch`** — os dorks de `local/config/dorks.json`, resultado para o `enriquecer`.
+2. **Score semântico (0–40)** — ler a descrição contra `local/curriculo/base_content_pt.json`.
 3. **Salário do texto** quando a fonte não traz campo. O Gupy nunca traz.
 4. **Nada de publicar.** A rodada registra as aprovadas no quadro sozinha. Se a pessoa usa Notion, espelhar a database com `espelhar()` de `src/arquivo.js` no começo da rodada; o histórico é preservado.
-5. **Currículo** — vaga aprovada passa pela skill `../Skills/adapt-resume/SKILL.md`, nunca por fora.
-6. **E-mail que leva o currículo** — os seis modelos estão em `../Skills/adapt-resume/modelos-email.md`, com o mapa de qual usar em cada `Status` do board. A rodada agendada **não envia e-mail** e nunca vai enviar: quem manda é você. O que a skill faz é deixar o texto pronto junto do PDF.
+5. **Currículo** — vaga aprovada passa pela skill `skills/adapt-resume/SKILL.md`, nunca por fora.
+6. **E-mail que leva o currículo** — os seis modelos estão em `skills/adapt-resume/modelos-email.md`, com o mapa de qual usar em cada `Status` do board. A rodada agendada **não envia e-mail** e nunca vai enviar: quem manda é você. O que a skill faz é deixar o texto pronto junto do PDF.
 
 ## O quadro, e o que cada fase significa
 
-`data/quadro.json`, versão 2: uma entrada por `idExterno`, com `status`, o retrato da vaga (título, empresa, link, fonte, nota, salário, data) e `historico`, uma linha por mudança de fase com data e quem moveu (`rodada`, `pessoa` ou `agente`).
+`local/data/quadro.json`, versão 2: uma entrada por `idExterno`, com `status`, o retrato da vaga (título, empresa, link, fonte, nota, salário, data) e `historico`, uma linha por mudança de fase com data e quem moveu (`rodada`, `pessoa` ou `agente`).
 
 **Fases:** `Avaliar` · `Aplicar` · `Já apliquei` · `Entrevista` · `Cancelada`. As três últimas são concluídas (`CONCLUIDOS` em `src/arquivo.js`): a vaga sai do radar e da fila de leitura, e continua no quadro. `Aplicado por IA` existe pra candidatura automática e aparece junto de `Já apliquei`. `Revisar` é aceito por compatibilidade e é ativo.
 
-**Regras:** nunca editar o arquivo à mão; nunca apagar entrada; mover por código só com `quadro.mover(id, status, { por: 'agente' })`, que grava o histórico. Toda gravação relê o disco na hora: card movido no navegador durante uma rodada não volta pra trás. A primeira gravação de cada dia deixa cópia em `data/backups/`.
+**Regras:** nunca editar o arquivo à mão; nunca apagar entrada; mover por código só com `quadro.mover(id, status, { por: 'agente' })`, que grava o histórico. Toda gravação relê o disco na hora: card movido no navegador durante uma rodada não volta pra trás. A primeira gravação de cada dia deixa cópia em `local/data/backups/`.
 
 ## Regra de nível e salário
 
-**Vaga júnior descarta. Salário baixo descarta.** Piso em `config/perfil.json`: R$ 8.000/mês, com câmbio grosseiro para USD e EUR só para comparar ordem de grandeza.
+**Vaga júnior descarta. Salário baixo descarta.** Piso em `local/config/perfil.json`: R$ 8.000/mês, com câmbio grosseiro para USD e EUR só para comparar ordem de grandeza.
 
 O piso **só se aplica quando valor e período são conhecidos.** Período desconhecido passa — descartar por período adivinhado custaria vaga boa, e esse erro já apareceu três vezes neste projeto.
 
@@ -162,7 +162,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
 1. **Nunca inventar** fato, número, salário ou empresa. Sem menção clara de salário no anúncio, deixe a propriedade `Salário` do Notion vazia (`null`); nunca use hífen, travessão ou estimativa. Preserve valores e intervalos publicados.
 2. O `Resumo` descreve a vaga e fecha com o encaixe. Todo fato de encaixe citado **existe** no `base_content`. Nada além disso.
 3. **Nunca sobrescrever** os `base_content_*.json`. Trabalhar em cópia, como manda a skill.
-4. Números travados: os que estiverem em `numeros_travados` no seu `base_content` (`Skills/adapt-resume/`).
+4. Números travados: os que estiverem em `numeros_travados` no seu `base_content` (`local/curriculo/`).
 5. Sem travessão (—) em nada que vá pro currículo.
 6. Vaga de `Fonte: Solta`, ou sem descrição confirmada, **nunca** gera currículo automático.
 7. **Inscrição encerrada descarta em qualquer idade.** Vaga de ontem já fechada não serve.
@@ -199,7 +199,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
 - **A Vagas UX precisa da página de detalhe.** A listagem só traz empresa e cargo; descrição, salário e nível estão em `/oportunidades/em-aberto/<slug>`. Sem isso o score fica cego.
 - **`robots.txt` da Vagas UX proíbe `/api` e `/_next`.** Só páginas públicas. Não contornar.
 
-- **Cache guarda veredito, não regra.** Apertar `config/palavras-chave.json` não tira nada do cache até a próxima coleta. O `coletar` expurga; a **vista** (`pendentes`) reaplica `avaliar()`, `semantico.aplicar()` e `arquivo.aplicar()` a cada chamada. Sem isso, registrar um julgamento não esvaziava a fila e sete vagas já barradas continuavam aparecendo para leitura.
+- **Cache guarda veredito, não regra.** Apertar `local/config/palavras-chave.json` não tira nada do cache até a próxima coleta. O `coletar` expurga; a **vista** (`pendentes`) reaplica `avaliar()`, `semantico.aplicar()` e `arquivo.aplicar()` a cada chamada. Sem isso, registrar um julgamento não esvaziava a fila e sete vagas já barradas continuavam aparecendo para leitura.
 - **Design de marketing não é design de produto, e o título não denuncia.** A CRMBonus abre com "Nossa área de Marketing" sob o título limpo "Designer Pleno". A checagem é na abertura (600 chars, `ABERTURA_MARKETING`) porque vaga de produto legítima cita marketing lá embaixo, entre os stakeholders — checar o texto inteiro descartaria vaga boa.
 - **`empresa_excluida` existe porque dedupe não resolve franquia.** Sete franqueadas da V4 Company ocuparam sete linhas do radar com a mesma vaga de designer gráfico: `empresa` é igual, mas o nome da franqueada entra no **título** e cada uma tem id próprio. A lista é curta e reversível de propósito — exclui **empresa**, não categoria.
 - **A quarta chave do dedupe é `empresa + título`, e ela é fraca de propósito.** Vaga republicada ganha identidade nova na própria fonte e não sobra nada em comum: a Radix voltou na InHire com outro UUID, a SCALIS na Vagas Remotas com slug `-2` e `-3`. Como duas vagas reais podem dividir o título, o perdedor **nunca some** — vai para `idsAlternativos`.
@@ -218,7 +218,7 @@ Modelo de trabalho desconhecido **passa** e fica marcado `modeloDesconhecido`. D
 
 ## A camada 4, e as armadilhas do dataset do Apify
 
-**Como ela liga (2026-09-14):** só `APIFY_TOKEN` no `.env`. O código dispara o Actor `curious_coder/linkedin-jobs-scraper` com o input montado de `config/linkedin.json` (`montarInput()` em `src/fontes/apify.js`). `APIFY_TASK` é opcional e, quando existe, manda. A URL de busca **precisa** de `location` e `geoId`: sem eles o LinkedIn devolveu 100 de 100 vagas nos EUA, e o filtro aprovou 97 porque não enxerga restrição de país no texto. O `waitForFinish` da API devolve em 60 s com status READY e a rodada leva de 76 a 91 s, então é polling do run (`aguardar()`). O Actor não traz `validThrough` (prazo) nem `applicationType`.
+**Como ela liga (2026-09-14):** só `APIFY_TOKEN` no `.env`. O código dispara o Actor `curious_coder/linkedin-jobs-scraper` com o input montado de `local/config/linkedin.json` (`montarInput()` em `src/fontes/apify.js`). `APIFY_TASK` é opcional e, quando existe, manda. A URL de busca **precisa** de `location` e `geoId`: sem eles o LinkedIn devolveu 100 de 100 vagas nos EUA, e o filtro aprovou 97 porque não enxerga restrição de país no texto. O `waitForFinish` da API devolve em 60 s com status READY e a rodada leva de 76 a 91 s, então é polling do run (`aguardar()`). O Actor não traz `validThrough` (prazo) nem `applicationType`.
 
 Medido no dataset real de 2026-08-01, 50 vagas. Cada decisão em `src/fontes/apify.js` saiu de olhar o dado:
 

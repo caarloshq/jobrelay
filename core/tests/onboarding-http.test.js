@@ -8,12 +8,14 @@ import net from 'node:net';
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Modelos distribuídos são imutáveis; nunca ler escolhas em local/config.
 function modelo(nome) {
-  const atual = path.join(repo, 'core/config/modelos', nome);
-  if (fs.existsSync(atual)) return fs.readFileSync(atual);
-  const legado = nome.startsWith('config/') || nome.startsWith('data/') ? 'vagas/' + nome : nome;
-  const r = spawnSync('git', ['show', 'HEAD:' + legado], { cwd: repo });
-  assert.equal(r.status, 0, 'Modelo neutro não encontrado: ' + nome);
-  return r.stdout;
+  const modelos = path.join(repo, 'core/config/modelos');
+  const mapa = JSON.parse(fs.readFileSync(path.join(modelos, 'mapa.json'), 'utf8'));
+  const fontes = Object.keys(mapa).filter(fonte => mapa[fonte] === nome);
+  assert.ok(fontes.length <= 1, 'Destino de modelo ambíguo: ' + nome);
+  const arquivo = path.join(modelos, fontes[0] || nome);
+  assert.ok(fs.existsSync(arquivo), 'Modelo neutro não encontrado: ' + nome);
+  assert.equal(fs.lstatSync(arquivo).isFile(), true, 'Modelo precisa ser arquivo regular: ' + nome);
+  return fs.readFileSync(arquivo);
 }
 
 
@@ -22,7 +24,7 @@ test('instalação sintética salva DOCX, rejeita ausência de CV e conclui Noti
   fs.mkdirSync(base, { recursive: true });
   const fixture = fs.mkdtempSync(path.join(base, 'teste-onboarding-http-'));
   t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
-  for (const dir of ['vagas/src', 'vagas/scripts', 'onboarding']) fs.cpSync(path.join(repo, dir), path.join(fixture, dir), { recursive: true });
+  for (const [origem, destino] of [['core/src', 'vagas/src'], ['core/scripts', 'vagas/scripts'], ['app/onboarding', 'onboarding']]) fs.cpSync(path.join(repo, origem), path.join(fixture, destino), { recursive: true });
   for (const dir of ['vagas/config', 'vagas/data', 'aplicacao', 'Skills/adapt-resume/materiais-fonte']) fs.mkdirSync(path.join(fixture, dir), { recursive: true });
   fs.writeFileSync(path.join(fixture, 'package.json'), '{"type":"module"}');
   // Templates versionados neutros, nunca os dados que o humano preencheu.

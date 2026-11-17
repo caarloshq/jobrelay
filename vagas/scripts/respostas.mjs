@@ -1,27 +1,24 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import { layout } from '../src/layout.js';
 import { readFile, lstat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { lerFontes } from '../src/fontes-respostas.js';
-import { consultarBaseRespostas } from '../src/base-respostas.js';
 import { importarLegado, lerFontesInstalacao } from '../src/fontes-instalacao.js';
 import { comEscritaCentral } from '../src/operacao.js';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const projeto = resolve(raiz, '..');
-const locais = layout(projeto);
 const caminhos = {
-  respostas: resolve(locais.aplicacao, 'RESPOSTAS.md'),
-  perfil: resolve(locais.aplicacao, 'PERFIL.md'),
-  bancoJson: resolve(locais.dados, 'perguntas.json'),
-  perfilJson: resolve(locais.config, 'perfil-candidatura.json'),
-  estadoOperacao: resolve(locais.dados, 'operacao/estado.json'),
-  lockEscrita: resolve(locais.dados, 'operacao/.escrita.lock'),
-  lockAtualizacao: resolve(locais.dados, 'operacao/.atualizacao.lock'),
+  respostas: resolve(projeto, 'aplicacao/RESPOSTAS.md'),
+  perfil: resolve(projeto, 'aplicacao/PERFIL.md'),
+  bancoJson: resolve(raiz, 'data/perguntas.json'),
+  perfilJson: resolve(raiz, 'config/perfil-candidatura.json'),
+  estadoOperacao: resolve(raiz, 'data/operacao/estado.json'),
+  lockEscrita: resolve(raiz, 'data/operacao/.escrita.lock'),
+  lockAtualizacao: resolve(raiz, 'data/operacao/.atualizacao.lock'),
 };
 
 async function existe(caminho) {
@@ -50,7 +47,7 @@ async function exportarProjecoes(banco, perfil, fontes) {
   if (process.env.VAGAS_OPERACAO_TOKEN) throw new Error('exportação exige execução sem token de operação');
   const alvos = [caminhos.bancoJson, caminhos.perfilJson];
   const conteudos = [`${JSON.stringify(banco, null, 2)}\n`, `${JSON.stringify(perfil, null, 2)}\n`];
-  comEscritaCentral(locais.dados, () => {
+  comEscritaCentral(resolve(raiz, 'data'), () => {
     const locais = [caminhos.respostas, caminhos.perfil, ...alvos];
     for (const caminho of locais) {
       const info = fs.lstatSync(caminho);
@@ -86,11 +83,10 @@ async function exportarProjecoes(banco, perfil, fontes) {
 }
 
 const argumentos = process.argv.slice(2);
-if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '--importar-legado', '--consultar-base'].includes(a)) ||
-    (argumentos.includes('--consultar-base') && argumentos.length !== 1) ||
+if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '--importar-legado'].includes(a)) ||
     (argumentos.includes('--importar-legado') && argumentos.length !== 1) ||
     (argumentos.includes('--exportar') && argumentos.includes('--conferir-projecoes'))) {
-  console.error('Uso: node scripts/respostas.mjs [--validar | --exportar | --conferir-projecoes | --importar-legado | --consultar-base]');
+  console.error('Uso: node scripts/respostas.mjs [--validar | --exportar | --conferir-projecoes | --importar-legado]');
   process.exitCode = 2;
 } else {
   try {
@@ -108,9 +104,7 @@ if (argumentos.some(a => !['--validar', '--exportar', '--conferir-projecoes', '-
       perfil: await readFile(caminhos.perfil, 'utf8'),
     };
     const { banco, perfil } = lerFontes(fontes);
-    if (argumentos.includes('--consultar-base')) {
-      console.log(JSON.stringify(consultarBaseRespostas(fontes.respostas, banco), null, 2));
-    } else if (argumentos.includes('--conferir-projecoes')) {
+    if (argumentos.includes('--conferir-projecoes')) {
       const [bancoAtual, perfilAtual] = await Promise.all([
         readFile(caminhos.bancoJson, 'utf8').then(JSON.parse),
         readFile(caminhos.perfilJson, 'utf8').then(JSON.parse),

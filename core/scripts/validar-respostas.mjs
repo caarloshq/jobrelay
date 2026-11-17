@@ -5,7 +5,7 @@ import { hashPacoteRespostas } from '../src/revisao-respostas.js';
 import { readFileSync, realpathSync, lstatSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, sep, relative } from 'node:path';
-import { validarBanco, validarCandidatura, modeloCandidatura, pacoteEditorialCandidatura } from '../src/respostas.js';
+import { validarBanco, validarCandidatura, modeloCandidatura, pacoteEditorialCandidatura } from '../src/banco-respostas.js';
 import { lerFontesInstalacao } from '../src/fontes-instalacao.js';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));

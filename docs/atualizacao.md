@@ -1,5 +1,11 @@
 # Receba avisos de versões e preserve seus dados ao atualizar
 
+## Instalações 1.5.3 para 1.6.0
+
+Use a entrada de atualização existente e confirme a release específica. O pacote compatível entrega uma ponte; a conversão do layout acontece automaticamente na próxima entrada normal, antes de operar. Não há etapa manual de migrador no fluxo normal. Confira essa entrada, os arquivos pessoais e o registro atual antes de dizer que a transição terminou. O procedimento completo está em [ATUALIZAR.md](../ATUALIZAR.md#transição-automática-para-appcoreskillsdocslocal).
+
+Depois da conversão, os donos pessoais são `local/data/`, `local/config/`, `local/aplicacao/` e `local/curriculo/`. Preserve o backup anterior e os snapshots legados; eles não são uma base alternativa para editar. As orientações abaixo sobre versões anteriores, instalações sem atualizador e checkouts intermediários conservam seu alcance: conflitos, dados protegidos e origem divergente continuam exigindo reconciliação, sem descarte ou aceite inferido.
+
 Para o pedido curto “atualiza aí”, comece pela entrada [ATUALIZAR.md](../ATUALIZAR.md), na raiz. Ela identifica a origem do produto e encaminha o assistente para os procedimentos deste guia.
 
 As versões publicadas ficam em Releases, com acesso pelo [README](../README.md#receba-e-instale-atualizações). Cada release identifica uma tag, mudanças, limites e o código disponível para download. A versão 1.2.0 separa coleta e aplicação, organiza as fontes de respostas e incorpora revisão editorial independente. A validação desta distribuição usa testes locais e dados fictícios; não comprova candidaturas reais nem aumento de contratações.
@@ -61,7 +67,7 @@ Para instalar a release estável, confirme a tag e o commit no original e siga o
 
 ## Se você baixou um ZIP
 
-O ZIP não tem histórico Git. Na versão com o atualizador seguro, siga a consulta e o aceite específicos descritos em [Atualização com confirmação](atualizacao-automatica.md). Instalações antigas sem esse recurso precisam de uma cópia da release em outra pasta dentro do projeto e migração assistida. O assistente pode ajudar; você também pode fazer a atualização manualmente. Preserve `.env`, perfis, currículo-base e materiais, `vagas/data/` inteiro e `revisoes/`. Dentro de `data/`, perguntas, histórico por vaga, pendências, quadro, gerações e tentativas de envio não são cache descartável. Não os substitua pelos exemplos do download.
+O ZIP não tem histórico Git. Na versão com o atualizador seguro, siga a consulta e o aceite específicos descritos em [Atualização com confirmação](atualizacao-automatica.md). Instalações antigas sem esse recurso precisam de uma cópia da release em outra pasta dentro do projeto e migração assistida. O assistente pode ajudar; você também pode fazer a atualização manualmente. Preserve `local/` inteiro, `.env`, perfis, currículo-base e materiais, `vagas/data/` legado inteiro e `revisoes/`. Dentro de `data/`, perguntas, histórico por vaga, pendências, quadro, gerações e tentativas de envio não são cache descartável. Não os substitua pelos exemplos do download.
 
 Depois da atualização, confira a configuração e os registros com os comandos de diagnóstico e validação antes de rodar busca ou retomar candidaturas. Um envio incerto permanece bloqueado mesmo depois de atualizar.
 

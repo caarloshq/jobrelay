@@ -56,7 +56,17 @@ test('CLI recusa perfil pendente e consulta incerta sem contar tempo; atestado v
   const base = path.join(vagas, '../local/data/testes-consultas-cli'); fs.mkdirSync(base, { recursive: true });
   const raiz = fs.mkdtempSync(path.join(base, 'caso-')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
   fs.cpSync(path.join(vagas, 'src'), path.join(raiz, 'src'), { recursive: true });
-  fs.cpSync(fs.realpathSync(path.join(vagas, 'config')), path.join(raiz, 'config'), { recursive: true, dereference: true });
+  // Apenas modelos neutros: core/config e local/config podem conter escolhas da instalação.
+  const modelos = path.join(vagas, 'config/modelos');
+  const mapa = JSON.parse(fs.readFileSync(path.join(modelos, 'mapa.json'), 'utf8'));
+  fs.mkdirSync(path.join(raiz, 'config'));
+  for (const entrada of fs.readdirSync(path.join(modelos, 'config'), { withFileTypes: true })) {
+    assert.equal(entrada.isFile(), true, 'Modelo de configuração precisa ser arquivo regular');
+    const fonte = 'config/' + entrada.name;
+    const destino = mapa[fonte] || fonte;
+    assert.equal(path.posix.dirname(destino), 'config', 'Destino do modelo precisa ficar em config');
+    fs.copyFileSync(path.join(modelos, fonte), path.join(raiz, destino));
+  }
   fs.mkdirSync(path.join(raiz, 'scripts')); fs.mkdirSync(path.join(raiz, 'data'));
   fs.copyFileSync(path.join(vagas, 'scripts/linkedin-feed.mjs'), path.join(raiz, 'scripts/linkedin-feed.mjs'));
   fs.writeFileSync(path.join(raiz, 'package.json'), '{"type":"module"}');

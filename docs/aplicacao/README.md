@@ -311,7 +311,7 @@ Antes de afirmar que um dado falta, procurar nos três:
 
 | O dado | Onde está |
 |---|---|
-| Formação, certificações, idiomas, experiência | `Skills/adapt-resume/base_content_pt.json` |
+| Formação, certificações, idiomas, experiência | `local/curriculo/base_content_pt.json` |
 | Contato, cidade, LinkedIn, pretensão | `local/aplicacao/PERFIL.md` |
 | Nascimento, endereço, autodeclaração | `local/data/dados-pessoais.json` (fora do git) |
 

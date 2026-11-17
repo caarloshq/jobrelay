@@ -2,7 +2,7 @@
 
 **Beta:** captura assistida experimental, opcional e desligada por padrão. Faça primeiro uma rodada de teste e confira os resultados, limites e tempo observado antes de adotá-la. O recurso pode encontrar login, CAPTCHA ou bloqueio e não garante cobertura. A escolha não inicia busca nem autoriza candidaturas.
 
-Fonte opcional, desligada por padrão em `vagas/config/linkedin-feed.json`. A pessoa pode ativá-la no onboarding, separadamente da Apify. Exige navegador autorizado e login feito pela pessoa no próprio site. Não pedir senha, importar cookies ou contornar bloqueios. A seleção de aplicação isolada não inicia captura.
+Fonte opcional, desligada por padrão em `local/config/linkedin-feed.json`. A pessoa pode ativá-la no onboarding, separadamente da Apify. Exige navegador autorizado e login feito pela pessoa no próprio site. Não pedir senha, importar cookies ou contornar bloqueios. A seleção de aplicação isolada não inicia captura.
 
 ## A pergunta antes da coleta 2
 
@@ -14,7 +14,7 @@ A captura é a **coleta 2**: vem depois da coleta principal e da aplicação, e 
 | Aplicação ainda aberta ou coleta principal não encerrada | Não perguntar; o resumo diz por quê |
 | Sem aplicação instalada ou em modo mapear | Perguntar logo depois da coleta principal |
 | Rodada agendada ou sem ferramenta de pergunta | Não perguntar nem rodar; registrar `sem_resposta` |
-| LinkedIn desligado em `vagas/config/linkedin-feed.json` | Não existe coleta 2: sem pergunta e sem linha no resumo |
+| LinkedIn desligado em `local/config/linkedin-feed.json` | Não existe coleta 2: sem pergunta e sem linha no resumo |
 | `planejar` devolve `dispensar` | Janela de hoje já feita; sem pergunta |
 | `planejar` devolve `integrar` | Trabalho local: rodar sem pergunta, também na rodada agendada |
 | `planejar` devolve `iniciar` ou `retomar` | Perguntar |
@@ -29,7 +29,7 @@ O controle exige a rota em cada intervalo e confere as três metas. Um intervalo
 
 ## Capturar primeiro, conferir depois
 
-Seguir [Coordenação das frentes](../vagas/COORDENACAO-FRENTES.md) quando ambas estiverem selecionadas. Um único controlador opera o navegador compartilhado. A coleta 2 só começa depois da aplicação, então não disputa o navegador com ela. Preservar o lote nas pausas e retomadas.
+Seguir [Coordenação das frentes](../core/COORDENACAO-FRENTES.md) quando ambas estiverem selecionadas. Um único controlador opera o navegador compartilhado. A coleta 2 só começa depois da aplicação, então não disputa o navegador com ela. Preservar o lote nas pausas e retomadas.
 
 Executar os comandos em `vagas/`. `npm run linkedin:feed -- planejar` informa se deve iniciar, retomar, integrar ou dispensar a janela diária. `status` consulta o lote. `iniciar`, `observar`, `intervalo`, `pausar`, `liberar`, `retomar` e `concluir` recebem `--dono` e, quando exigido, `--arquivo` com o JSON da ação. Não usar credenciais ou dados pessoais nos argumentos. O comando não controla navegador ou chama MCP.
 

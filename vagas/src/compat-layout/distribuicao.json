@@ -1,0 +1,1816 @@
+{
+  "contrato": 1,
+  "payloadSha256": "a0727f29b0780db219f039b23d129c56615b52d7d6ce40425a2846a7178f96bb",
+  "arquivos": [
+    {
+      "path": ".agents/skills/aplicar/SKILL.md",
+      "sha256": "ea22bba531a52d53e4375b28322ad8f9d27bee3756b4f46b454a11859d295959",
+      "mode": "0o644"
+    },
+    {
+      "path": ".agents/skills/coletar/SKILL.md",
+      "sha256": "2af5877709e0b507a8a7e8dfe62c61e512599dd258315beca53adda876398e12",
+      "mode": "0o644"
+    },
+    {
+      "path": ".agents/skills/onboarding/SKILL.md",
+      "sha256": "d1b63011196e988072c6452a3f272d821dc0af8af0a84ec460a2720729e90309",
+      "mode": "0o644"
+    },
+    {
+      "path": ".claude/skills/aplicar/SKILL.md",
+      "sha256": "ea22bba531a52d53e4375b28322ad8f9d27bee3756b4f46b454a11859d295959",
+      "mode": "0o644"
+    },
+    {
+      "path": ".claude/skills/coletar/SKILL.md",
+      "sha256": "2af5877709e0b507a8a7e8dfe62c61e512599dd258315beca53adda876398e12",
+      "mode": "0o644"
+    },
+    {
+      "path": ".claude/skills/onboarding/SKILL.md",
+      "sha256": "d1b63011196e988072c6452a3f272d821dc0af8af0a84ec460a2720729e90309",
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "b63838250c6fafc023d7a34995265ce2f98bacd0ba3d4c7901973ac883f7e680",
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/test.yml",
+      "sha256": "2cb994895ec11f5b739c5d35a47f48ec7e8fcf3c4a88ee1333b8b0ae01dd92b7",
+      "mode": "0o644"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "217131a0301622a1714194572b47d93b2112dd7c223fdaf2002a93cd5590f2eb",
+      "mode": "0o644"
+    },
+    {
+      "path": ".impeccable/config.json",
+      "sha256": "9a90b996affdfb5a256d4363d8cd5dacd1c2b607592f2437cca03937fbb3de50",
+      "mode": "0o644"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "8295b538f392cd659bec29e81ac64491300f43b1c82b0fd09044e54bd5575fd1",
+      "mode": "0o644"
+    },
+    {
+      "path": "ATUALIZAR.md",
+      "sha256": "3a9494ff41140e5c371159cfddd61230ec5ac1290a651b9b59758ef6e7940cb7",
+      "mode": "0o644"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "2c40e084890b1956396b45b382144b187c0aa55740e5baa4206afc7affb4a744",
+      "mode": "0o644"
+    },
+    {
+      "path": "CURRENT-CONTEXT.md",
+      "sha256": "2029f8622cddfa6bdcb5f2bf86bb8b3da2f9932fcd85bf238baf24d06d1ee053",
+      "mode": "0o644"
+    },
+    {
+      "path": "DESIGN.md",
+      "sha256": "9acbd626cd22273a1988d17cfc051b036987a30acbdd8ed9ade8a5f2a2d4aa76",
+      "mode": "0o644"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "ac7927c63cffe5c1f0f1baec262399201a514d9b55115683c1621be8fc96427d",
+      "mode": "0o644"
+    },
+    {
+      "path": "ONBOARDING.md",
+      "sha256": "83dbe8553fc115a45de520f8921acf368893b0aece2ddb0d147dc379afce91fa",
+      "mode": "0o644"
+    },
+    {
+      "path": "PRODUCT.md",
+      "sha256": "10536e1887d8c30e61137460fddb3acc4d1a3f19b3bc2da9f219c191a02404d5",
+      "mode": "0o644"
+    },
+    {
+      "path": "README.md",
+      "sha256": "af0284d7412c9a11db6744d130d50e42bc78ade0fd26c9062ac2e3a88535fd12",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/SKILL.md",
+      "sha256": "d0fef14286f351003ba09b1de3e68e5356239348feb0a404431e5704fb26d0d2",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/base_content_en.json",
+      "sha256": "7aae757477f6106fac3f8219a5aba2d1a22d290dccc48e7084bb358d3cdc9d4b",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/base_content_pt.json",
+      "sha256": "a994f1cff8fa513d80b5a5dc5a595dd1ee35cfde916b73fea9f0a371a15d081d",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/builds/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/generate_resume.py",
+      "sha256": "4dbf36e38c56f3d65d5275b5bdd665559d1065563c94b576980c417562278363",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/materiais-fonte/README.md",
+      "sha256": "8c4b68dd7655bb5e6766d55948305363b074bde53894b303ee075d5ff630d377",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/render_pdf.py",
+      "sha256": "1a48b7ae46dec811a2b9cf6a05308bd60306018fb36f75c763bce133d109b1b2",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/sinonimos.json",
+      "sha256": "7b1a5687f2cf1f46c4d7a38edcdc3cc31d4f254d649d9bd984d0be2acb5c22a2",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/tests/test_verificar_resume.py",
+      "sha256": "f57c69df065f5ac8378a5a6f12aea9329578bbbdb494f1306e2542a7d44aea9f",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/adapt-resume/verificar_resume.py",
+      "sha256": "750e66a2a77db3d9ea2a60c4836a6af82b2d071d60f28f8f8529013fe72b2e3a",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/aplicar/SKILL.md",
+      "sha256": "4abe0889d1bf046f6e77a340bb7a151b827988fe64a26277bd04d779bae1e346",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/apply-jobs/SKILL.md",
+      "sha256": "061316a7f22b1888fdb53e2e0ac42199552bf19f89a2805a500807c7e10f9191",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/coletar/SKILL.md",
+      "sha256": "8489b011250308a84aed2352c3d158c394d21ecba0397a267c1e3e9c1d0f36ac",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/onboarding/SKILL.md",
+      "sha256": "94ade6d5b1e84d3f9809787635aab593d000127464d3323257e6d47d894b332e",
+      "mode": "0o644"
+    },
+    {
+      "path": "Skills/review-escrita/SKILL.md",
+      "sha256": "61381088f41e807074715ef7d97f00ea8e1d1c0cb97141f83ed6f9f3538ace97",
+      "mode": "0o644"
+    },
+    {
+      "path": "aplicacao/PERFIL.md",
+      "sha256": "af2ba3c0f4b02ad219b8f2377daab2c005ddd0d9c99d0405151cf7be49d110f2",
+      "mode": "0o644"
+    },
+    {
+      "path": "aplicacao/README.md",
+      "sha256": "a9014e57b9e944a7cd9ec58644c79995a26803b83aedd8ccbf4324fa662e1f64",
+      "mode": "0o644"
+    },
+    {
+      "path": "aplicacao/RESPOSTAS-PREENCHIDAS.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    {
+      "path": "aplicacao/RESPOSTAS.md",
+      "sha256": "af0c0336d51f53a9759f6f58d1c6f83c3e6d3b08f0c72a56d027e3ba09d8a573",
+      "mode": "0o644"
+    },
+    {
+      "path": "coleta/LINKEDIN-FEED.md",
+      "sha256": "f87d093795c82a363526465156a833f727ecd24e5a8d733e6148d0f11f4d938f",
+      "mode": "0o644"
+    },
+    {
+      "path": "coleta/README.md",
+      "sha256": "4cd2214cc07cc14f4f5036a9c53bfce8ec36f0f061952a114dffdf13a479b6cc",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/CREDITOS.md",
+      "sha256": "1890ad718503d4e8cb4961aa8d619f31bdb0853d9187136ac92cb7bcae661b86",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/atualizacao-automatica.md",
+      "sha256": "3244c7da3a001ab5dcc36bf60ea2eed5ffc91b3f091a0b15ee241567f6d5b780",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/atualizacao.md",
+      "sha256": "b6f57c2b13319983f632e84024d2cd7754dd1a554696c9a97cc3ee21dbe9f4e2",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/configuracao-tecnica.md",
+      "sha256": "3708977c1b23aae9305c1abb4109a163287dc5b86ac39d62f416ea0589d96376",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/fontes-e-criterios.md",
+      "sha256": "8bd07bd0c32da47e9c482f2fe32d4b94775bda94fe7cdd6d3bea1785952d94dd",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/img/apify/01-botao-api.webp",
+      "sha256": "9bf51235d3d67826431ccef13accab5146260906e6163316f1f3ca7b61249823",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/img/apify/02-menu-api-clients.webp",
+      "sha256": "b056f00b5caf089728c95fa49bdc3873396d57110d5d440cfaac7bb83b3a5a15",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/img/apify/03-api-clients-copiar-token.webp",
+      "sha256": "473fc679cc79c573dc2e2798683b2142b9192203601d5db42c8061fcaaac726c",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/img/apify/README.md",
+      "sha256": "e3b1b0bb07f6181cd3d1c06fa688797eb87132158f8bf27e277de94b7f6f0ed2",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/instalar-com-agente.md",
+      "sha256": "bb5e3017fe449c3ff9dc94c7332dddc13283c12eba66cb4c14e3d56ee68ec75a",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/interface-ambiente.exemplo",
+      "sha256": "2067169c48f12149caf908f5e36a0e7eb83edfd600babcc05b14fb8b258e1038",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/materiais-onboarding.md",
+      "sha256": "33aa0b0d89f632ba413ddadde20c76e0e70d0673cb6318262fa673496311c71c",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/modelo-notion/README.md",
+      "sha256": "b28c48e0057b70c31caca0b249155602d5a8991b02c74765ec17561b47721626",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/modelo-notion/quadro.json",
+      "sha256": "f0846257a02b3ff1a938e385af19ffc0b7aed9957edef69fb025d8c530050381",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/navegador-config.exemplo.json",
+      "sha256": "6656528374e75ff0a576faf1b8d02ad260360a8fb40e4432e4977bfc474d9836",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/navegador.md",
+      "sha256": "4c3ca439bc5fc1bcabe936ac6e1b098cf6fed0104d3f5831f383ae60a7b5dc30",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/operacao-local.md",
+      "sha256": "6bd55b4c360e6ad4b3b1ffccef55218e57340e9fe300cf5584890e0db394abf5",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/releases/v1.4.0.md",
+      "sha256": "81c99d7286a1e87ee4ff86a5973d3338aaeddf820415fdd8ac4c8dced6f273e9",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/releases/v1.5.0.md",
+      "sha256": "de6b0a30e4bb22bb614517afe9878b15285b036abbe9e2f0db4ee8cc2f104408",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/releases/v1.5.3.md",
+      "sha256": "acdfe5a3e78ffd8389041f927ced3567df780d98d7ee2efde20e0ac422fdaa27",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/revisao-escrita.md",
+      "sha256": "c80c68cd1d39ef8ce554ce5d9f4729bb9b9abe127bf5485f4561031d4d3e3348",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/revisor-respostas.md",
+      "sha256": "de2bec3b0fc74d902f1607b8a3ab2ea1220c8cb85c42d93a369a0b462aa5b8bb",
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/validacao-1.1.0.md",
+      "sha256": "c1f7311ff774bb74d2b8699f0e6a14b90471262e4cb8c06375171ccb4ca873c2",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.design-system.json",
+      "sha256": "a70e3933909bfe66a70973d38dca3ae55030d9b37e6dcde14f6ec70c52621791",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.gitignore",
+      "sha256": "b107d06bae8cc2679965dd019b9280198d20c0a6747a1ceaa5c74277896c5313",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.prettierignore",
+      "sha256": "f3a0d1963101646d5fa36ad894d0a81f53f2b71b6171e4443ddb98e9ea8d1617",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.prettierrc",
+      "sha256": "d169c9632212a8cd1471e8814f2aa6ec87b0668941e34fb1a35c95b856c20bf5",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.vscode/extensions.json",
+      "sha256": "cc8f4bcdc3c31be539aa67fbdacaaac4c9fcccb55b02048acf02f56e623ef682",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/.vscode/launch.json",
+      "sha256": "461accad2f8d7604a8470fb4705b84768bcf24791b0974d49cba0d96c3fea857",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/README.md",
+      "sha256": "9f63ba57cd7358689acaf58c43750dc4c8af8fbeee0ea33e2b6f129beff5f2e5",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/architecture.md",
+      "sha256": "9bd100da56bed78298b6739ed889e16122a5ee8a51628554c832053284de2be5",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/astro.config.mjs",
+      "sha256": "048595850b425550b6fddbeff462e9165e7ebdcfef04f1d01f00502d8b2cb10b",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/components.json",
+      "sha256": "6d064e66b156d8ac503bca0e29b7661af10497f19d7e387c1ca13d9472933067",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/eslint.config.js",
+      "sha256": "035b0ef4af2c669752013ddd9f83db8f0d38ffc89414882fcabaf0912453058b",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/package.json",
+      "sha256": "6d401b930b4641a3cf888f55a139b3429959f4919695ee44346379a25ecef03b",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/pnpm-lock.yaml",
+      "sha256": "be6e07b5532c086c7aeaad5cb23d362d18bba3fac02131e79d3587114516cf4a",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/pnpm-workspace.yaml",
+      "sha256": "a1896de37444c65173fb1051622146dc24bbfceae45cb5bd2a61cc5ebc3da25c",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/public/favicon.svg",
+      "sha256": "b78f61c46769bfe125216bf057824e977168f7d1d1ee77dd2d294f5acb1438bd",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/scripts/serve.mjs",
+      "sha256": "f9b03f1a150e93cf16519d7abe07dee3d2bb9ac72ca6bd549334eba31453640a",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/job-board.tsx",
+      "sha256": "b76be007676fd4602d4d92f8de7bc51cae47448c7f3ee856c71b30498a4a8731",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/avatar.tsx",
+      "sha256": "782659d874d45f3c886a7243353f8635f6a87991988947a1e37fe9a0f3483b42",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/badge.tsx",
+      "sha256": "d9fb280e266119c4b62a4c518e63152de27b094c68d3e5f8929d05bfb0c1bc6c",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/button.tsx",
+      "sha256": "fe8220afc0ec9b62c7a520f4e6eb0b56b3b9e951eb963183c29d274395ee476c",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/card.tsx",
+      "sha256": "28dec8d76e1cf48bf822bf533acc00a9b389d2de804a40b27a24b869e4845ed7",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/input.tsx",
+      "sha256": "b8d0c2a2ab66080b5fe9a3467884f896eb6f9e6b45ac0185925e831f551362e6",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/progress.tsx",
+      "sha256": "894878cd65f908a0341249f7bf45e25667f488e7777f830ba1c4715b47feba06",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/select.tsx",
+      "sha256": "56b191d1a754e25ca78b69664eb490ad4faabb07667e86c29dc45c4636235f2d",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/separator.tsx",
+      "sha256": "8a1d9397433ccf70631104f377b0e778754582a74c93a57cf13a2f2dcba778bf",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/sheet.tsx",
+      "sha256": "88bf61a1b24a5f6eef8309f0f068f6254aaf7b8291a1c2bb7d406ac226efdeeb",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/skeleton.tsx",
+      "sha256": "4c2af7fa9c645358a0fb188779deab6f0b981733b62befc25e18aaebea1350dc",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/sonner.tsx",
+      "sha256": "f151588c74fbf94f44953a674d4a8dde523fca595c17a1a8adfd5fef442fd75d",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/components/ui/table.tsx",
+      "sha256": "749b0501e97591f8d7c9ef81366d636e4b47857a15a28e6cf3b87841232e74bf",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/layouts/main.astro",
+      "sha256": "f8681c0680bd215dbefe15248ae885d9a6daf5f4b05d8a830bc580a18d1939d8",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/file-store.test.ts",
+      "sha256": "b3839cd134ca173d9bc3f449309e1e7ce4eb9b9567d518727168a1cb168868bc",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/gaps.test.ts",
+      "sha256": "e4a54ac92584782fbf681487281e883bc181b936d5e513869609ac16a55a3618",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/gaps.ts",
+      "sha256": "53293df07e716497b92c209af12d689d8bc39dae6217f7dfbb01206558ce9ac5",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/jobs.test.ts",
+      "sha256": "56e1e4789a51be0808e65d91bf032d5d9c4ed84ea8a76bd19cc80ba2a16113c6",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/jobs.ts",
+      "sha256": "3b9e39ecd03c8c20bd707ef6c76f2901eba2d6ee39e55dd560602ccf8975bbe1",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/server-store.ts",
+      "sha256": "cf229a7b20851b87a723a7a0c14acafe868450367938eb6991956aa85f913f91",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/lib/utils.ts",
+      "sha256": "14300d758170c270c75b057f38fedb3793a5920ea872f0477e29fb131185e8a7",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/pages/api/status.ts",
+      "sha256": "9bb14e3b45392b924915410402885f237ef0c75aaf45ba8a8613eb48094b135f",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/pages/api/vagas.ts",
+      "sha256": "128c1c96e3a20e1c682b0f4459ae95555a223a02135996b1b021e82d86116006",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/pages/index.astro",
+      "sha256": "a9978127cdb59449305e4eb2e792ccbbeca932c43474039f8753af686db40ce4",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/src/styles/global.css",
+      "sha256": "61a1f7d3903358f3e4673e65cc84fbea3b337d0467dd275a260d768f3da5cd69",
+      "mode": "0o644"
+    },
+    {
+      "path": "interface/tsconfig.json",
+      "sha256": "3a6de704a2582104224e01c8da4d9eff1e6277d1227c8e290b03a638117db740",
+      "mode": "0o644"
+    },
+    {
+      "path": "onboarding/index.html",
+      "sha256": "6e0531904a43ff53f5eb07734091cce9563db1b90beb7361318be44c99573576",
+      "mode": "0o644"
+    },
+    {
+      "path": "quadro/index.html",
+      "sha256": "d8f48bb254d7643ffcfcae93483154f928bdd126d68e547083edad9ab8812f68",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/003-resumo-diario-email.md",
+      "sha256": "7a52cb84a1abb8b970a489ed605f91afa3e3daded497818e43b3f8da425749df",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/concluidas/004-estrutura-coleta-aplicacao.md",
+      "sha256": "c92e7876aa0307938e59b2d626e54a792753b35a5468b92245007b1e050a48f4",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/pendentes/005-onboarding-visual-materiais-conclusao.md",
+      "sha256": "487b262d1df73c6b7fe443213be91397b7f40e70dc722fa1be53b85695e1db89",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/pendentes/006-preset-bIkfnxQ.json",
+      "sha256": "02c6f3d81dd12c4b92d99e2aafaf1c421e2c2db7456d87c13c1c843ff6cf9d01",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/pendentes/006-tema-quadro-onboarding-notion.md",
+      "sha256": "75def38c0f1e8a113675d2d9ad45dc779ababaf9ea97108d9331c64566d3f0d4",
+      "mode": "0o644"
+    },
+    {
+      "path": "specs/pendentes/007-release-1.4.0.md",
+      "sha256": "90f463bb1954809c17f3999a6ee7332acf776c0e4d612b0a866a42355ba9c483",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/.env.example",
+      "sha256": "019577be202258b6e003b3b57b94fd951243bb4321b784ec20e34f53fe06700c",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/.gitignore",
+      "sha256": "966d879186ef50e875f03770b6ba6eb2c93e8e9d1b1aee553fde166618c31746",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/AGENTS.md",
+      "sha256": "148afb9771f13a14059120f641ed4cdd7c5cec7b36d71bdb117387760842d63e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/COORDENACAO-FRENTES.md",
+      "sha256": "7414baf92e4d56c0fdc3634edcad895f04637cdb5bf68575afc32b1b563f7c13",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/FLUXO-DA-RODADA.md",
+      "sha256": "b3695eba3ae9dfabe87bbbf38977cd8acdacccbbacad059eb1585c7669843d97",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/OPERACAO-MULTIAGENTE.md",
+      "sha256": "a8b5959e4c7db04d73adb7fd65e4e56a01e651194f9da10bc0d278fc63860189",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/README.md",
+      "sha256": "6c30a98f56fa606d92f57b906658ad11fefa817e584f32c0b2e141af1a42f772",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/RESPOSTAS.md",
+      "sha256": "a7c4f28edfbf8d5a15f3221994dc184ccc1b1ae8406b3baa6b4c61e3cb37e879",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/REVISOR-RESPOSTAS.md",
+      "sha256": "c2d716d0902821051247c99c0e93a8cf0e004a072a5d3d2d7fef2982095eabba",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/RODADA-DIARIA.md",
+      "sha256": "c5307beb5926090efc0a82e7429682428335f70e48f3f280ce97cc3b6e28e334",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/catalogo-fontes.json",
+      "sha256": "bf50f20e4ed69f4dd0837475ae0565ae59c79e6287e35d3a33fe830763eb4339",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/dorks.json",
+      "sha256": "2127bd2cef76928daf1c84cf3ad8bcf5bfce1c9bc50166509079741d3fc00246",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/empresas-ats.json",
+      "sha256": "4d8a62cb7f8f3eca6ce8023c843ad62d099716f59219d74b5d35ec7b4f231d48",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/fontes-gringas.json",
+      "sha256": "c071244dfec3aa4e45b121a8f81a9305c1a092f74342ebd6c35827d309473738",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/fontes-importadas.json",
+      "sha256": "6b12de00b93771d241a85e8b9f932c18b149c73cc255887e6ee240e501bf0c15",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/fontes-portais.json",
+      "sha256": "ead1016f8557c1e37e156adc7124596d6711692bd5aea1d4717c1a05fb1fcf27",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/inhire-tenants.json",
+      "sha256": "0fbfdee17dd03eb2db12993433f33ceaa2fe6685e3a60285537100d93ce7c006",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/linkedin.json",
+      "sha256": "b6b4eff56ffbd2996b194857ad79a2c711778a3df2680838cf67cbc264a7a74b",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/mapa-enfase.json",
+      "sha256": "dea078979e3c6eae406a5267bc946aea99a859637246c9d6d60630f2ba0408a9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/palavras-chave.json",
+      "sha256": "8967788753d6910478072b48b13e8213a9bb41fe979495a4ceb0d8b2cfa4c27c",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/perfil-candidatura.json",
+      "sha256": "b62c0c3108e464611ec19a66ef784466ff15b02bdc453a1560bd38fc818a6dbc",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/config/perfil.json",
+      "sha256": "5fc1a1ca4845d1b22a843a9f1bab9069104a55f5f84a1b460679cb1db90c2e84",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/data/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/data/perguntas.json",
+      "sha256": "3b35f5b85d841fc195b01e9bb2ee0d1605a5dd2df9d154e7423ea67b02abe874",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/docs-fontes.md",
+      "sha256": "6d710b77ec2f200540657757361f0d76fb232f88fa8cc27aee04ad09ffb504a2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/docs-importadas.md",
+      "sha256": "be24dc36ab3d25fa7a44c197715b74113be083ae639205b479f98d3afe8f4710",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/package-lock.json",
+      "sha256": "3e26be21334fb3868f24f075347567c7cab43f2545a4132de320933d4a5da0e3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/package.json",
+      "sha256": "6a07e742411e7b0cf83454a451ae0fb7d50680c5e62b8268a1613e4eb4f5c114",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/apify.mjs",
+      "sha256": "b0dba990bb07abd3b0bd857072863f27d74994e1deeaf397d9e60c2a64fbd2c4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/atualizar.mjs",
+      "sha256": "6a7d43923249689b774f67c2da56a993c3f4c4ffd7e5526ca1aa5ffc6d503054",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/autonomia.mjs",
+      "sha256": "d640ec331f65e0c8f32da2c30db467da0a98340e3ef3fbf3413cc7af8b875491",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/checar-publico.mjs",
+      "sha256": "740122674a15582be765e5890182242e0c79f31e30e91b6cb7dbb731c4bff73f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/contatos-posts.mjs",
+      "sha256": "c749b8cb859d450be082ff112c519b160122fc1e4d10342e90ec534639204db4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/coordenar-frentes.mjs",
+      "sha256": "f675b76859af693b450033bd04a8c40b69badd2745fbbe0a9d56bf75db052bba",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/descartes.mjs",
+      "sha256": "69f7305822ed1deb9034fb75468e525aefe061c8603fbecfaa491dca10b3b1d8",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/descobrir-empresas.mjs",
+      "sha256": "ed6b775564faf0b89b8ed309c5db8de0bc6cb08779cb5cf0eb7bfdddda0af1eb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/doctor.mjs",
+      "sha256": "076cff96a263740989cfb55624dfc3c9c9f41799674d57155fa326a379a99f0d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/enriquecer.mjs",
+      "sha256": "5f9cf61f0e9fd206377342a0888d8c22fb3ec5539060acfab0114484ef6c52d5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/estado.mjs",
+      "sha256": "38c38dcd72297553e97c35ac7020fb5eb8d09c121ca9a59ce27469088bd07e7a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/executar.mjs",
+      "sha256": "81277e1ceb44e1f5eac9d1e3bc7e4ddad1e78ec5632c52b390aee8a9b764f2ba",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/fila-notion.mjs",
+      "sha256": "9350fc0224b6511fc886b0fd12bfefe5939cd8fd7600173fa6f622758c64038b",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/fonte-respostas.mjs",
+      "sha256": "a6d1e65d4e039098ad83fa20f931e19b8314f01fc03d4a533b39a3aaa969e0ce",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/fontes.mjs",
+      "sha256": "9bdbb0ff9ef0d8cda9ed384b7befcfe9db05d2657e95502f6447d8534b7861e2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/gerir-respostas.mjs",
+      "sha256": "0c5b0afef988490c9cfff4318d9af82b6ed89627dbd3000ba954b6dc2046fb33",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/instrucoes.mjs",
+      "sha256": "a82ca5e299e22ebf7cb6125ea3aae2eaf12fa8f7e9dd63105dcf144f55ae28e7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/ler-vaga.mjs",
+      "sha256": "b9d46d564f2c33c9a9fb54c246a5d0826c7d43d8e3f54831b60564b5869f19a2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/lib-captura.mjs",
+      "sha256": "dee4a0b58a27a0faeb75da3975102b5e6bd7a72d6563f1781dea927247ff17cd",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/linkedin-feed.mjs",
+      "sha256": "dd3f255d4a31fc23be50b2128cae51842d8fe77d4126c3d56c7e44e849831780",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/navegador.mjs",
+      "sha256": "b6c968dcd91ff61c7eeef6a65a8476409b52555807baf6ddff18271626a83a49",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/onboarding.mjs",
+      "sha256": "4d65ee54951df5e4d5d733ae45b080c02189671682572d17bd93ceadb81ea275",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/operacao.mjs",
+      "sha256": "e8b998bccee6f50b55a36c4f833e15d5055a233e6761004d5b53963d943125e4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/pendencias-candidaturas.mjs",
+      "sha256": "0e61b766b93ff963e18738c4ba8b10a729b040434bed2a13c1eea392fe30ce81",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/pendentes.mjs",
+      "sha256": "c335acb8bc0de0d380d3f3fa49622ec01311959bbe50d4427afb62e9f03b1799",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/quadro.mjs",
+      "sha256": "292a9a57aba095783b469ec5cb5ab3b86f9cbb0fc16d0192604e93ddbd7b870d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/registrar-respostas.mjs",
+      "sha256": "cbffcf628925f8c2296e0575276b0397b184d136c7376223ca16dbfed51abd27",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/regras-projeto.mjs",
+      "sha256": "54daf9fdd97a0dd69c56fed32971ce37a0424c0ea59e8999f98799c1ae7c2597",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/respostas.mjs",
+      "sha256": "9f47af7965b472c8e665db92fe1fea9ec0c4de06b256952fa936f3e569f62369",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/revisar-escrita.mjs",
+      "sha256": "ade1deec9c874dc733e53f5be96960d2dfd9961d2beeca36137a5513ad9a1b8a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/rodada-lote.mjs",
+      "sha256": "7e0693b52a7c3b135c6c7d3a78df181097d3d84979bcfa76f0a2aa4fe2b5106f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/setup.mjs",
+      "sha256": "01e01a6cf026f9c7cee6e9c03565604a9fd597331761e1b873919bc43119750a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/sincronizar-fontes.mjs",
+      "sha256": "78dbc5b6418a0e927a0e421840a23c745e34c71643357f92fef6cbdf928fef17",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/validar-respostas.mjs",
+      "sha256": "31a093abe340acfe272bff919755abd162f0dd5737b1e38cff03d46c6c83441a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/verificar-envio.mjs",
+      "sha256": "5f81535177c7dff0c0aeff5c9254c44b68579c2c43bb40ffa6044c5711d111fb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/verificar-fontes.mjs",
+      "sha256": "17b548ecdeb822a507345bcdb52392b4417050a35d1b5c41431c31ea16695fae",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/scripts/verificar-versao.mjs",
+      "sha256": "03c0efc6b6e5512526ac75c26f29e0005076ee4d66d97f6ab5647e042ed119ac",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/arquivo.js",
+      "sha256": "fb44d4a2c1e559f087fa34e7e2a5ee69b9f19aa64d122cc72e25d379a9d6ebae",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/atualizacao-zip.js",
+      "sha256": "2c7746d3e0ed1c36fba19b3b09b8cab1327618a5d4c4918d79c118a8399586c4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/atualizacao.js",
+      "sha256": "d4744de29cfa6221446670da1182cd4c66898bfffee21aa4d31d7a8704c020a8",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/busca/ddg.js",
+      "sha256": "d65e57b0d4e9d8873a232e841303bd11772b03606254f9837fd8a6da8a74f4d1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/busca/extrair-id.js",
+      "sha256": "01b8896a736ffe6f3827cfa008bd8d972a111714909922ede20ec9b3d947d47d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/cache.js",
+      "sha256": "e88f04dbb7d4c3abd4d32adfe42924584d0facf45f3d673c2e0d1560ae80ffab",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/candidaturas.js",
+      "sha256": "c88294192229ca12c0518057ea9020739919fbcec93cd56169c2b46ec2c0358e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/coletar.js",
+      "sha256": "842685e12219a7384f61b2b1075e05b576df93cec453a5b49ded24e2b5ae01e1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/compat-layout/bootstrap.mjs",
+      "sha256": "b31c52567c86c1115b9978d1c4c7961c53c24f258dd61983de454ee088be0fb0",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/compat-layout/conteudo.json",
+      "sha256": "a0727f29b0780db219f039b23d129c56615b52d7d6ce40425a2846a7178f96bb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/compat-layout/conteudo.sha256",
+      "sha256": "8f884b40f9aab43ece3a3db024da0a1c226e5cab77faa8f113cea8ffbe06e9f7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/config.js",
+      "sha256": "c52ab1f09f3a880c13e91df3177d399289ebc5c24749229d0613e4337453f4b1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/coordenacao-frentes.js",
+      "sha256": "c797cd23ac4c2809460335c07a18b3a70686a2c79c3189f9ba8fd6e34a397ee3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/cota-apify.js",
+      "sha256": "dadbd42d13679d1a6c42515c2622fbb997c5523b39ff286a871b7ca13c93dc2d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/dedupe.js",
+      "sha256": "9a9df7cacbce5713ad705a2e6a96da4609e2248330e566f0da7b685403bf9169",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/entrada-operacao.js",
+      "sha256": "472849c7220af043cfe18c2b7d3febb5c01befe0cd3d22f08d2ae1628f120284",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/estado-central.js",
+      "sha256": "6c0f5761f795c162af38bf6ccd9de0775a450c1fb2c588106cabdf765f1af1f7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/filtro.js",
+      "sha256": "42f07400d6ad67b0718f7ee0ce5b5842e2e507f89770e77e04d7d02fe871389f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fonte-estado.js",
+      "sha256": "831bd85848ccc3b45c1ff32347192aa3e2e2d8e201b4e2f4447a6f11bbf94c2a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fonte-respostas.js",
+      "sha256": "e8785b99a05227900383bc2946497250d0542ecff584a57c6b6743d93b926277",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes-instalacao.js",
+      "sha256": "5a183efdcbbe21afe5031b5cf494b93666788ffab343d7ec0d2d3e60fe1f4d7a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes-registro.js",
+      "sha256": "9dda3508ff1b99f7693c1264c28fbc686f029e343f222637513a3a0df2dd93aa",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes-respostas.js",
+      "sha256": "e089c873ac0362899f5feb987ce6bfe230980423da21fb27ca9a2625fa1663a3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/apify.js",
+      "sha256": "f0bde8b913e54007089be5f23a1a0e5d55764af47dd85b6fd5a1e037baa11f49",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/arc.js",
+      "sha256": "705f44b99b1b736ac2d46126e642f6ccf71927d7fc0702dab50260206644c76a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/ats.js",
+      "sha256": "32970600379fdd923d1291d5daea4d86919138b1133416d48e981154c8b0a60f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/CREDITO.md",
+      "sha256": "d4fa10d7f0ab34d21d0d18bd803bc783dbcccc5fd56a7d509d6465572cc8e4a9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/LICENSE",
+      "sha256": "823a264e7ce4a246f0c59ccc21a88f0648d4f502dba8fd6162a762745c063b7c",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/4dayweek.mjs",
+      "sha256": "96a5f0acaf471bb04ceb66af0ed775d58e877e7b90700aa2e40b04691e1ccf60",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_config-utils.mjs",
+      "sha256": "e8ef6ceada3a1ee2d05798c9f59002094a80d9ac81529b39b18a3a7329ff9cc9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_dns-cache.mjs",
+      "sha256": "8cd3aa59652c2e81c2f9768f7715f20bbbc8b7f02978a62ecde0f153c4388abc",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_html-entities.mjs",
+      "sha256": "b1d6673f8b8eb2de84a6710e012a954959b89c7a8e374ec874223ab4b5f872e4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_html-to-text.mjs",
+      "sha256": "c2f23b2c971f3f1b2a66d5c4f181688b5b5e5f64441744959c66cd05b74d14d8",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_http.mjs",
+      "sha256": "a19f7904af45095990e6cd07bab0ba1aed1c095c5053c14aa3a3737269a9c4b5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_ip-guard.mjs",
+      "sha256": "74fdf66b724e57afdcbf670ab3ca96d443296671de43795a0e93f3e3c7fc3877",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_safe-url.mjs",
+      "sha256": "4d2ba03cbdd27a5bde38bfc7a47eeed04950c34e935f95645b082170bdbb6a13",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/_types.js",
+      "sha256": "ce251a89e0433efa3c7e98c8b79e6c2f6934c478321c70cf8b61c878a2ba67e9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/a16z-speedrun-talent.mjs",
+      "sha256": "5256afa928da644e990e6a1c503dcd3d8baac3ab9db3fc136a5533f11aaf9850",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/ashby.mjs",
+      "sha256": "2a5f65e716e59e64ec90cae6a1bf657ed5cc9a1d4144bf84a61cc3dcbb8eaedf",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/bamboohr.mjs",
+      "sha256": "b3204b8c752e7f3ff8f2085450e3d19887f3ae9dba6a402bef2ef21e3e6d3777",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/breezy.mjs",
+      "sha256": "f918220cccd13a6f7591f8b2ab8de566e97c1a0f9d7c109d8464085712faa6e0",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/builtin.mjs",
+      "sha256": "87c07402018b65e914e3879c68fabc3ad7c7490dd2092cf720aeb990034dc1aa",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/comeet.mjs",
+      "sha256": "72b408071bfa2e83e14931b81a3ca3af09f9339c2b9097060d23ccb01ebf8d29",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/cryptocurrencyjobs.mjs",
+      "sha256": "8291fcfa41af9fd1a9d5e8ea12ff4bd5bb514a16fed71c8bd455ef871e82fd3f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/gem.mjs",
+      "sha256": "a162ad4f597f94a6641e71504271ef8b7b1f21bab94143e74a4f4bb3a576d419",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/generalist-world.mjs",
+      "sha256": "54e0c6ec4bcba16b434cc7a4686001c2e33f0098b13cb004dc5ebcaeb70f5fbf",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/getonbrd.mjs",
+      "sha256": "fcad3b6c765d37ed77b32fb7fb6802edf8e769997a7eedf8c1c38492e0204214",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/greenhouse.mjs",
+      "sha256": "916fd9fc67d534fde885543d2efd7dc30a6c282d126d65e884021565868101eb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/hackernews.mjs",
+      "sha256": "023610ddf426141a1386cc04f6070aace07953aa284cd0365d9bb2035c4703fa",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/himalayas.mjs",
+      "sha256": "e447d748183b853f5484b50228e9dae0095d58ff401193eef6f6e777529b2a95",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/jobicy.mjs",
+      "sha256": "0f4c4ffba2c00a00b4ad7e449c84f6cbbedb1b7afefa4cfc87ceba524413ffff",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/jobspresso.mjs",
+      "sha256": "84596f7bc0b696c27b31b0d0d774cea99cb50f16139636307d373c03656af6dd",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/jobvite.mjs",
+      "sha256": "a5c0b28e93d0a94e1510f8e5e7ab76a709ec8b2735e82c167d326cfe592aba74",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/join.mjs",
+      "sha256": "9afa7a1416017f2ca81215f3a78e13542eda425cdf17919711ef4d5af0ec2380",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/landingjobs.mjs",
+      "sha256": "5da9dce86c8bdf26f9f2c8f61b6f2d8d57cf902d32f852846ccb09902c8269f0",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/lever.mjs",
+      "sha256": "7ae6ae32c0c59232ac21bf9abaa938510f836e08c6604649ffab87c2a2d21606",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/nodesk.mjs",
+      "sha256": "ca06bd2c9fd06aea35a3f1460af196b1e6922c9697a41ae3c4b5c3aff308dff6",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/personio.mjs",
+      "sha256": "685d9a4f53b09e27fc82d5586921be765cee5093ccc13bb76f678761a79b2403",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/pinpoint.mjs",
+      "sha256": "c2af8c67910bd3594719e360917b9adb602ee35f54725bd9aa85f9602d74db72",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/recruitee.mjs",
+      "sha256": "af4f7929c114f6c91e4f7eb19909497259585f88c455077f719b6bbfbfedcc75",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/remoteok.mjs",
+      "sha256": "f4d1e2c82e1cf12f8d29f4e5b37c16209025f39f57e420964ff60e6b1989c094",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/remotive.mjs",
+      "sha256": "a9724e258798f467e500ae0ea880f9b3e949dbbb7c705c391445fc768173972d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/remotli.mjs",
+      "sha256": "c95b0a4de77a1ad5dc0a62016beabc04d436b0fc26a2f25c9586e4d2f75c3679",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/rippling.mjs",
+      "sha256": "617f989fce9e70c6f01d9239cc6a6e57114fdee55646a911f90ac6b83b2326c7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/teamtailor.mjs",
+      "sha256": "a3fef841a6df5d202ca19d013871d85bce80bf8c001338652dd78e4a0b11418f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/themuse.mjs",
+      "sha256": "f813ece41b38429357c6cb46aa1cc06ab8b04a825e8c7c3e9ca658bcf2278f87",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/torre.mjs",
+      "sha256": "1852359743aac038253ceb8262c3e76b76c0ea5c225d4b4b37d20743d1ef0622",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/weworkremotely.mjs",
+      "sha256": "c8c3bcb1e08910c7bae6aad1ffc362445bc0937ae58e5be3afe57dcaf481bb42",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/workable.mjs",
+      "sha256": "d1806c69291934859a982a5c153c8547d20cb4636dcaf67764489acfd1478b54",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/workday.mjs",
+      "sha256": "fc6d2b1dc129693c50f00f9e1dd5840294c6a9a584dd69ccbd0945f7cc69b7c5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/workingnomads.mjs",
+      "sha256": "c9598a4cd313eb6e6bec42c4b7a4ddae77fe9241a9c848a0ca07a65d1d90fa4e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/providers/wttj.mjs",
+      "sha256": "ecac582a2faffa84f5caec79b33e3468c6ad4a0171abc4fb4e5ed983d066b948",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/careerops/user-agent.mjs",
+      "sha256": "e47ae2f5d1862313a3db54db2e0af15a8e042751c845fc13a4aecd31c9d47f6a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/colunatech.js",
+      "sha256": "8a135f67e9ca63cdd147b23e264e1d9032250e4d3da255f3da3b7b703ab227d2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/gringas.js",
+      "sha256": "09b387615e475d7d6aa2f4d7e4cae61526ee8b22f9a62757012267ebef086bc9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/gupy.js",
+      "sha256": "c8924800eaae32a8195cc8ae65230ff01240418b57ec7359a6150aba8be0d2a3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/himalayas.js",
+      "sha256": "0190e102238f2f440cd405046fadaf12e490aea96c7dc0b6b539c387b442de26",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/importadas.js",
+      "sha256": "be086d93b3907d134904a18077b719fc0ab0d820f5f295e2f4e4b4ecb1dd61d5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/inhire.js",
+      "sha256": "033a4b064dc40f4a7d717f9df9747a731c36ffbf3d61c13fb7cf7ac484e82520",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/intl.js",
+      "sha256": "5ac37d50e12959bb2b4be2e144a48cd435a35385385c3a2004f6ee93a216d22b",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/portais.js",
+      "sha256": "86bd83cd802dce863a58c137381489efa5f6c268a1defd3df3295401081be135",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/remotar.js",
+      "sha256": "a3073a4b4b6d0a19c776595ce9c3dd554470f9f6f3670f3a61aeca3e0d1f77da",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/uxjobs.js",
+      "sha256": "df5626585458532a1a9b1c5ee37c7b299fd2ce5e371e7aaa59537311e7a724db",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/uxremotetalent.js",
+      "sha256": "b699e57ae873e4b877095678d3ee2521fd2fdc01ead7767f702e7f57174214be",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/vagasremotas.js",
+      "sha256": "48dd532e34c9f3aeec5b9568a2e70d1a34fcea737bc975180b12c11d99a2dda1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/fontes/vagasux.js",
+      "sha256": "b61d190cb5a321c0b2d833feb04c73e00b5491948be4cfce4b64f265a92452e9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/frescor.js",
+      "sha256": "6d462defedc77ca3540bc8665ef765669c3460ac7b89eb2f2698c8dc0c339c9c",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/hidratar.js",
+      "sha256": "69b897e426ef5a0f0474b34b7d4d8da705afe64ab1dae132c80a304bbe47f517",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/instrucao.js",
+      "sha256": "179b0fe5b1889ab0ec8f2b5915c5b77450c762279e6dc22de26845fd5d3916d1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/linkedin-consultas.js",
+      "sha256": "463f47d60ccf1dfc10b38a297135ae738e90be2faef267c5509a27a0360ea3d1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/linkedin-feed-config.js",
+      "sha256": "232e018435d86aaaf009e3124eaac3921372e88187ece558d0d3cff2edd26242",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/linkedin-feed-entrada.js",
+      "sha256": "971fb2158bd4cf76aa75a20e85bcd02d96fc8949789b92ab7007866eeb89d53a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/linkedin-feed-sessao.js",
+      "sha256": "dc028482b554d09434349db42863b491e410d3174aa0abd6bab395e42589864e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/linkedin-feed.js",
+      "sha256": "1762d603b6ef25f2b5fe0caa3e9973fb021dd93795992e2e62ef001ee6a420d4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/liveness.js",
+      "sha256": "bd54022cb9f2d2a2497da2fabe036c7fd17b8e7f1a30695422d96b4f34717814",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/materiais-onboarding.js",
+      "sha256": "5f0d8fb8f71f0db6ee0630672897d13a9cef17495d1edf7abf9eb81d7283838d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/mercado.js",
+      "sha256": "44326ec61c12d29bb05629b30d512ee4f01e11486a69946ab14473f16a062bd1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/navegador-controle.js",
+      "sha256": "3c50fd49960a29ce7300e234a36332a0694b2f6ae2275148f0db66764f01f9fd",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/navegador.js",
+      "sha256": "d1aca18cc532c2cd7caf035e338ca3655f901963d94ee2b6f8b57173cf02c0f2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/onboarding-autonomia.js",
+      "sha256": "91b70008fc0dfc14d16745effd2e3bae972102bc408b3de3880c656fdae1ef8d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/onboarding-humano.js",
+      "sha256": "10d705b5b28f0d55b726932ba0147aca98ff3c5d94bb215463ab4ed999560486",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/operacao.js",
+      "sha256": "4ca20fe611801df16a6e204da45ceb68c27d726fb373b67548ec4e0d9b464103",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/persistencia.js",
+      "sha256": "30d689d059d58e254cb396e84c7a8ddde03fc795cb8fcc0139710014096c6055",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/quadro.js",
+      "sha256": "15fe3825e6ddba3d88d395fffade102570aea4244dfe5225c6bc949032737ec9",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/registro-md.js",
+      "sha256": "63373ec4a831798824cf2ef88b6b681225a4246c89d0b62ac5b7eb43d7eb7b9f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/regras-projeto-leitura.js",
+      "sha256": "918de24aa44025b2b1c7c35b7e04bc7cb9c459269a53ad3d2b39e739721f6312",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/regras-projeto.js",
+      "sha256": "41024bfccd0ddfe5bef5b2c4c065189ae471af39d47bf14a1b858f5d4d1f4a8f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/respostas.js",
+      "sha256": "7f51c1d91afe4531f7e5eb3f1f723a861569778d84b88fdebde47ab36d17cfe4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/revisao-respostas.js",
+      "sha256": "83d1ef871d79a165e9e6907f1ddc15684b9925b496e35ea483eb37691a050e0b",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/rodada-lote.js",
+      "sha256": "82d1992b10c57ff96f1d63cd5dc342d1bf97dba8cfc4e95b61b969cd386ab28f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/salario.js",
+      "sha256": "7fd91f8eb0c5311b39eb8f045eb24d31d1bd00dd06c14817bf44ac94689f4799",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/score.js",
+      "sha256": "31d17de5fb3cf7150ab028ba5573c9e617400a29584432de6291b41a75175caa",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/semantico.js",
+      "sha256": "61fc951c578d83cd553a31fc10ecee990a58a37f4197c340086c9eadbcb2a3bc",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/senioridade.js",
+      "sha256": "03554e9502531b2cec9a97d9f6814020bcb6abe11dd6b7f87166d61b756965a0",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/texto-respostas.js",
+      "sha256": "ddf1b72b850103a73a4016ce1ae2ebdfd9d4b3e16e140c14de07652773e583aa",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/util.js",
+      "sha256": "9a99748a2ec6a75793da3de88d5bac4dae672c4cf944dfd45f31df629120e347",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/verificar-envio.js",
+      "sha256": "645468c89a0afa4929b1b715d67ac9ee48d24569b8166e7e9aee0d26e6e42856",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/src/versao-git.js",
+      "sha256": "6defe52e90c978c46b19d55ab4adff94fec501e8eecba88625defccd1e7b8260",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/apify.test.js",
+      "sha256": "da7cd30e8291aab801204c922f5ff896584adb25d3b556c0c235309f457b857c",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/arc.test.js",
+      "sha256": "dc86035395c739f36721a310b9c1c7ab435a185c5c7d70ef353024b6a70f0518",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/arquivo.test.js",
+      "sha256": "27fbee2fec10dad09f4a08bc7924c49fb2f497bbb24f5c37fd83914a55f8e4b2",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/atualizacao-entrada.test.js",
+      "sha256": "5f5bb346a6bd0e9b3c3557983dfc47cfe4095f82760b47653e8e531c9def365d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/atualizacao-zip.test.js",
+      "sha256": "a66ef7d4428b5b0130d7498e48f9c5090347c14e1c88a02faacc6bda61e54580",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/atualizacao.test.js",
+      "sha256": "13bf420bc79c990fe50d12c5f6d7c55dc9ebff776f51b177d8d317d9aeb48a3e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/cache-operacao.test.js",
+      "sha256": "48d8dbb92026b0135025810fc2499c8fd52da5aa98950c7518383190425e6909",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/casa-termo.test.js",
+      "sha256": "ecabc5c2c74cf1c3867ae71ec70df50478127cc34066a195611bdf564bc08f77",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/checar-publico.test.js",
+      "sha256": "88e9375135f30a179238f8e75bd28ee6ac95b2ce421acb47dcc2df926907983f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/colunatech.test.js",
+      "sha256": "b988d8ce16f2c525d2bb36316a3acace5f67c44fff3cd864150d1c5d166f8dbd",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/coordenacao-frentes.test.js",
+      "sha256": "e10012b6f8a2f6e8dd4a5e30053fad0241f674050db44a1c9a0c938d41037a18",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/cota-apify.test.js",
+      "sha256": "6c7e8965e7d38a31bad4e588cac665fefd11c5347373f9f1dfcca9802984ff46",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/dedupe-reanuncio.test.js",
+      "sha256": "74a9722174eb624548a6bceba68a104ac3c5325f99176d51f780396324a40cc7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/dedupe.test.js",
+      "sha256": "b91ead7731984b8955a91f8c9600da64cddf83c09357b7afac2034ee9b15475b",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/dork.test.js",
+      "sha256": "efe9b447f682489ea79e3f278eba4009ce06d3feba419afa59ab92c6500a5e70",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/entrada-operacao.test.js",
+      "sha256": "c8ae9b35932daba8d9977dafeff54650ed8319d09f5325fa726f66318f2568eb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/extrair-id.test.js",
+      "sha256": "95e44d62d14f55f908fef286b974d44ae32628b62edaa96db80fcc8c9930d2ed",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/filtro.test.js",
+      "sha256": "acb26f409d6a653f44076e455d7581a345e5c6f24080960c3d2ee6f1d919a762",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/fonte-estado.test.js",
+      "sha256": "b08c7fa094daff4bd2a81839b6b65c7949dfda3a121dd785b38ad6fb881cb74d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/fonte-respostas.test.js",
+      "sha256": "bbdfebc5d1b53aa522d542cd84fbf445cc6480b281080862e9e21f685ab3f3ce",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/fontes-instalacao.test.js",
+      "sha256": "d0c77fc89f0488b0f0321c28e2abbd22ce562e2abd31264298ba949532fba072",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/fontes-novas.test.js",
+      "sha256": "8882e781ca3a635c373e19cddd6a9eb79790522d4cc2794b0de469a539a635ce",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/fontes-respostas.test.js",
+      "sha256": "e57eaba137bce9200d4eb32d3b07fa3ac22ad7153f5854a4788437f423382b4f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/frescor.test.js",
+      "sha256": "62ea74ebe499b246f170198f731d98df95391108bceac0e410733bd9a5b35eba",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/gringas.test.js",
+      "sha256": "75860c93ed06ba9ba08ba27c5ddec99f8cb628e487c58f89947fb06951b78268",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/hidratar.test.js",
+      "sha256": "7cc91f2b7505747ee1249af0d7fe5c29d745c6897ae7f563bba541bf0543454f",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/importadas.test.js",
+      "sha256": "ae59dfdde097454c6fcadb5d3a82babe20dc11b4028679f9a8ddf95d66c990c1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/inhire.test.js",
+      "sha256": "64e89387c3283044752f9b0769603affcdd2c9a781de93cca5d8bbee826bcbcf",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/instrucao.test.js",
+      "sha256": "2effbe903149eba837c82ada2668d4f170fae645e0d9d91fa3b919cf7ac5e664",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/integracao.test.js",
+      "sha256": "58d80b41f8e7715a52a262a522ab6cc08279c1dc6ec2be6e3b595f4414818eb3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/intl.test.js",
+      "sha256": "aca42f1d5e1a4f7553cd73161942afeb96483677021eeaba7698eb0df9e9baca",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/linkedin-consultas.test.js",
+      "sha256": "ba6e4ea49eae90b5e7989bcf433f5717e512429ae21a47f1807819e6cf8da577",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/linkedin-feed-sessao.test.js",
+      "sha256": "5170440572df3a40e8dfc7240342d833891bfdf78bd9c6d33d620a6cce70549a",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/linkedin-feed.test.js",
+      "sha256": "cc854b3e11de2d6fc5d2785c1ff9e435c9246dbd1d8d3a8ff90740e36dfe42e3",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/liveness.test.js",
+      "sha256": "21a3ec5616fd494f8e46855e76251669719e5096657932c89eb8c41b9b74f44e",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/materiais-onboarding.test.js",
+      "sha256": "bfd5d1f7588d28c35109bf62be6dbb9767cbe929504d88c13a2bf8e69deb1ebe",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/mercado.test.js",
+      "sha256": "cfa626b553cdb67a7012be9623aced4aeb56ea8237320bb0888bb45c6dab2700",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/modelo-notion.test.js",
+      "sha256": "b3566d1f180b3ad77d5a1ab4c7b7b949241274b1d7262e40bac7f30329d77c71",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/navegador-controle.test.js",
+      "sha256": "157bec1fabc069d50d13fee07cb2699a195ad6437390b377bed73493f498f728",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/navegador.test.js",
+      "sha256": "68652a76f33d82bebbf5e934c65c429a9b7509fb31f62cafd28c2f2f5a147af8",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/onboarding-autonomia.test.js",
+      "sha256": "766d047e3e783489a483a0ec9336bf40cc94f5af906e2c0a726c9cac43921c60",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/onboarding-http.test.js",
+      "sha256": "cd25fbd918558dfd3d735a996538c9f3c4a2166bc7f47af2cfec43a4eb08bed7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/onboarding-humano.test.js",
+      "sha256": "6f804827472af952f43ace940b8b00a4367f88c6785b5cdcfe5fe53255991836",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/operacao.test.js",
+      "sha256": "367b199c6a43baff0a34a6bc4859fc20892f586c1c77c065d37891eed4a728c5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/providers-unknown.test.js",
+      "sha256": "5b1140b8a22a2dbb54f13be6502d0f4bacc08bc6644c8730a7fb5d412736c982",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/quadro-http.test.js",
+      "sha256": "89593eebc5ce855a1b09bded868fc34f560edff8ed187c06865bcb9509229dc1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/quadro.test.js",
+      "sha256": "93d63651b6a2d166f2f2e3026dae40675d281f9525cc8c7efb8277602362dd54",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/registro-md.test.js",
+      "sha256": "d0dcebc2b7f899ff6b13e6cb042afb047389afe0af482020cb37da4517e69679",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/regras-projeto.test.js",
+      "sha256": "6834a1c138c54413f0d13c0652ea75af4475f61dc9bff432dd1565f5c841ddbb",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/respostas.test.js",
+      "sha256": "4e1768a82396610db12bd7cbd445a0a91c4270e463de5f8c3f08c20e39b613b4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/revisao-respostas.test.js",
+      "sha256": "821c010993ea48afa5cc268e56c672c4ca6f370927f73d2143be89cbbfc4d205",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/revisar-escrita.test.js",
+      "sha256": "a37c11403089b63a8227c29c2d296da3d3362a4c3fd93c6a86a59ab2a7520cbf",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/revisor-cli.test.js",
+      "sha256": "9c06ca1176e00bd552aa677d773e12424f153dc76120f7d26efa066814f131ba",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/revisor-operacao.test.js",
+      "sha256": "0d32e247de24816ff056e9768467fbedf39939a9ae9018d6c7723ab1c210dc03",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/rodada-lote.test.js",
+      "sha256": "c61ad27fa312ad277a40335146b71b58b02e03343ed119e653231318bb41cb66",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/salario.test.js",
+      "sha256": "abe281d91377bc4af797e2408bbfbb1dcd72cfd98a50f69127ee75b191c11a78",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/score.test.js",
+      "sha256": "2af66b651f31a484e42efc023393cc0967b435410c24591dc0cf13b9b2050c83",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/semantico.test.js",
+      "sha256": "8e16dfa37099468785d7374a7f2a22e51a8cc1f85ae551f66dcc5fd636ccbbc4",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/senioridade.test.js",
+      "sha256": "6395ad1ffe66936e1f4249b09390aea82fcb2e888657e74c1d81fa63cd63dcd7",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/sincronizar-fontes.test.js",
+      "sha256": "3aa866b404530c7d43ab40fa81d4fe38743c7be39f72c1c242302f86faf8fcb5",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/upgrade-release.test.js",
+      "sha256": "2ebd3546c88f852a5a465befe5c5f146463c09cc15776ae88a8b1266ac0506e1",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/uxjobs-security.test.js",
+      "sha256": "630d8f12489a262c6a5fdfe273b790bd2506b25d8d4d67a76d3b01c418b96527",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/uxjobs.test.js",
+      "sha256": "47ac564b86977f125b6a06a9bc21cbabb60e8a585106d440541b538997224f3d",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/uxremotetalent.test.js",
+      "sha256": "38e73586a2e234a61cee8cdcf25783a07dadb72d16ca719db22da5504fe58140",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/verificar-envio.test.js",
+      "sha256": "8e746bad3e3c5b4e1eb45b7524ad791ca42fa764f96df8186107bf743161c429",
+      "mode": "0o644"
+    },
+    {
+      "path": "vagas/test/versao-git.test.js",
+      "sha256": "b6b690d6b2333dad69ade5726213cf35715e2fc960ec83c0c512c7537a8e3932",
+      "mode": "0o644"
+    }
+  ]
+}
