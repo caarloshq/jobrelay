@@ -62,7 +62,7 @@ class GateNota(unittest.TestCase):
     def setUpClass(cls):
         cls.dir = tempfile.mkdtemp()
         cls.pdf = os.path.join(cls.dir, "cv.pdf")
-        cls.content = str(AQUI / "base_content_pt.json")
+        cls.content = str(AQUI.parents[1] / "core/config/modelos/curriculo/modelo-base-content_pt.json")
         subprocess.run([sys.executable, str(AQUI / "generate_resume.py"), cls.content, cls.pdf],
                        check=True, capture_output=True)
 
