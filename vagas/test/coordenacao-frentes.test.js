@@ -1,13 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {planejarFrentes,CoordenadorFrentes,executarFrentes,PERGUNTA_COLETA2} from '../src/coordenacao-frentes.js';
-const op={frentes:['coleta','aplicacao'],modoCandidatura:'chrome_assistido',capacidade:4};
+const op={frentes:['coleta','aplicacao'],modoCandidatura:'chrome_assistido',autorizadoCandidatura:true,capacidade:4};
 const recibo={localConfirmado:true,destinoConfirmado:true,arquivosOrganizados:true,provaRef:'fixture:releitura-local-e-destino'};
 const sim={decisao:'sim',provaRef:'fixture:aceite-da-pessoa'};
 const nao={decisao:'nao',provaRef:'fixture:recusa-da-pessoa'};
-test('seleção isolada e mapear não iniciam outra frente',()=>{
+test('aplicação exige modo assistido e opt-in explícito do perfil',()=>{
  assert.deepEqual(planejarFrentes({frentes:['aplicacao']}).ativas,[]);
  assert.deepEqual(planejarFrentes({...op,frentes:['aplicacao']}).ativas,['aplicacao']);
+ assert.deepEqual(planejarFrentes({...op,frentes:['aplicacao'],autorizadoCandidatura:false}).ativas,[]);
+ assert.deepEqual(planejarFrentes({...op,frentes:['aplicacao'],modoCandidatura:'mapear'}).ativas,[]);
  assert.equal(planejarFrentes(op).paralelo,false);
 });
 test('ordem da rodada: coleta principal antes da aplicação, e a coleta 2 só existe com a frente de coleta',()=>{
@@ -19,26 +21,25 @@ test('ordem da rodada: coleta principal antes da aplicação, e a coleta 2 só e
  assert.equal(planejarFrentes({...op,frentes:['coleta']}).coleta2.exigeAceite,true);
  assert.throws(()=>planejarFrentes({...op,origem:'robo'}),/ORIGEM_INVALIDA/);
 });
-test('ciclo completo: coleta, aplicação, pergunta, coleta 2, pergunta de aplicar, aplicação das novas',async()=>{
+test('ciclo completo: aceite da coleta 2 segue direto à aplicação autorizada das novas',async()=>{
  const eventos=[];
  const r=await executarFrentes(op,{
   coletar:async c=>{eventos.push(c.etapa);return recibo;},
   aplicar:async c=>{assert.equal(c.somenteFilaConfirmada,true);assert.equal(c.coletaEncerrada(),true);eventos.push(c.etapa);},
   perguntarColeta2:async c=>{eventos.push(c.etapa);return sim;},
   coletar2:async c=>{eventos.push(c.etapa);return {...recibo,novasCompativeis:2};},
-  perguntarAplicarNovas:async (c,n)=>{assert.equal(n,2);eventos.push(c.etapa);return sim;},
   aplicarNovasColeta2:async c=>{eventos.push(c.etapa);},
  });
- assert.deepEqual(eventos,['coleta','retomadas_e_novas_confirmadas','pergunta_coleta2','coleta2','pergunta_aplicar_novas','novas_da_coleta2']);
+ assert.deepEqual(eventos,['coleta','retomadas_e_novas_confirmadas','pergunta_coleta2','coleta2','novas_da_coleta2']);
  assert.ok(r.resultados.every(x=>x.status==='fulfilled'));
- assert.deepEqual(r.coleta2,{estado:'encerrada',aceiteRef:sim.provaRef});
+ assert.deepEqual(r.coleta2,{estado:'encerrada',aceiteRef:sim.provaRef,aplicacaoIniciada:true});
 });
-test('não aplicar agora: as vagas da coleta 2 ficam para a próxima rodada',async()=>{
+test('sem opt-in de candidatura, coleta 2 termina e deixa vagas na fila',async()=>{
  const eventos=[];
- const r=await executarFrentes(op,{coletar:async()=>recibo,aplicar:async()=>{eventos.push('aplicar');},perguntarColeta2:async()=>sim,coletar2:async()=>({...recibo,novasCompativeis:3}),
-  perguntarAplicarNovas:async()=>nao,aplicarNovasColeta2:async()=>{eventos.push('novas');}});
- assert.deepEqual(eventos,['aplicar']);
- assert.equal(r.coleta2.novasAdiadas,true);
+ const r=await executarFrentes({...op,autorizadoCandidatura:false},{coletar:async()=>recibo,aplicar:async()=>{eventos.push('aplicar');},perguntarColeta2:async()=>sim,coletar2:async()=>({...recibo,novasCompativeis:3}),
+  aplicarNovasColeta2:async()=>{eventos.push('novas');}});
+ assert.deepEqual(eventos,[]);
+ assert.equal(r.coleta2.novasMantidasNaFila,true);
 });
 test('sem resposta, resposta não ou sim sem prova: a coleta 2 nunca roda',async()=>{
  for(const [perguntar,esperado] of [[undefined,'sem_resposta'],[async()=>nao,'recusada'],[async()=>({decisao:'sim'}),'sem_resposta'],[async()=>({decisao:'sim',provaRef:' '}),'sem_resposta'],[async()=>null,'sem_resposta'],[async()=>{throw new Error('x');},'sem_resposta'],[async()=>'sim','sem_resposta']]){
@@ -72,12 +73,12 @@ test('LinkedIn desligado ou janela feita: dispensada antes de qualquer pergunta,
   assert.equal(perguntou,false);assert.deepEqual(r.coleta2,{estado:'dispensada',motivo:'linkedin_desligado'});
  }
 });
-test('sem aplicação (só coleta, ou modo mapear): a pergunta vem logo depois da coleta e não há segunda pergunta',async()=>{
+test('sem aplicação configurada: coleta 2 termina e mantém as novas na fila sem a segunda passagem',async()=>{
  for(const opcoes of [{...op,frentes:['coleta']},{...op,modoCandidatura:'mapear'}]){
-  const eventos=[];let perguntouAplicar=false;
+  const eventos=[];
   const r=await executarFrentes(opcoes,{coletar:async c=>{eventos.push(c.etapa);return recibo;},perguntarColeta2:async c=>{eventos.push(c.etapa);return sim;},coletar2:async c=>{eventos.push(c.etapa);return recibo;},
-   perguntarAplicarNovas:async()=>{perguntouAplicar=true;return sim;},aplicarNovasColeta2:async()=>{}});
-  assert.deepEqual(eventos,['coleta','pergunta_coleta2','coleta2']);assert.equal(perguntouAplicar,false);assert.equal(r.coleta2.estado,'encerrada');
+   aplicarNovasColeta2:async()=>{eventos.push('novas_da_coleta2');}});
+  assert.deepEqual(eventos,['coleta','pergunta_coleta2','coleta2']);assert.equal(r.coleta2.estado,'encerrada');
  }
 });
 test('aplicação isolada não tem coleta 2',async()=>{

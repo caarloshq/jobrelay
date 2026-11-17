@@ -1,13 +1,13 @@
 import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdtempSync, realpathSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 // O quadro grava em DIR_DADOS. Para nao tocar no quadro de verdade, a pasta e
 // trocada por uma temporaria ANTES de importar qualquer modulo (config.js le a
 // variavel uma vez, na importacao). Cada teste comeca com a pasta vazia.
-const dir = mkdtempSync(join(tmpdir(), 'quadro-'));
+const dir = mkdtempSync(join(realpathSync(tmpdir()), 'quadro-'));
 process.env.VAGAS_DIR_DADOS = dir;
 const quadro = await import('../src/quadro.js');
 const arquivo = await import('../src/arquivo.js');

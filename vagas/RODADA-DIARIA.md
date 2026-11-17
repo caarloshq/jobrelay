@@ -1,6 +1,6 @@
 # Rodada diária — ciclo completo
 
-Leia o [fluxo vigente da rodada](FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura, pergunta da coleta 2 depois da aplicação e melhorias opcionais somente depois dela. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
+Leia o [fluxo vigente da rodada](FLUXO-DA-RODADA.md): regras no início, confirmação de atualização, coleta salva/conferida antes de aplicar, revisor por candidatura, pergunta da coleta 2 depois da aplicação e aplicação automática das novas somente quando modo e opt-in desta instalação estão ativos. Melhorias opcionais vêm somente depois da fila. O fluxo governa a sequência; este documento conserva os procedimentos especializados.
 
 Este é o ponto de entrada da tarefa agendada. A tarefa não contém lógica: ela aponta para este arquivo. A instalação pode executar o ciclo completo ou chamar cada frente de modo independente.
 

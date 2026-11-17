@@ -50,7 +50,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 2. **Mercado antes do currículo.** A resposta de nacional, internacional ou ambos (e qual prioriza) decide o idioma do currículo base, as fontes e a moeda. Sem ela, não monte o `base_content`.
 3. **Currículo vem do material, nunca da sua cabeça.** A pessoa coloca PDF ou ZIP em `Skills/adapt-resume/materiais-fonte/`; rode `npm run onboarding -- --extrair` e leia os `*.extraido.*`. Cada frase do `base_content` tem que ser rastreável a um trecho ou a uma resposta dela. Se não tem material, entreviste até ter. A skill dona disso é [`Skills/adapt-resume/SKILL.md`](Skills/adapt-resume/SKILL.md), seção "Montando a base pela primeira vez".
 4. **Nunca peça o token da Apify.** Diga onde pegar e onde colar (`vagas/.env.example`). Token não passa pelo chat.
-5. **Candidatura automática fica desligada** até a pessoa preencher `aplicacao/PERFIL.md` e marcar `autorizado: true`. Enquanto for `false`, você não abre navegador pra preencher nem enviar formulário. Sem exceção.
+5. **Candidatura automática fica desligada** até a pessoa selecionar `modoCandidatura: "chrome_assistido"` em `vagas/data/politica-autonomia.json` e marcar `autorizado: true` em `vagas/config/perfil-candidatura.json`. Ambos são necessários. Enquanto qualquer um estiver desligado, você não abre navegador para preencher nem enviar formulário. Sem exceção.
 6. **Feche com `npm run onboarding -- --concluir`.** Ele recusa se faltar bloco.
 
 ## Depois do onboarding

@@ -1,3 +1,4 @@
+import { executar as executarFeed } from '../src/linkedin-feed-sessao.js';
 // Spec 015: coleta 2 (LinkedIn assistido) depois da aplicação, no controle da rodada.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,15 +11,31 @@ import { operarLote, planejarLote, resumoColeta, resumoAplicacao, resumoColeta2F
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const H = 'a'.repeat(64), J = 'b'.repeat(64);
 const CAPTURA = { estado: 'encerrada', provaRef: 'fixture:captura', integracaoRef: 'fixture:quadro-conferido', arquivosRef: 'fixture:arquivos' };
+const RUN_ID = '11111111-1111-4111-8111-111111111111';
 
-function fixture(t, { ids = [], frentes = ['coleta', 'aplicacao'], coleta2Habilitada = true, origem } = {}) {
+function fixture(t, { ids = [], frentes = ['coleta', 'aplicacao'], coleta2Habilitada = true, origem, autorizadoCandidatura = true, modoCandidatura = 'chrome_assistido' } = {}) {
   const dados = fs.mkdtempSync(path.join(raiz, 'data', 'rodada-lote-c2-test-'));
   t.after(() => fs.rmSync(dados, { force: true, recursive: true }));
   let atual = [...ids];
-  const deps = { consultarFila: () => ({ ids: atual, provaRef: 'fixture:consulta-atual' }), gateEnvio: () => ({ aceito: true, provaRef: 'fixture:gate' }) };
+  const deps = { modoCandidatura, autorizadoCandidatura, consultarFila: () => ({ ids: atual, provaRef: 'fixture:consulta-atual' }), gateEnvio: () => ({ aceito: true, provaRef: 'fixture:gate' }) };
   const inicial = operarLote(dados, 'iniciar', { frentes, coleta2Habilitada, ...(origem ? { origem } : {}), leituraRegrasRef: 'fixture:regras', filaInicial: { ids, provaRef: 'fixture:fila-inicial' } });
   const fazer = (acao, args = {}) => operarLote(dados, acao, { rodadaId: inicial.rodadaId, ...args }, deps);
-  return { dados, deps, fazer, fila: novo => { atual = novo; }, plano: () => planejarLote(dados, deps), arquivo: () => JSON.parse(fs.readFileSync(path.join(dados, 'rodada-lote.json'), 'utf8')) };
+  return { dados, deps, fazer, fila: novo => { atual = novo; }, filaAtual: () => [...atual], plano: () => planejarLote(dados, deps), arquivo: () => JSON.parse(fs.readFileSync(path.join(dados, 'rodada-lote.json'), 'utf8')) };
+}
+function relatorioIntegracao(f, ids, ajustes = {}) {
+  const { relatorioRunId, ...camposRelatorio } = ajustes;
+  const runId = RUN_ID;
+  const diretorio = path.join(f.dados, 'linkedin-feed', runId);
+  fs.mkdirSync(diretorio, { recursive: true });
+  const relatorioPath = path.join(diretorio, 'integracao.json');
+  const relatorio = { runId: relatorioRunId || runId, concluida: true, confirmadas: ids.map(idExterno => ({ idExterno, referencia: 'fixture:confirmada', status: 'Aplicar' })), pendentes: [], falhas: [], triagemPendente: 0, ...camposRelatorio };
+  fs.writeFileSync(relatorioPath, JSON.stringify(relatorio));
+  return { runId, relatorioPath };
+}
+function capturarColeta2(f, ids = f.filaAtual(), args = {}) {
+  const integracao = relatorioIntegracao(f, ids, args.relatorio || {});
+  return f.fazer('coleta2_captura', { ...CAPTURA, runId: integracao.runId, integracaoRef: integracao.relatorioPath,
+    ...(args.provaRef ? { provaRef: args.provaRef } : {}) });
 }
 function enviar(f, id) {
   const h = f.fazer('fixar', { id, autor: 'aplicador-a', pacoteHash: H, fontes: [{ ref: 'fixture:fonte', hash: J }], observacaoAlvoRef: 'fixture:form' }).vaga.pacote.hash;
@@ -26,7 +43,7 @@ function enviar(f, id) {
   f.fazer('liberar_envio', { id, pacoteHash: h });
   f.fazer('confirmar_envio', { id, pacoteHash: h, provaRef: 'fixture:recibo' });
 }
-const decidir = (f, decisao, extra = {}) => f.fazer('coleta2_decidir', { decisao, provaRef: `fixture:${decisao}`, ...extra });
+const decidir = (f, decisao, extra = {}) => f.fazer('coleta2_decidir', { decisao, provaRef: `fixture:${decisao}`, ...(decisao === 'aceita' ? { feedRunId: RUN_ID } : {}), ...extra });
 
 test('a pergunta só é devida com a coleta principal encerrada e a aplicação terminada', t => {
   const f = fixture(t, { ids: ['ats:A'] });
@@ -41,6 +58,24 @@ test('a pergunta só é devida com a coleta principal encerrada e a aplicação 
   enviar(f, 'ats:A');
   assert.equal(f.plano().podeOferecerColeta2, true);
   assert.equal(f.plano().coleta2.motivoPendente, null);
+});
+
+test('fila inicial não bloqueia coleta 2 quando modo ou opt-in deixam aplicação inativa', t => {
+  for (const controles of [{ modoCandidatura: 'mapear' }, { autorizadoCandidatura: false }]) {
+    const f = fixture(t, { ids: ['ats:INICIAL'], ...controles });
+    f.fazer('captura', CAPTURA);
+    const p = f.plano();
+    assert.deepEqual(p.naoPercorridas, []);
+    assert.equal(p.podeAplicar, false);
+    assert.equal(p.podeOferecerColeta2, true);
+    assert.equal(p.coleta2.motivoPendente, null);
+    decidir(f, 'aceita');
+    f.fila(['ats:INICIAL', 'li:NOVA']);
+    capturarColeta2(f);
+    assert.equal(f.plano().podeEncerrar, true);
+    assert.deepEqual(['ats:INICIAL', 'li:NOVA'].map(i => f.arquivo().vagas[i].estado), ['nao_percorrida', 'nao_percorrida']);
+    assert.throws(() => f.fazer('atualizar', { id: 'ats:INICIAL', estado: 'preparando', provaRef: 'fixture:sem-optin' }), /APLICACAO_NAO_AUTORIZADA/);
+  }
 });
 
 test('pendência (bloqueada ou aguardando pessoa) conta como aplicação terminada; preparando e liberada não', t => {
@@ -121,39 +156,102 @@ test('janela de hoje já feita: dispensada só com o motivo permitido', t => {
   assert.equal(f.plano().podeEncerrar, true);
 });
 
-test('sim, coleta 2 grava vagas novas com origem própria; sem decisão sobre elas a rodada não fecha', t => {
+test('aceite da coleta 2 grava novas elegíveis e habilita a passagem quando a aplicação está autorizada', t => {
   const f = fixture(t, { ids: ['ats:A'] });
   f.fazer('captura', CAPTURA);
   enviar(f, 'ats:A');
   decidir(f, 'aceita');
+  assert.deepEqual(f.arquivo().coleta2.filaAntes.ids, ['ats:A']);
   assert.equal(f.plano().podeEncerrar, false);
   assert.throws(() => f.fazer('coleta2_captura', { estado: 'encerrada', provaRef: 'fixture:janela', integracaoRef: 'fixture:i' }), /PROVA_ARQUIVOS_OBRIGATORIA/);
   f.fila(['ats:A', 'li:1', 'li:2']);
-  f.fazer('coleta2_captura', { ...CAPTURA, provaRef: 'fixture:janela' });
+  capturarColeta2(f, f.filaAtual(), { provaRef: 'fixture:janela' });
   const p = f.plano();
   assert.deepEqual(p.novasColeta2, ['li:1', 'li:2']);
   assert.equal(p.coleta2.estado, 'encerrada');
   assert.deepEqual(p.naoPercorridas, ['li:1', 'li:2']);
+  assert.equal(p.podeAplicar, true);
   assert.equal(p.podePerguntar, false);
   assert.equal(p.podeEncerrar, false);
   assert.equal(f.arquivo().vagas['li:1'].origem, 'coleta2');
+  assert.deepEqual(f.arquivo().coleta2.idsIntegrados, ['li:1', 'li:2']);
+  assert.equal(f.arquivo().coleta2.integracaoRunId, RUN_ID);
 });
 
-test('não aplicar agora: adiar tira as vagas da coleta 2 de todas as listas e a rodada fecha', t => {
+test('coleta 2 integra só o delta do relatório local e preserva IDs ausentes do relatório', t => {
   const f = fixture(t, { ids: [] });
   f.fazer('captura', CAPTURA);
   decidir(f, 'aceita');
+  assert.deepEqual(f.arquivo().coleta2.filaAntes.ids, []);
   f.fila(['li:1', 'li:2']);
-  f.fazer('coleta2_captura', CAPTURA);
+  const resultado = capturarColeta2(f, ['li:1']);
+  assert.deepEqual(resultado.coleta2, { runId: RUN_ID, novasIntegradas: 1 });
+  assert.deepEqual(f.plano().novasColeta2, ['li:1']);
+  assert.equal(f.arquivo().vagas['li:1'].origem, 'coleta2');
+  assert.equal(f.arquivo().vagas['li:2'], undefined);
+});
+
+test('coleta 2 recusa run de integração diferente do run vinculado ao aceite', t => {
+  const f = fixture(t, { ids: [] });
+  f.fazer('captura', CAPTURA);
+  decidir(f, 'aceita', { feedRunId: '22222222-2222-4222-8222-222222222222' });
+  f.fila(['li:1']);
+  assert.throws(() => capturarColeta2(f, ['li:1']), /RUN_COLETA2_DIVERGENTE_DO_ACEITE/);
+  assert.equal(f.arquivo().coleta2.idsIntegrados, undefined);
+});
+
+test('coleta 2 recusa relatório local ausente, divergente, incompleto ou vaga delta fora da fila', t => {
+  const preparar = t => {
+    const f = fixture(t, { ids: [] });
+    f.fazer('captura', CAPTURA);
+    decidir(f, 'aceita');
+    return f;
+  };
+  const ausente = preparar(t);
+  const caminhoAusente = path.join(ausente.dados, 'linkedin-feed', RUN_ID, 'integracao.json');
+  assert.throws(() => ausente.fazer('coleta2_captura', { ...CAPTURA, runId: RUN_ID, integracaoRef: caminhoAusente }), /INTEGRACAO_COLETA2_NAO_CONCLUIDA/);
+  for (const ajuste of [
+    { relatorioRunId: '22222222-2222-4222-8222-222222222222' },
+    { concluida: false },
+    { pendentes: ['li:1'] },
+    { falhas: [{ idExterno: 'li:1', erro: 'fixture' }] },
+  ]) {
+    const f = preparar(t);
+    f.fila(['li:1']);
+    assert.throws(() => capturarColeta2(f, ['li:1'], { relatorio: ajuste }), /INTEGRACAO_COLETA2_NAO_CONCLUIDA/);
+  }
+  const fora = preparar(t);
+  fora.fila([]);
+  assert.throws(() => capturarColeta2(fora, ['li:1']), /NOVA_COLETA2_FORA_DA_FILA/);
+});
+
+test('sem aplicação autorizada, a coleta 2 fecha a rodada e retoma as novas no próximo opt-in', t => {
+  const f = fixture(t, { ids: [], autorizadoCandidatura: false });
+  f.fazer('captura', CAPTURA);
+  decidir(f, 'aceita');
+  f.fila(['li:1', 'li:2']);
+  capturarColeta2(f);
   assert.equal(f.plano().podeAplicar, false);
-  f.fazer('adiar', { provaRef: 'fixture:nao-agora' });
   const p = f.plano();
-  assert.deepEqual([p.naoPercorridas, p.ordemAplicacao, p.podeAplicar, p.podePerguntar], [[], [], false, true]);
-  assert.equal(p.coleta2.adiadas, 2);
+  assert.deepEqual(p.naoPercorridas, []);
+  assert.deepEqual(p.ordemAplicacao, []);
+  assert.equal(p.podeAplicar, false);
+  assert.equal(p.podePerguntar, true);
   assert.equal(p.podeEncerrar, true);
-  for (const acao of ['atualizar', 'fixar']) assert.throws(() => f.fazer(acao, { id: 'li:1', estado: 'preparando', provaRef: 'fixture:x' }), /VAGA_ADIADA/);
-  f.fazer('encerrar', { provaRef: 'fixture:fim' });
-  assert.equal(f.arquivo().vagas['li:1'].estado, 'adiada');
+  assert.deepEqual(p.novasColeta2, ['li:1', 'li:2']);
+  assert.deepEqual(['li:1', 'li:2'].map(i => f.arquivo().vagas[i].estado), ['nao_percorrida', 'nao_percorrida']);
+  assert.throws(() => f.fazer('atualizar', { id: 'li:1', estado: 'preparando', provaRef: 'fixture:x' }), /APLICAR_NOVAS_NAO_AUTORIZADO/);
+  f.fazer('encerrar', { provaRef: 'fixture:fechou-sem-aplicacao' });
+
+  f.deps.modoCandidatura = 'chrome_assistido';
+  f.deps.autorizadoCandidatura = true;
+  const nova = operarLote(f.dados, 'iniciar', { frentes: ['aplicacao'], leituraRegrasRef: 'fixture:regras-segunda-rodada',
+    filaInicial: { ids: ['li:1', 'li:2'], provaRef: 'fixture:releitura-fila-apos-optin' } }, f.deps);
+  const retomada = planejarLote(f.dados, f.deps);
+  assert.equal(retomada.rodadaId, nova.rodadaId);
+  assert.deepEqual(retomada.ordemAplicacao.map(v => v.id), ['li:1', 'li:2']);
+  assert.deepEqual(['li:1', 'li:2'].map(i => f.arquivo().vagas[i].estado), ['nao_percorrida', 'nao_percorrida']);
+  assert.deepEqual(['li:1', 'li:2'].map(i => f.arquivo().vagas[i].origem), ['filaInicial', 'filaInicial']);
 });
 
 test('agendada: integração pendente de outro dia entra sem pergunta, e as vagas ficam para a próxima rodada', t => {
@@ -167,6 +265,8 @@ test('agendada: integração pendente de outro dia entra sem pergunta, e as vaga
   assert.equal(f.plano().coleta2.estado, 'encerrada');
   assert.equal(f.plano().coleta2.motivo, 'so_integracao');
   assert.deepEqual(f.plano().novasColeta2, ['li:9']);
+  assert.equal(f.arquivo().coleta2.aceiteRef, undefined);
+  assert.throws(() => f.fazer('aplicar_novas'), /ACEITE_COLETA2_AUSENTE/);
   assert.throws(() => f.fazer('coleta2_integrar', { provaRef: 'x', integracaoRef: 'y', arquivosRef: 'z' }), /COLETA2_NAO_PENDENTE/);
   f.fazer('adiar', { provaRef: 'fixture:ninguem-para-responder' });
   assert.equal(f.plano().podeEncerrar, true);
@@ -186,17 +286,16 @@ test('rodada agendada só aceita sem resposta (ou janela já feita), nunca recus
   assert.equal(f.plano().podeEncerrar, true);
 });
 
-test('sim, aplicar agora: segunda passagem só nas vagas da coleta 2, com perguntas reabertas', t => {
+test('aceite da coleta 2 autoriza segunda passagem só nas novas, sem outro aceite', t => {
   const f = fixture(t, { ids: ['ats:A'] });
   f.fazer('captura', CAPTURA);
   enviar(f, 'ats:A');
   decidir(f, 'aceita');
   f.fila(['ats:A', 'li:1']);
-  f.fazer('coleta2_captura', CAPTURA);
-  assert.deepEqual(f.plano().ordemAplicacao, []);
-  assert.throws(() => f.fazer('atualizar', { id: 'li:1', estado: 'preparando', provaRef: 'fixture:sem-sim' }), /APLICAR_NOVAS_NAO_AUTORIZADO/);
-  f.fazer('aplicar_novas', { provaRef: 'fixture:sim-segunda-pergunta' });
+  capturarColeta2(f);
+  assert.equal(f.arquivo().coleta2.aplicarNovas.provaRef, 'fixture:aceita');
   assert.throws(() => f.fazer('adiar', { provaRef: 'fixture:volta-atras' }), /NOVAS_JA_AUTORIZADAS/);
+  assert.deepEqual(f.plano().ordemAplicacao.map(v => v.id), ['li:1']);
   assert.deepEqual(f.plano().ordemAplicacao.map(v => v.id), ['li:1']);
   f.fazer('atualizar', { id: 'li:1', estado: 'aguardando_pessoa', provaRef: 'fixture:pergunta-nova' });
   assert.equal(f.plano().podePerguntar, true);
@@ -207,14 +306,28 @@ test('sim, aplicar agora: segunda passagem só nas vagas da coleta 2, com pergun
   assert.equal(f.plano().podeEncerrar, true);
 });
 
-test('adiar exige coleta 2 encerrada e só atinge vagas de origem coleta2', t => {
+test('sem opt-in ou sem modo assistido, novas da coleta 2 permanecem fora da aplicação', t => {
+  for (const auth of [{ autorizadoCandidatura: false }, { modoCandidatura: 'mapear' }]) {
+    const f = fixture(t, { ids: ['ats:A'] });
+    f.fazer('captura', CAPTURA);
+    enviar(f, 'ats:A');
+    Object.assign(f.deps, auth);
+    decidir(f, 'aceita');
+    f.fila(['ats:A', 'li:1']);
+    capturarColeta2(f);
+    assert.deepEqual(f.plano().ordemAplicacao, []);
+    assert.throws(() => f.fazer('aplicar_novas'), /APLICACAO_NAO_AUTORIZADA/);
+  }
+});
+
+test('adiar exige coleta 2 encerrada e só pode remover vagas quando não houve autorização de aplicação', t => {
   const f = fixture(t, { ids: ['ats:A'] });
   f.fazer('captura', CAPTURA);
   assert.throws(() => f.fazer('adiar', { provaRef: 'fixture:x' }), /COLETA2_NAO_ENCERRADA/);
   enviar(f, 'ats:A');
   decidir(f, 'aceita');
-  f.fazer('coleta2_captura', CAPTURA);
-  f.fazer('adiar', { provaRef: 'fixture:x' });
+  capturarColeta2(f);
+  assert.throws(() => f.fazer('adiar', { provaRef: 'fixture:x' }), /NOVAS_JA_AUTORIZADAS/);
   assert.equal(f.arquivo().vagas['ats:A'].estado, 'enviada');
 });
 
@@ -225,9 +338,11 @@ test('coleta 2 impedida pede a ação, conta como resolvida e pode voltar a ence
   assert.throws(() => f.fazer('coleta2_captura', { estado: 'impedida', provaRef: 'fixture:login' }), /ACAO_NECESSARIA_OBRIGATORIA/);
   f.fazer('coleta2_captura', { estado: 'impedida', provaRef: 'fixture:login', acaoRef: 'fixture:entrar-no-linkedin' });
   assert.equal(f.plano().coleta2.estado, 'impedida');
+  assert.equal(f.arquivo().coleta2.aceiteRef, 'fixture:aceita');
   assert.equal(f.plano().podeEncerrar, true);
-  f.fazer('coleta2_captura', CAPTURA);
+  capturarColeta2(f);
   assert.equal(f.plano().coleta2.estado, 'encerrada');
+  assert.equal(f.arquivo().coleta2.aplicarNovas.provaRef, 'fixture:aceita');
 });
 
 test('lote anterior à spec 015 é lido como dispensada e segue funcionando', t => {
@@ -248,6 +363,9 @@ test('textos de resumo da coleta 2 e da segunda passagem, sem travessão', () =>
   assert.match(resumoColeta({ fase: 'coleta2', encontradas: 3, compativeis: 1, descartadas: 0, pendentesGravacao: 2 }), /^Coleta 2 \(LinkedIn assistido\) com gravação pendente ⚠️/);
   assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 2, pendentes: 0, naoEnviadas: 0 }), /^Aplicação das novas da coleta 2 concluída ✅/);
   assert.match(resumoAplicacao({ fase: 'coleta2', total: 2, enviadas: 1, pendentes: 1, naoEnviadas: 0 }), /^Aplicação das novas da coleta 2 encerrada com pendências ⏳/);
+  const resumo = resumoAplicacao({ total: 3, enviadas: 1, pendentes: 1, naoEnviadas: 1 });
+  assert.match(resumo, /⏳ Pendentes \(aguardando você\/site, envio incerto ou impedimento com próxima ação\)/);
+  assert.match(resumo, /🚫 Não enviadas \(encerradas, fora do perfil ou sem próxima ação viável\)/);
   assert.match(resumoColeta({ encontradas: 1, compativeis: 1, descartadas: 0 }), /^Coleta concluída ✅/);
   assert.throws(() => resumoColeta({ fase: 'outra', encontradas: 0, compativeis: 0, descartadas: 0 }), /FASE_INVALIDA/);
   assert.equal(resumoColeta2Fora({ motivo: 'recusada' }), 'Coleta 2 (LinkedIn assistido) ficou de fora ⏭️\n\nVocê escolheu fechar a rodada sem ela.');
@@ -275,4 +393,17 @@ test('CLI imprime o resumo da coleta 2 fora e devolve só o código de erro', ()
   assert.notEqual(ruim.status, 0);
   assert.doesNotMatch(ruim.stderr, /NAO-ECOAR/);
   assert.match(ruim.stderr, /CAMPO_DESCONHECIDO/);
+});
+
+
+test('sessão real gera o run antes de persistir o aceite da coleta 2', t => {
+  const f = fixture(t);
+  f.fazer('captura', CAPTURA);
+  const sessao = executarFeed({ dirDados: f.dados, acao: 'iniciar', dono: 'coletor-teste',
+    fuso: 'America/Sao_Paulo', agora: '2026-11-16T12:00:00.000Z',
+    aceiteRef: 'fixture:aceite-humano', browserLiberadoRef: 'fixture:browser' });
+  assert.equal(sessao.segundosAtivos, 0);
+  f.fazer('coleta2_decidir', { decisao: 'aceita', provaRef: sessao.aceiteRef, feedRunId: sessao.runId });
+  assert.equal(f.arquivo().coleta2.feedRunId, sessao.runId);
+  assert.deepEqual(f.arquivo().coleta2.filaAntes.ids, []);
 });

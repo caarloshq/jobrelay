@@ -147,7 +147,7 @@ Os valores que estão lá são exemplo. O agente pergunta os seus e marca `salar
 
 ## Bloco 6: candidatura automática, desligada
 
-O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e continua desligado até você preencher `aplicacao/PERFIL.md` e marcar `autorizado: true`. Enquanto isso, o agente prepara currículo e rascunho, e a candidatura é sua.
+O projeto sabe preencher formulário de vaga no navegador, com um banco de respostas que você aprova uma a uma. **Isso chega desligado**, e só aplica quando os dois controles desta instalação estão ativos: `vagas/data/politica-autonomia.json#modoCandidatura` em `chrome_assistido` e `vagas/config/perfil-candidatura.json#autorizado: true`. Enquanto qualquer um estiver desligado, o agente prepara currículo e rascunho, e a candidatura é sua.
 
 O agente explica o que é, e pergunta se você quer ligar agora. "Não" é a resposta padrão, e não tem prova: o bloco fecha sozinho.
 
