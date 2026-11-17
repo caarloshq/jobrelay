@@ -1,5 +1,9 @@
 # Contexto atual do JobRelay
 
+## Fechamento documental adicional em 17 de Novembro de 2026
+
+A006 foi encerrada no escopo visual final aprovado; a007 foi arquivada como candidata histórica substituída, sem revalidar ZIP/logs ausentes nem certificar release. Ambas estão em `docs/specs/concluidas/`. A005 permanece pendente da conferência visual interna prevista. Nenhum push ou release.
+
 ## Estado local em 17 de Novembro de 2026
 
 O layout vigente usa `app/`, `core/`, `skills/`, `docs/` e `local/`. A [continuidade da coleta 2](docs/specs/concluidas/008-continuidade-coleta2-optin-publico.md) foi concluída no recorte local (`99bbda7`). O commit `1726812` corrige o envelope JOIN e acrescenta avisos de empresas/ferramentas declaradas fora da base, após revisão independente. Integração Node: 853 aprovados, quatro ignorados, zero falhas. Os avisos não aprovam fatos nem comprovam registro real no quadro. Não houve push ou release. As seções antigas abaixo são registros datados e não substituem os contratos vigentes.
@@ -16,7 +20,7 @@ As [notas para quem usa](docs/releases/v1.5.0.md) estão preparadas. Esta contin
 
 ## Candidata 1.4.0 preparada para revisão
 
-A revisão para lançamento corrigiu a origem das mudanças de status no quadro operacional e o caminho de atualização desde a release estável v1.3.0, preservando as proteções de dados. Metadados e nota estão preparados para 1.4.0. Os commits de correção ficam separados da preparação da versão, sem reescrever histórico publicado. Evidências, testes e limites estão na [spec 007](specs/pendentes/007-release-1.4.0.md); a nota curta fica em [docs/releases/v1.4.0.md](docs/releases/v1.4.0.md).
+A revisão para lançamento corrigiu a origem das mudanças de status no quadro operacional e o caminho de atualização desde a release estável v1.3.0, preservando as proteções de dados. Metadados e nota estão preparados para 1.4.0. Os commits de correção ficam separados da preparação da versão, sem reescrever histórico publicado. Evidências, testes e limites estão na [spec 007](docs/specs/concluidas/007-release-1.4.0.md); a nota curta fica em [docs/releases/v1.4.0.md](docs/releases/v1.4.0.md).
 
 Atualização automática ativa por padrão e confirmação humana obrigatória permanecem critérios da release. O quadro Astro continua experimental e separado da entrada operacional. Nenhuma tag, release ou mudança de visibilidade foi publicada nesta preparação; a estratégia comercial está em uma frente separada. As seções abaixo preservam o registro das rodadas anteriores.
 
@@ -49,7 +53,7 @@ Diagnóstico real do wrapper: dependência instalada localmente, mas Chrome/Chro
 
 ## Tema e quadro local em avaliação, 11 de Novembro
 
-Spec [006](specs/pendentes/006-tema-quadro-onboarding-notion.md), implementação autorizada pela pessoa usuária, sem commit/push. Tema neutro do preset, Montserrat preservada; onboarding só recebeu CSS. Kanban inspirado no Todoist e painel lateral no Midday; busca/tabela/arraste mantidos. API transporta logo/localização/modelo/senioridade quando existem na fonte. Logos ausentes usam iniciais.
+Spec [006](docs/specs/concluidas/006-tema-quadro-onboarding-notion.md), implementação autorizada pela pessoa usuária, sem commit/push. Tema neutro do preset, Montserrat preservada; onboarding só recebeu CSS. Kanban inspirado no Todoist e painel lateral no Midday; busca/tabela/arraste mantidos. API transporta logo/localização/modelo/senioridade quando existem na fonte. Logos ausentes usam iniciais.
 
 Prévia em localhost:4184 usa cópia isolada dos cinco exemplos fictícios em revisoes/tema-2026-11-11/demo-data. A fonte original quadro.json tem dois hard links e a proteção de persistência recusa a leitura; ela não foi alterada nem a proteção contornada. localhost:4181 continua o onboarding original. Vinte testes passaram com TMPDIR dentro do projeto (o caminho macOS /var é symlink e é recusado pela validação). Detector: lista vazia. Conferência com navegador inclui abrir/fechar painel, foco, busca e tabela, sem POST ou preenchimento de onboarding.
 

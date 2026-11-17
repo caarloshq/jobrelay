@@ -43,4 +43,8 @@ No navegador, a cópia isolada com vagas fictícias permitiu alternar tabela, bu
 
 ## Próximo estado
 
-Revisar o ZIP local e as [notas da versão](../../docs/releases/v1.4.0.md), então decidir o lançamento. Publicação e mudança de visibilidade são estados separados desta preparação.
+Revisar o ZIP local e as [notas da versão](../../releases/v1.4.0.md), então decidir o lançamento. Publicação e mudança de visibilidade são estados separados desta preparação.
+
+## Arquivamento histórico em 17 de Novembro de 2026
+
+**Estado: candidata histórica substituída pelas versões posteriores; não é aprovação de release atual.** O commit de preparação `7394827` existe no histórico. O ZIP e os logs originais citados acima não foram localizados nesta auditoria, portanto suas contagens permanecem relatos históricos, sem revalidação. A candidata1.4.0 não será republicada como efeito do objetivo atual. O produto local e seus gates atuais têm registros próprios; publicação remota permanece um estado separado.
