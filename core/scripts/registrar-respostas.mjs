@@ -2,6 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { registrarRespostas, migrarHistorico, raizDoProjeto } from '../src/registro-md.js';
 
+import { garantirFichas } from '../src/migracao-fichas.js';
+import { layout } from '../src/layout.js';
+
 function arquivoEntrada(nome) {
   if (typeof nome !== 'string' || !nome) throw new Error('USO: --arquivo <JSON dentro do projeto>');
   const absoluto = path.resolve(nome);
@@ -32,6 +35,7 @@ try {
     : process.argv.length === 4 && process.argv[2] === '--arquivo'
       ? arquivoEntrada(process.argv[3])
       : (() => { throw new Error('USO: node scripts/registrar-respostas.mjs [--arquivo arquivo.json]'); })();
+  if (!process.env.VAGAS_DIR_DADOS) garantirFichas(layout(raizDoProjeto).dados);
   const resultado = registrarRespostas(JSON.parse(bruto));
   process.stdout.write(`${resultado.registrado ? 'registrado' : resultado.motivo}: ${resultado.campos || 0} campo(s)\n`);
 } catch (erro) {

@@ -7,6 +7,7 @@ import * as cache from './cache.js';
 import { configuracao, carregarFonte } from './fonte-estado.js';
 import { hidratar } from './hidratar.js';
 import { validarEnvio } from './operacao.js';
+import { localizarFicha, usaFichas } from './fichas-vagas.js';
 import { lerPolitica } from './onboarding-autonomia.js';
 
 export function avaliarPrecondicoes({ vaga, card, autorizado, transmissao, fonte = 'local', sincronizadoEm = null, agora = new Date(), modoCandidatura = 'chrome_assistido' }) {
@@ -37,11 +38,18 @@ export function verificarEnvio(idExterno, { agora = new Date() } = {}) {
   const { perfil } = lerFontesInstalacao();
   const fonte = configuracao();
   const estado = carregarFonte();
-  const card = estado.vagas[id];
-  const vaga = hidratar(Object.values(cache.carregar().vagas)).ativas.find(v => v.idExterno === id);
+  const ficha = usaFichas(DIR_DADOS) ? localizarFicha(DIR_DADOS, id)?.ficha : null;
+  const ids = new Set([id, ficha?.id, ...(ficha?.aliases ?? [])].filter(Boolean));
+  const card = ficha?.quadro ?? estado.vagas[id];
+  const vagas = hidratar(Object.values(cache.carregar().vagas)).ativas;
+  const vaga = vagas.find(v => v.idExterno === id) ??
+    vagas.find(v => ids.has(v.idExterno) || ids.has(v.idCanonico));
   let transmissao = false;
   try { validarEnvio(DIR_DADOS, vaga?.idCanonico || id); transmissao = true; }
   catch { /* ausência, envio incerto ou confirmado mantêm o bloqueio */ }
+  if (ficha?.tentativas.length || ficha?.quadro?.historico?.some(item => ['Já apliquei', 'Aplicado por IA', 'Entrevista'].includes(item.para))) {
+    transmissao = false;
+  }
   return { idExterno: id, ...avaliarPrecondicoes({ vaga, card, autorizado: perfil.autorizado,
     transmissao, fonte: fonte.fonte, sincronizadoEm: estado.sincronizadoEm, agora, modoCandidatura: lerPolitica(DIR_DADOS).modoCandidatura }) };
 }

@@ -84,12 +84,12 @@ function caminhoSeguro(caminho, criarDiretorio = false) {
   return absoluto;
 }
 
-export function lerJsonComHash(caminho, inicial) {
+function lerComHash(caminho, inicial, temInicial, interpretar) {
   const absoluto = caminhoSeguro(caminho);
   let anterior;
   try { anterior = fs.lstatSync(absoluto); }
   catch (erro) {
-    if (erro.code === 'ENOENT' && arguments.length >= 2) return { dados: structuredClone(inicial), hash: null };
+    if (erro.code === 'ENOENT' && temInicial) return { dados: structuredClone(inicial), hash: null };
     if (erro.code === 'ENOENT') throw new Error(`ARQUIVO_AUSENTE: ${absoluto}`);
     throw erro;
   }
@@ -105,28 +105,36 @@ export function lerJsonComHash(caminho, inicial) {
     const depois = fs.fstatSync(fd);
     if (depois.size !== bruto.length || depois.ino !== aberto.ino || depois.dev !== aberto.dev) throw new Error(`ARQUIVO_ALTERADO_DURANTE_LEITURA: ${absoluto}`);
     let dados;
-    try { dados = JSON.parse(bruto.toString('utf8')); }
-    catch { throw new Error(`JSON_INVALIDO: ${absoluto}`); }
+    dados = interpretar(bruto.toString('utf8'), absoluto);
     return { dados, hash: crypto.createHash('sha256').update(bruto).digest('hex') };
   } finally {
     if (fd !== undefined) fs.closeSync(fd);
   }
 }
 
+export function lerTextoComHash(caminho, inicial) {
+  return lerComHash(caminho, inicial, arguments.length >= 2, texto => texto);
+}
+
+export function lerJsonComHash(caminho, inicial) {
+  return lerComHash(caminho, inicial, arguments.length >= 2, (texto, arquivo) => {
+    try { return JSON.parse(texto); }
+    catch { throw new Error(`JSON_INVALIDO: ${arquivo}`); }
+  });
+}
+
 export function lerJsonSeguro(caminho, inicial) {
   return (arguments.length >= 2 ? lerJsonComHash(caminho, inicial) : lerJsonComHash(caminho)).dados;
 }
 
-export function gravarJsonAtomico(caminho, valor) {
+export function gravarTextoAtomico(caminho, conteudo) {
   const absoluto = caminhoSeguro(caminho, true);
   const diretorio = path.dirname(absoluto);
   const temporario = path.join(diretorio, `.${path.basename(absoluto)}.${process.pid}.${crypto.randomUUID()}.tmp`);
-  const conteudo = JSON.stringify(valor, null, 2);
-  if (conteudo === undefined) throw new Error('JSON_INVALIDO: valor não serializável');
   let fd;
   try {
     fd = fs.openSync(temporario, 'wx', 0o600);
-    fs.writeFileSync(fd, `${conteudo}\n`, 'utf8');
+    fs.writeFileSync(fd, conteudo, 'utf8');
     fs.fsyncSync(fd);
     fs.closeSync(fd); fd = undefined;
     // Revalidar antes de publicar evita substituir link criado após a checagem inicial.
@@ -139,4 +147,10 @@ export function gravarJsonAtomico(caminho, valor) {
     try { fs.unlinkSync(temporario); } catch (erro) { if (erro.code !== 'ENOENT') throw erro; }
   }
   return absoluto;
+}
+
+export function gravarJsonAtomico(caminho, valor) {
+  const conteudo = JSON.stringify(valor, null, 2);
+  if (conteudo === undefined) throw new Error('JSON_INVALIDO: valor não serializável');
+  return gravarTextoAtomico(caminho, conteudo + '\n');
 }

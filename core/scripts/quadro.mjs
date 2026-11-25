@@ -11,12 +11,15 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { RAIZ, perfil } from '../src/config.js';
+import { garantirFichas } from '../src/migracao-fichas.js';
+import { RAIZ, DIR_DADOS, perfil } from '../src/config.js';
 import * as cache from '../src/cache.js';
 import * as quadro from '../src/quadro.js';
 import { hidratar } from '../src/hidratar.js';
 import { janela, ROTULO, idadeEmDias } from '../src/frescor.js';
 import { resolver as resolverSalario, formatar as formatarSalario } from '../src/salario.js';
+
+if (!process.env.VAGAS_DIR_DADOS) garantirFichas(DIR_DADOS);
 
 const PORTA = Number(process.env.QUADRO_PORTA || 4182);
 const DIR_REPO = join(RAIZ, '..');
@@ -104,7 +107,7 @@ const servidor = createServer((req, res) => {
 
 servidor.listen(PORTA, '127.0.0.1', () => {
   const endereco = `http://localhost:${PORTA}`;
-  console.log(`\nQuadro em ${endereco}\nArrastar o card grava em data/quadro.json. Ctrl+C fecha.\n`);
+  console.log(`\nQuadro em ${endereco}\nArrastar o card atualiza a vaga na fonte local. Ctrl+C fecha.\n`);
   if (process.argv.includes('--sem-navegador')) return;
   const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
   try { spawn(cmd, [endereco], { stdio: 'ignore', detached: true, shell: process.platform === 'win32' }).unref(); } catch { /* abre a mao */ }

@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, copyFileSync, constants } from 'node:fs';
 import { DIR_DADOS } from './config.js';
 import { lerEstado, salvarEstado } from './estado-central.js';
 import { comEscritaCentral } from './operacao.js';
+import { usaFichas } from './fichas-vagas.js';
 import { carregarFonte, exigirLocal } from './fonte-estado.js';
 import { normalizarLink } from './util.js';
 import { chaveAnuncio, chaveRequisicao, idCanonico, requisicoesConflitam } from './dedupe.js';
@@ -215,6 +216,7 @@ export function resumo(dados = carregar()) {
 // API operacional de coleta: não altera carregarFonte/exigirLocal nem a seleção da GUI.
 export function carregarOperacional({ arquivo = ARQ } = {}) {
   const local = lerEstado(arquivo, { versao: 2, sincronizadoEm: null, vagas: {} });
+  if (usaFichas(dirname(arquivo))) return { ...local, conflitosStatus: [] };
   const remoto = lerEstado(join(dirname(arquivo), 'notion.json'), { vagas: {} });
   const vagas = { ...local.vagas };
   const conflitosStatus = [];

@@ -62,7 +62,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 | Preparar e acompanhar candidaturas autorizadas | [`aplicacao/README.md`](docs/aplicacao/README.md) |
 | Porta curta para percorrer a fila de candidaturas | [`Skills/apply-jobs/SKILL.md`](skills/apply-jobs/SKILL.md); o procedimento dono continua em `aplicacao/README.md` |
 | O ciclo completo da tarefa agendada | [`vagas/RODADA-DIARIA.md`](docs/core/RODADA-DIARIA.md) |
-| O quadro: estado e histórico de cada vaga | `local/data/quadro.json`, escrito só por `core/src/quadro.js`. **Nunca apague nem edite à mão.** Pra mover uma vaga por código: `quadro.mover(id, status, { por: 'agente' })` |
+| O quadro: estado e histórico de cada vaga | No modo local, use `npm run fichas -- mostrar <ID>` para localizar a ficha. Para mover uma vaga por código, use `quadro.mover(id, status, { por: 'agente' })` |
 | Currículo: base, adaptação por vaga, PDF | [`skills/adapt-resume/SKILL.md`](skills/adapt-resume/SKILL.md) |
 | Escrita de resumo, currículo e resposta aberta | [`Skills/review-escrita/SKILL.md`](skills/review-escrita/SKILL.md) |
 | Respostas abertas e pendências | [`aplicacao/RESPOSTAS.md`](local/aplicacao/RESPOSTAS.md) |
@@ -72,7 +72,7 @@ A sua parte é **entrevista**, não formulário: o formulário já pegou os fato
 
 Perguntas abertas usam somente a seção enxuta de `aplicacao/RESPOSTAS.md#arsenal-de-entrevista`, consultada por `npm run respostas -- --consultar-base` em `vagas/`. O banco técnico antigo permanece vazio; não recuperar respostas de backups ou históricos. Os modelos públicos chegam pendentes e não comprovam experiência ou aprovação. Fatos e escolhas continuam no Perfil, e a resposta final exige adaptação e revisão da vaga real.
 
-Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Aplicação](docs/aplicacao/README.md#ações-pessoais-por-vaga). Consultar antes de abrir/preparar novamente; pendência conhecida sem fato novo é pulada e informada no fechamento. O Markdown é a fonte e o comando `npm run pendencias:candidaturas` mantém a projeção. Nenhuma instalação pública recebe os registros do mantenedor.
+Ações pessoais ficam na ficha local ou em `local/aplicacao/PENDENCIAS-CANDIDATURAS.md` no modo Notion, conforme [Aplicação](docs/aplicacao/README.md#ações-pessoais-por-vaga). Consultar antes de abrir/preparar novamente; pendência conhecida sem fato novo é pulada e informada no fechamento. O Markdown é a fonte e o comando `npm run pendencias:candidaturas` mantém a projeção. Nenhuma instalação pública recebe os registros do mantenedor.
 
 ## Duas regras que valem sempre
 
@@ -87,7 +87,7 @@ Ações pessoais ficam em `aplicacao/PENDENCIAS-CANDIDATURAS.md`, conforme [Apli
 
 O onboarding escolhe quadro local ou Notion para vagas e, separadamente, Markdown local ou Markdown local + Notion para respostas; também escolhe só mapeamento ou Chrome assistido e tarefa opcional de quatro em quatro horas. Configuração da instalação e conexões pertencem à própria pessoa; nenhum token deve ser colado no chat. O agente usa `vagas/RODADA-DIARIA.md` como entrada do ciclo e segue os runbooks de coleta e aplicação e cria/atualiza a tarefa de operação no agendador nativo somente quando a pessoa escolher autonomia. Essa tarefa é distinta da checagem de releases, cuja autorização e frequência estão em `ATUALIZAR.md`. Se não houver agendador, entrega o prompt no chat e informa que não criou a tarefa. O processo Node não instala um serviço de agentes nem executa o agendador.
 
-O registro obrigatório do preenchimento é `aplicacao/RESPOSTAS-PREENCHIDAS.md`, escrito pelo maestro/aplicador através de `npm run registrar:respostas` dentro de vagas. Não exigir banco novo por resposta. Nas entradas npm de coleta, atualização estável ocorre antes da importação do código quando as condições seguras permitem; recusa mantém dados e informa o motivo. Notion opcional usa snapshot completo e a conexão do agente; não usa credenciais do mantenedor.
+O maestro/aplicador registra o preenchimento com `npm run registrar:respostas` em `core/`. O registro fica na ficha do quadro local ou em `local/aplicacao/RESPOSTAS-PREENCHIDAS.md` no modo Notion. Não exigir banco novo por resposta. Nas entradas npm de coleta, atualização estável ocorre antes da importação do código quando as condições seguras permitem; recusa mantém dados e informa o motivo. Notion opcional usa snapshot completo e a conexão do agente; não usa credenciais do mantenedor.
 
 
 ## Passagem do HTML ao assistente

@@ -37,5 +37,9 @@ if (!podeIniciarOperacao(resultado)) {
   console.log(JSON.stringify(resultado));
   throw new Error('ATUALIZACAO_PENDENTE: confirme a release específica com atualizar antes de iniciar a operação, ou desative a checagem nas preferências.');
 }
+if (!process.env.VAGAS_DIR_DADOS && fs.existsSync(path.join(raiz, 'core/src/migracao-fichas.js'))) {
+  const { garantirFichas } = await import('../src/migracao-fichas.js');
+  garantirFichas(destinoDados);
+}
 process.argv.splice(2, 1);
 await import(alvos[acao]);

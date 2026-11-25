@@ -1,6 +1,8 @@
 // Pendências pessoais persistentes. O Markdown é a fonte; JSON é projeção reconstruível.
 import fs from 'node:fs';
 import { layout } from './layout.js';
+import { comEscritaCentral } from './operacao.js';
+import { gravarPendenciasFichas, lerFichas, sanearFicha, usaFichas } from './fichas-vagas.js';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
@@ -91,7 +93,21 @@ function validar(p) {
   else if (registro.provaResolucao) throw new Error('PENDENCIA_PROVA_PREMATURA');
   return registro;
 }
-export function lerPendencias(dirDados) {
+export function lerPendencias(dirDados, { comAliases = false } = {}) {
+  if (usaFichas(dirDados)) {
+    return [...lerFichas(dirDados).fichas.values()].flatMap(ficha => ficha.pendencias.map(pendencia => ({
+      ...validar(pendencia),
+      ...(comAliases ? { idsVaga: [ficha.id, ...ficha.aliases] } : {}),
+    })));
+  }
+  return lerPendenciasLegadas(dirDados);
+}
+
+export function validarPendenciasParaFicha(registros) {
+  return registros.map(p => validar(sanearFicha(p)));
+}
+
+export function lerPendenciasLegadas(dirDados) {
   const { markdown } = caminhosPendencias(dirDados);
   if (!arquivoSeguro(markdown)) return [];
   const conteudo = fs.readFileSync(markdown, 'utf8');
@@ -103,6 +119,11 @@ export function lerPendencias(dirDados) {
   return registros;
 }
 export function bloqueiosPendencias(dirDados, idCanonico) {
+  if (usaFichas(dirDados)) {
+    const { fichas } = lerFichas(dirDados);
+    const ficha = fichas.get(idCanonico) ?? [...fichas.values()].find(f => f.aliases.includes(idCanonico));
+    return (ficha?.pendencias ?? []).filter(p => BLOQUEIOS.has(p.estado));
+  }
   return lerPendencias(dirDados).filter(p => p.idCanonico === idCanonico && BLOQUEIOS.has(p.estado));
 }
 function salvar(dirDados, registros) {
@@ -112,12 +133,21 @@ function salvar(dirDados, registros) {
   arquivoSeguro(markdown);
   arquivoSeguro(json);
   const textoMd = CABECALHO + (registros.length ? '\n' + registros.map(p => `\n## ${p.id} · ${p.empresa} · ${p.cargo}\n\nEstado: **${p.estado}** · Ação: ${p.proximaAcao}\n\n\`\`\`json pendencia\n${JSON.stringify(p, null, 2)}\n\`\`\`\n`).join('') : '\nNenhuma pendência registrada.\n');
-  for (const [destino, conteudo] of [[markdown, textoMd], [json, JSON.stringify({ versao: 1, pendencias: registros }, null, 2) + '\n']]) {
-    gravarAtomico(destino, conteudo);
+  if (usaFichas(dirDados)) {
+    gravarPendenciasFichas(dirDados, validarPendenciasParaFicha(registros));
+    return;
   }
+  gravarAtomico(markdown, textoMd);
+  gravarAtomico(json, JSON.stringify({ versao: 1, pendencias: registros }, null, 2) + '\n');
 }
+function comEscritaDaFonte(dirDados, acao) {
+  return usaFichas(dirDados)
+    ? comEscritaCentral(dirDados, acao, [caminhosPendencias(dirDados).json])
+    : comEscritaPendencias(dirDados, acao);
+}
+
 export function registrarPendencias(dirDados, entradas) {
-  return comEscritaPendencias(dirDados, () => registrarSemLock(dirDados, entradas));
+  return comEscritaDaFonte(dirDados, () => registrarSemLock(dirDados, entradas));
 }
 function registrarSemLock(dirDados, entradas) {
   if (!Array.isArray(entradas) || !entradas.length) throw new Error('PENDENCIAS_ENTRADA_INVALIDA');
@@ -137,7 +167,7 @@ function registrarSemLock(dirDados, entradas) {
   return existentes;
 }
 export function atualizarPendencia(dirDados, id, estado, provaResolucao) {
-  return comEscritaPendencias(dirDados, () => atualizarSemLock(dirDados, id, estado, provaResolucao));
+  return comEscritaDaFonte(dirDados, () => atualizarSemLock(dirDados, id, estado, provaResolucao));
 }
 function atualizarSemLock(dirDados, id, estado, provaResolucao) {
   if (!ESTADOS.has(estado)) throw new Error('PENDENCIA_ESTADO_INVALIDO');
@@ -159,7 +189,7 @@ function atualizarSemLock(dirDados, id, estado, provaResolucao) {
 
 
 export function projetarPendencias(dirDados) {
-  return comEscritaPendencias(dirDados, () => {
+  return comEscritaDaFonte(dirDados, () => {
     const registros = lerPendencias(dirDados);
     gravarAtomico(caminhosPendencias(dirDados).json, JSON.stringify({ versao: 1, pendencias: registros }, null, 2) + '\n');
     return registros;

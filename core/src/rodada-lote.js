@@ -4,7 +4,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { lerJsonSeguro, gravarJsonAtomico } from './persistencia.js';
 import { comEscritaCentral } from './operacao.js';
-import { lerPendencias } from './pendencias-candidaturas.js';
+import { lerPendencias, bloqueiosPendencias } from './pendencias-candidaturas.js';
+import { gravarEtapaFicha, lerFichas, usaFichas } from './fichas-vagas.js';
 
 const erro = codigo => { throw new Error(codigo); };
 const texto = (v, codigo) => typeof v === 'string' && v.trim() ? v.trim() : erro(codigo);
@@ -20,15 +21,15 @@ const ler = dir => {
   if (!s.origem) s.origem = 'manual';
   return s;
 };
-function fila(valor) {
+function fila(valor, canonico = entrada => entrada) {
   if (!valor || !Array.isArray(valor.ids)) erro('FILA_ATUAL_OBRIGATORIA');
-  return { ids: [...new Set(valor.ids.map(id))], provaRef: texto(valor.provaRef, 'PROVA_FILA_OBRIGATORIA') };
+  return { ids: [...new Set(valor.ids.map(v => canonico(id(v))))], provaRef: texto(valor.provaRef, 'PROVA_FILA_OBRIGATORIA') };
 }
 function consultar(deps) {
   if (typeof deps.consultarFila !== 'function') erro('CONSULTA_FILA_OBRIGATORIA');
-  return fila(deps.consultarFila());
+  return fila(deps.consultarFila(), deps.canonico);
 }
-function integracaoColeta2(dirDados, args) {
+function integracaoColeta2(dirDados, args, canonico = entrada => entrada) {
   const runId = texto(args.runId, 'RUN_COLETA2_OBRIGATORIO');
   if (!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(runId) || !/^[0-9a-f-]+$/.test(runId)) erro('RUN_COLETA2_INVALIDO');
   const relatorioPath = path.join(path.resolve(dirDados), 'linkedin-feed', runId, 'integracao.json');
@@ -42,10 +43,19 @@ function integracaoColeta2(dirDados, args) {
     return id(item.idExterno);
   });
   if (new Set(ids).size !== ids.length) erro('IDS_INTEGRACAO_COLETA2_DUPLICADOS');
-  return { runId, relatorioPath, ids };
+  // O relatório conserva os IDs recebidos; o lote compara e grava pela ficha.
+  return { runId, relatorioPath, ids, canonicos: [...new Set(ids.map(canonico))] };
 }
-function acrescentar(s, ids, origem, provaRef) {
-  for (const identidade of ids) {
+function identidadeNoLote(s, identidade, canonico) {
+  const chave = canonico(identidade);
+  const correspondencias = Object.keys(s.vagas).filter(i => canonico(i) === chave);
+  if (correspondencias.length > 1) erro('FICHA_FILA_IDENTIDADE_DUPLICADA');
+  return correspondencias[0] ?? chave;
+}
+
+function acrescentar(s, ids, origem, provaRef, canonico) {
+  for (const novoId of ids) {
+    const identidade = identidadeNoLote(s, novoId, canonico);
     if (!Object.hasOwn(s.vagas, identidade)) s.vagas[identidade] = { id: identidade, estado: 'nao_percorrida', origem, provaRef, versao: 0, pacote: null, revisao: null, aceite: null };
     else if (origem === 'filaInicial' && s.vagas[identidade].origem === 'coleta2' && s.vagas[identidade].estado === 'nao_percorrida') {
       // A pessoa pode ativar a aplicação em outra rodada; a leitura atual da fila
@@ -60,22 +70,33 @@ function coletaLiberada(s) {
 }
 // Coleta 2 pendente de uma rodada agendada nunca terá resposta: vale sem_resposta.
 const coleta2Efetiva = s => s.coleta2.estado === 'pendente' && s.origem === 'agendada' ? { ...s.coleta2, estado: 'sem_resposta', provaRef: 'origem:agendada' } : s.coleta2;
-function vagaConfirmada(v, atual) {
-  return ['filaInicial', 'novaConfirmada', 'filaConferida', 'coleta2'].includes(v.origem) && atual.ids.includes(v.id);
+function vagaConfirmada(v, atual, canonico) {
+  return ['filaInicial', 'novaConfirmada', 'filaConferida', 'coleta2'].includes(v.origem) && atual.ids.includes(canonico(v.id));
 }
 function plano(s, atual, dependencias = {}) {
   const pendenciasPessoais = (dependencias.consultarPendencias?.() || []).filter(p => ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado));
-  const bloqueados = new Set(pendenciasPessoais.map(p => p.idCanonico));
-  const desconhecidas = atual.ids.filter(i => !Object.hasOwn(s.vagas, i));
+  const bloqueados = new Set(pendenciasPessoais.flatMap(p => p.idsVaga ?? [p.idCanonico]));
+  const { canonico } = dependencias;
+  // Duas entradas do lote que hoje levam à mesma ficha ficam fora até conferência.
+  const porFicha = new Map();
+  for (const chave of Object.keys(s.vagas)) porFicha.set(canonico(chave), [...(porFicha.get(canonico(chave)) ?? []), chave]);
+  const identidadesAmbiguas = [...porFicha].filter(([, chaves]) => chaves.length > 1).map(([ficha, chaves]) => ({ ficha, ids: chaves }));
+  for (const { ficha, ids } of identidadesAmbiguas) for (const chave of [ficha, ...ids]) bloqueados.add(chave);
+  const conhecidas = new Set(porFicha.keys());
+  const desconhecidas = atual.ids.filter(i => !conhecidas.has(i));
   const vagas = Object.values(s.vagas);
+  // Envio já registrado fecha o preparo; só a vaga liberada neste lote segue para reconciliar o recibo.
+  const envioRegistrado = dependencias.envioRegistrado ?? (() => false);
+  const fechadaPorEnvio = v => v.estado !== 'liberada' && envioRegistrado(v.id);
   const aplicacaoAtiva = s.frentes.includes('aplicacao') && dependencias.modoCandidatura === 'chrome_assistido' && dependencias.autorizadoCandidatura === true;
   const autorizouNovas = Boolean(s.coleta2.aplicarNovas?.provaRef) &&
     aplicacaoAtiva;
   const naoPercorridas = aplicacaoAtiva ? [...new Set([...desconhecidas, ...vagas.filter(v => v.estado === 'nao_percorrida' &&
-    (v.origem !== 'coleta2' || autorizouNovas)).map(v => v.id)])].filter(i => !bloqueados.has(i)) : [];
-  const independentes = aplicacaoAtiva ? vagas.filter(v => ['preparando', 'aguardando_revisao', 'revisada', 'liberada'].includes(v.estado) && !bloqueados.has(v.id)).map(v => ({ id: v.id, estado: v.estado })) : [];
+    (v.origem !== 'coleta2' || autorizouNovas)).map(v => v.id)])].filter(i => !bloqueados.has(i) && !envioRegistrado(i)) : [];
+  const independentes = aplicacaoAtiva ? vagas.filter(v => ['preparando', 'aguardando_revisao', 'revisada', 'liberada'].includes(v.estado) && !bloqueados.has(v.id) && !fechadaPorEnvio(v)).map(v => ({ id: v.id, estado: v.estado })) : [];
   const capturaPendente = !coletaLiberada(s);
-  const acionaveis = aplicacaoAtiva ? vagas.filter(v => !['enviada', 'descartada', 'adiada'].includes(v.estado) && vagaConfirmada(v, atual) && (v.origem !== 'coleta2' || autorizouNovas)) : [];
+  const acionaveis = aplicacaoAtiva ? vagas.filter(v => !['enviada', 'descartada', 'adiada'].includes(v.estado) && !fechadaPorEnvio(v) && vagaConfirmada(v, atual, canonico) && (v.origem !== 'coleta2' || autorizouNovas)) : [];
+  const enviosRegistrados = vagas.filter(v => !['enviada', 'descartada', 'adiada'].includes(v.estado) && fechadaPorEnvio(v)).map(v => v.id);
   const acionaveisSemPendencia = acionaveis.filter(v => !bloqueados.has(v.id));
   const retomadas = acionaveisSemPendencia.filter(v => v.origem === 'filaInicial' || v.estado !== 'nao_percorrida');
   const novasConfirmadas = acionaveisSemPendencia.filter(v => !retomadas.includes(v));
@@ -93,41 +114,63 @@ function plano(s, atual, dependencias = {}) {
   const novasColeta2 = vagas.filter(v => v.origem === 'coleta2' && !['descartada', 'adiada'].includes(v.estado)).map(v => v.id);
   return { rodadaId: s.rodadaId, estado: s.estado, filaAtualRef: atual.provaRef, naoPercorridas, trabalhoIndependente: independentes,
     capturaPendente, podeAplicar: s.estado === 'ativa' && aplicacaoAtiva && acionaveisSemPendencia.length > 0,
-    pendenciasPessoais, resumoPendenciasPessoais: { quantidade: pendenciasPessoais.length }, ordemAplicacao: [...retomadas, ...novasConfirmadas].map(v => ({ id: v.id, estado: v.estado, origem: v.origem })), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta, origem: s.origem, coleta2: { ...coleta2, motivoPendente }, podeOferecerColeta2, novasColeta2, podeEncerrar: fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa' && !bloqueados.has(v.id)).map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
+    pendenciasPessoais, identidadesAmbiguas, enviosRegistrados, resumoPendenciasPessoais: { quantidade: pendenciasPessoais.length }, ordemAplicacao: [...retomadas, ...novasConfirmadas].map(v => ({ id: v.id, estado: v.estado, origem: v.origem })), podePerguntar, perguntas: s.perguntas, fronteiraOperacionalPronta, origem: s.origem, coleta2: { ...coleta2, motivoPendente }, podeOferecerColeta2, novasColeta2, podeEncerrar: fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado !== 'aceita', perguntasPendentes: podePerguntar ? vagas.filter(v => v.estado === 'aguardando_pessoa' && !bloqueados.has(v.id)).map(v => ({ id: v.id, provaRef: v.provaRef })) : [],
     podeOferecerMelhorias: s.estado !== 'encerrada' && aplicacaoAtiva && fronteiraOperacionalPronta && coleta2Resolvida && s.melhorias.estado === 'nao_oferecida', melhorias: s.melhorias, liberadoSubmit: false };
 }
-export function planejarLote(dirDados, dependencias = {}) { return plano(ler(dirDados), consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }); }
+const SITUACOES_APLICADAS = new Set(['Já apliquei', 'Entrevista', 'Aplicado por IA']);
+function contextoLote(dirDados, dependencias) {
+  const aliases = new Map();
+  // Fichas com envio confirmado ou tentativa incerta, por ID principal.
+  const comEnvio = new Set();
+  if (usaFichas(dirDados)) {
+    for (const ficha of lerFichas(dirDados).fichas.values()) {
+      for (const alias of ficha.aliases) aliases.set(alias, ficha.id);
+      if (ficha.tentativas.length || SITUACOES_APLICADAS.has(ficha.quadro?.status)) comEnvio.add(ficha.id);
+    }
+  }
+  const canonico = identidade => aliases.get(identidade) ?? identidade;
+  return { ...dependencias, canonico, envioRegistrado: identidade => comEnvio.has(canonico(identidade)),
+    consultarPendencias: () => lerPendencias(dirDados, { comAliases: true }) };
+}
 
-export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
-  if (acao === 'planejar') return planejarLote(dirDados, dependencias);
+export function planejarLote(dirDados, dependencias = {}) {
+  const contexto = contextoLote(dirDados, dependencias);
+  return plano(ler(dirDados), consultar(contexto), contexto);
+}
+
+export function operarLote(dirDados, acao, args = {}, entradas = {}) {
+  if (acao === 'planejar') return planejarLote(dirDados, entradas);
   const destino = arquivo(dirDados);
   return comEscritaCentral(dirDados, () => {
+    const dependencias = contextoLote(dirDados, entradas);
+    const { canonico } = dependencias;
     let s;
+    let vagaAfetada;
     if (acao === 'iniciar') {
       const anterior = lerJsonSeguro(destino, null);
       if (anterior && (anterior.contrato !== 1 || anterior.estado !== 'encerrada')) erro('LOTE_EXISTENTE');
       const frentes = [...new Set(args.frentes || [])];
       if (!frentes.length || frentes.some(f => !['coleta', 'aplicacao'].includes(f))) erro('FRENTES_INVALIDAS');
-      const inicial = fila(args.filaInicial);
+      const inicial = fila(args.filaInicial, canonico);
       const origem = args.origem === undefined ? 'manual' : ['manual', 'agendada'].includes(args.origem) ? args.origem : erro('ORIGEM_INVALIDA');
       const coleta2 = !frentes.includes('coleta') ? { estado: 'dispensada', motivo: 'frente_coleta_ausente' }
         : args.coleta2Habilitada === true ? { estado: 'pendente' } : { estado: 'dispensada', motivo: 'linkedin_desligado' };
       s = { contrato: 1, origem, coleta2, estado: 'ativa', historico: anterior ? [...(anterior.historico || []), Object.fromEntries(Object.entries(anterior).filter(([k]) => k !== 'historico'))] : [], rodadaId: crypto.randomUUID(), frentes, leituraRegrasRef: texto(args.leituraRegrasRef, 'LEITURA_REGRAS_OBRIGATORIA'),
         captura: { estado: frentes.includes('coleta') ? 'pendente' : 'dispensada', provaRef: null }, vagas: {}, houvePerguntas: false, perguntas: { estado: 'pendente', provaRef: null }, melhorias: { estado: 'nao_oferecida', provaRef: null } };
-      acrescentar(s, inicial.ids, 'filaInicial', inicial.provaRef);
+      acrescentar(s, inicial.ids, 'filaInicial', inicial.provaRef, canonico);
     } else {
       s = ler(dirDados);
       if (args.rodadaId !== s.rodadaId) erro('RODADA_DIVERGENTE');
       if (s.estado === 'encerrada') erro('RODADA_ENCERRADA');
       if (acao === 'encerrar') {
-        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podeEncerrar) erro('FECHAMENTO_PENDENTE');
+        if (!plano(s, consultar(dependencias), dependencias).podeEncerrar) erro('FECHAMENTO_PENDENTE');
         s.coleta2 = coleta2Efetiva(s);
         s.estado = 'encerrada'; s.encerramentoRef = texto(args.provaRef, 'PROVA_ENCERRAMENTO_OBRIGATORIA');
       } else if (acao === 'integrar') {
         const atual = consultar(dependencias);
-        const confirmadas = fila(args.confirmadas);
-        if (confirmadas.ids.some(i => !atual.ids.includes(i))) erro('INTEGRACAO_NAO_CONFIRMADA_NA_FILA');
-        acrescentar(s, confirmadas.ids, 'novaConfirmada', confirmadas.provaRef);
+        const confirmadas = fila(args.confirmadas, canonico);
+        if (confirmadas.ids.some(i => !atual.ids.includes(canonico(i)))) erro('INTEGRACAO_NAO_CONFIRMADA_NA_FILA');
+        acrescentar(s, confirmadas.ids, 'novaConfirmada', confirmadas.provaRef, canonico);
       } else if (acao === 'captura') {
         if (!s.frentes.includes('coleta') || !['encerrada', 'impedida'].includes(args.estado)) erro('CAPTURA_INVALIDA');
         const atual = consultar(dependencias);
@@ -140,7 +183,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
           if (registro.cobertura === 'parcial') registro.limiteRef = texto(args.limiteRef, 'LIMITE_COBERTURA_OBRIGATORIO');
         }
         s.captura = registro;
-        acrescentar(s, atual.ids, 'filaConferida', atual.provaRef);
+        acrescentar(s, atual.ids, 'filaConferida', atual.provaRef, canonico);
       } else if (acao === 'coleta2_decidir') {
         if (!s.frentes.includes('coleta')) erro('COLETA2_NAO_APLICAVEL');
         if (s.coleta2.estado !== 'pendente') erro('COLETA2_JA_DECIDIDA');
@@ -168,10 +211,11 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         if (args.estado === 'encerrada') {
           if (!aceiteRef || !s.coleta2.filaAntes) erro('ACEITE_OU_SNAPSHOT_COLETA2_AUSENTE');
           registro.arquivosRef = texto(args.arquivosRef, 'PROVA_ARQUIVOS_OBRIGATORIA');
-          const integracao = integracaoColeta2(dirDados, args);
+          const integracao = integracaoColeta2(dirDados, args, canonico);
           if (integracao.runId !== s.coleta2.feedRunId) erro('RUN_COLETA2_DIVERGENTE_DO_ACEITE');
-          const antes = new Set(s.coleta2.filaAntes.ids);
-          const novas = integracao.ids.filter(identidade => !antes.has(identidade));
+          // Um alias confirmado depois do aceite ainda aponta para a vaga que já estava na fila.
+          const antes = new Set(s.coleta2.filaAntes.ids.map(canonico));
+          const novas = integracao.canonicos.filter(identidade => !antes.has(identidade));
           const naFila = new Set(atual.ids);
           if (novas.some(identidade => !naFila.has(identidade))) erro('NOVA_COLETA2_FORA_DA_FILA');
           registro.integracaoRef = integracao.relatorioPath;
@@ -179,8 +223,8 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
           registro.cobertura = args.cobertura || 'completa';
           if (!['completa', 'parcial'].includes(registro.cobertura)) erro('COBERTURA_INVALIDA');
           if (registro.cobertura === 'parcial') registro.limiteRef = texto(args.limiteRef, 'LIMITE_COBERTURA_OBRIGATORIO');
-          registro.idsIntegrados = novas;
-          acrescentar(s, novas, 'coleta2', atual.provaRef);
+          registro.idsIntegrados = novas.map(identidade => identidadeNoLote(s, identidade, canonico));
+          acrescentar(s, novas, 'coleta2', atual.provaRef, canonico);
         } else {
           registro.motivo = 'impedida';
           registro.acaoRef = texto(args.acaoRef, 'ACAO_NECESSARIA_OBRIGATORIA');
@@ -197,7 +241,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         const atual = consultar(dependencias);
         s.coleta2 = { estado: 'encerrada', motivo: 'so_integracao', provaRef: texto(args.provaRef, 'PROVA_INTEGRACAO_OBRIGATORIA'), filaConferidaRef: atual.provaRef,
           integracaoRef: texto(args.integracaoRef, 'PROVA_INTEGRACAO_OBRIGATORIA'), arquivosRef: texto(args.arquivosRef, 'PROVA_ARQUIVOS_OBRIGATORIA'), cobertura: 'completa' };
-        acrescentar(s, atual.ids, 'coleta2', atual.provaRef);
+        acrescentar(s, atual.ids, 'coleta2', atual.provaRef, canonico);
       } else if (acao === 'aplicar_novas') {
         if (s.coleta2.estado !== 'encerrada') erro('COLETA2_NAO_ENCERRADA');
         if (dependencias.modoCandidatura !== 'chrome_assistido' || dependencias.autorizadoCandidatura !== true) erro('APLICACAO_NAO_AUTORIZADA');
@@ -213,7 +257,7 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
         for (const v of Object.values(s.vagas)) if (v.origem === 'coleta2' && v.estado === 'nao_percorrida') { v.estado = 'adiada'; v.provaRef = provaRef; n++; }
         s.coleta2 = { ...s.coleta2, adiadas: (s.coleta2.adiadas || 0) + n };
       } else if (acao === 'perguntas') {
-        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podePerguntar) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), dependencias).podePerguntar) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         if (!['apresentada', 'encerrada', 'impedida'].includes(args.estado)) erro('FASE_PERGUNTAS_INVALIDA');
         if (args.estado !== 'apresentada' && s.perguntas?.estado !== 'apresentada') erro('PERGUNTAS_NAO_APRESENTADAS');
         if (args.estado === 'encerrada' && Object.values(s.vagas).some(v => v.estado === 'aguardando_pessoa')) erro('RESPOSTAS_PESSOAIS_PENDENTES');
@@ -221,25 +265,30 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
       } else if (acao === 'melhorias') {
         if (!s.frentes.includes('aplicacao')) erro('MELHORIAS_SOMENTE_APLICACAO');
         if (s.melhorias.estado !== 'nao_oferecida' || typeof args.aceite !== 'boolean') erro('ACEITE_MELHORIAS_INVALIDO');
-        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).podeOferecerMelhorias) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), dependencias).podeOferecerMelhorias) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         s.melhorias = { estado: args.aceite ? 'aceita' : 'recusada', provaRef: texto(args.provaRef, 'PROVA_ACEITE_OBRIGATORIA') };
       } else if (acao === 'concluir_melhorias') {
-        if (!plano(s, consultar(dependencias), { ...dependencias, consultarPendencias: () => lerPendencias(dirDados) }).fronteiraOperacionalPronta) erro('TRABALHO_INDEPENDENTE_PENDENTE');
+        if (!plano(s, consultar(dependencias), dependencias).fronteiraOperacionalPronta) erro('TRABALHO_INDEPENDENTE_PENDENTE');
         if (s.melhorias.estado !== 'aceita' || !['concluida', 'impedida'].includes(args.estado)) erro('CONCLUSAO_MELHORIAS_INVALIDA');
         s.melhorias = { ...s.melhorias, estado: args.estado, conclusaoRef: texto(args.provaRef, 'PROVA_MELHORIAS_OBRIGATORIA') };
       } else {
-        const identidade = id(args.id);
+        const identidade = identidadeNoLote(s, id(args.id), canonico);
         const v = Object.hasOwn(s.vagas, identidade) ? s.vagas[identidade] : null;
+        vagaAfetada = v;
         if (!v) erro('VAGA_FORA_DO_LOTE');
         if (['enviada', 'descartada'].includes(v.estado)) erro('VAGA_TERMINAL');
         if (v.estado === 'adiada') erro('VAGA_ADIADA');
+        // Preparo e liberação ficam fechados para ficha com envio registrado, inclusive por outro alias
+        // ou em outro lote. confirmar_envio segue exigindo o aval exato deste lote, sem veto adicional.
+        if ((['fixar', 'revisar', 'liberar_envio'].includes(acao) || (acao === 'atualizar' && args.estado === 'preparando')) &&
+            dependencias.envioRegistrado(v.id)) erro('ENVIO_JA_REGISTRADO');
         if (v.origem === 'coleta2' && (!s.coleta2.aplicarNovas?.provaRef ||
             dependencias.modoCandidatura !== 'chrome_assistido' || dependencias.autorizadoCandidatura !== true) &&
             ['fixar', 'revisar', 'liberar_envio', 'confirmar_envio', 'atualizar'].includes(acao)) erro('APLICAR_NOVAS_NAO_AUTORIZADO');
         if (['fixar', 'revisar', 'liberar_envio', 'confirmar_envio', 'atualizar'].includes(acao) &&
             (dependencias.modoCandidatura !== 'chrome_assistido' || dependencias.autorizadoCandidatura !== true || !s.frentes.includes('aplicacao'))) erro('APLICACAO_NAO_AUTORIZADA');
         if ((['fixar', 'liberar_envio', 'revisar'].includes(acao) ||
-              (acao === 'atualizar' && ['preparando', 'aguardando_pessoa'].includes(args.estado))) && !vagaConfirmada(v, consultar(dependencias))) erro('VAGA_NAO_CONFIRMADA_NA_FILA');
+              (acao === 'atualizar' && ['preparando', 'aguardando_pessoa'].includes(args.estado))) && !vagaConfirmada(v, consultar(dependencias), canonico)) erro('VAGA_NAO_CONFIRMADA_NA_FILA');
         if (acao === 'atualizar') {
           if (['preparando', 'aguardando_pessoa'].includes(args.estado) && !s.frentes.includes('aplicacao')) erro('APLICACAO_NAO_SELECIONADA');
           if (!['preparando', 'aguardando_pessoa', 'bloqueada', 'descartada'].includes(args.estado)) erro('ESTADO_INVALIDO');
@@ -262,22 +311,23 @@ export function operarLote(dirDados, acao, args = {}, dependencias = {}) {
           v.revisao = { pacoteHash: v.pacote.hash, revisor, aprovada: args.aprovada, provaRef: texto(args.provaRef, 'PROVA_REVISAO_OBRIGATORIA') };
           v.aceite = null; v.estado = args.aprovada ? 'revisada' : 'preparando';
         } else if (acao === 'liberar_envio') {
-          if (lerPendencias(dirDados).some(p => p.idCanonico === v.id && ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado))) erro('ACAO_PESSOAL_PENDENTE');
+          if (bloqueiosPendencias(dirDados, v.id).length) erro('ACAO_PESSOAL_PENDENTE');
           if (!v.pacote || args.pacoteHash !== v.pacote.hash || !v.revisao?.aprovada || v.revisao.pacoteHash !== v.pacote.hash) erro('REVISAO_EXATA_OBRIGATORIA');
           if (typeof dependencias.gateEnvio !== 'function') erro('GATE_ENVIO_OBRIGATORIO');
           const aceite = dependencias.gateEnvio(structuredClone({ rodadaId: s.rodadaId, id: v.id, pacote: v.pacote, revisao: v.revisao }));
           if (aceite?.aceito !== true) erro('GATE_ENVIO_RECUSADO');
           v.aceite = { pacoteHash: v.pacote.hash, provaRef: texto(aceite.provaRef, 'PROVA_ACEITE_OBRIGATORIA') }; v.estado = 'liberada';
         } else if (acao === 'confirmar_envio') {
-          if (lerPendencias(dirDados).some(p => p.idCanonico === v.id && ['pendente', 'realizada_aguardando_conferencia'].includes(p.estado))) erro('ACAO_PESSOAL_PENDENTE');
+          if (bloqueiosPendencias(dirDados, v.id).length) erro('ACAO_PESSOAL_PENDENTE');
           if (v.estado !== 'liberada' || args.pacoteHash !== v.aceite?.pacoteHash) erro('ACEITE_EXATO_OBRIGATORIO');
           v.provaRef = texto(args.provaRef, 'CONFIRMACAO_EXTERNA_OBRIGATORIA'); v.estado = 'enviada';
         } else erro('ACAO_DESCONHECIDA');
       }
     }
-    gravarJsonAtomico(destino, s);
+    if (vagaAfetada && usaFichas(dirDados)) gravarEtapaFicha(dirDados, s, vagaAfetada);
+    else gravarJsonAtomico(destino, s);
     return { rodadaId: s.rodadaId,
-      ...(args.id ? { vaga: s.vagas[args.id] } : {}),
+      ...(vagaAfetada ? { vaga: vagaAfetada } : {}),
       ...(acao === 'coleta2_captura' && s.coleta2.estado === 'encerrada' ? {
         coleta2: { runId: s.coleta2.integracaoRunId, novasIntegradas: s.coleta2.idsIntegrados.length },
       } : {}),

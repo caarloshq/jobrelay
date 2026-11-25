@@ -1,6 +1,6 @@
 {
   "contrato": 1,
-  "payloadSha256": "f496a831b28421b75b18b0ac14fa388b2c26ae118058eb24392cefb364d148ee",
+  "payloadSha256": "4ada02c6d92d91cefb8d9db48fb0bac1a707d6f278df55e0bd10465763ba8883",
   "arquivos": [
     {
       "path": ".agents/skills/aplicar/SKILL.md",
@@ -54,7 +54,7 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "c963071f145e543a5b016f3f8884deb72c33c82df90284462c07115210a8f040",
+      "sha256": "3f39380becc0ffa65d59c78c4beba9837dac3ae978545d329dc88462ec74495b",
       "mode": "0o644"
     },
     {
@@ -214,7 +214,7 @@
     },
     {
       "path": "docs/atualizacao.md",
-      "sha256": "b6f57c2b13319983f632e84024d2cd7754dd1a554696c9a97cc3ee21dbe9f4e2",
+      "sha256": "92404fd12e0b53e7d7757bdfafb3af6ab59d4966a2aed5966614dd8a01f87abe",
       "mode": "0o644"
     },
     {
@@ -704,7 +704,7 @@
     },
     {
       "path": "vagas/package.json",
-      "sha256": "6a07e742411e7b0cf83454a451ae0fb7d50680c5e62b8268a1613e4eb4f5c114",
+      "sha256": "b2204ac8d1492dd249e006aeeebb3c2e3a32328fc535f5aebf43a37df1ccc656",
       "mode": "0o644"
     },
     {
@@ -944,12 +944,12 @@
     },
     {
       "path": "vagas/src/compat-layout/conteudo.json",
-      "sha256": "f496a831b28421b75b18b0ac14fa388b2c26ae118058eb24392cefb364d148ee",
+      "sha256": "4ada02c6d92d91cefb8d9db48fb0bac1a707d6f278df55e0bd10465763ba8883",
       "mode": "0o644"
     },
     {
       "path": "vagas/src/compat-layout/conteudo.sha256",
-      "sha256": "53c2f6b26479efab561ce4bb2e777ce7d1af1c08f39486fde2be4ef3ba0543e9",
+      "sha256": "48c6832d399e103b11fa4b521d684d52df96a91c3e6a10746baeeee04fb01506",
       "mode": "0o644"
     },
     {
@@ -1409,7 +1409,7 @@
     },
     {
       "path": "vagas/src/persistencia.js",
-      "sha256": "30d689d059d58e254cb396e84c7a8ddde03fc795cb8fcc0139710014096c6055",
+      "sha256": "1fbc45101889bf235ac9d84a373e7e5e6659b7db9d86b344990d05a50bc368dd",
       "mode": "0o644"
     },
     {

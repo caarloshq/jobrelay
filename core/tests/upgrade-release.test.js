@@ -101,6 +101,16 @@ async function conferirPreservados(dir, antes) {
   const policy = await import(pathToFileURL(path.join(dir, caminhoAtual(dir, 'vagas/src/onboarding-autonomia.js'))).href);
   assert.doesNotThrow(() => guard.exigirOnboardingHumano(dados));
   assert.equal(policy.lerPolitica(dados).atualizarAutomaticamente, false);
+  if (!menor(versao, '1.7.0')) {
+    const executar = (...args) => JSON.parse(execFileSync(process.execPath,
+      [path.join(dir, 'core/scripts/estado.mjs'), '--fichas', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+    assert.equal(executar('prever').fichas, 1);
+    const migracao = executar('migrar');
+    assert.equal(migracao.estado, 'ativada');
+    assert.equal(migracao.fichas, 1);
+    assert.equal(executar('mostrar', 'ficticio:1').ficha.quadro.status, 'Avaliar');
+    assert.equal(hash(fs.readFileSync(path.join(migracao.backup, 'quadro.json'))), antes['local/data/quadro.json']);
+  }
   fs.unlinkSync(path.join(dados, 'onboarding-humano.json'));
   assert.throws(() => guard.exigirOnboardingHumano(dados), /ONBOARDING_HUMANO_OBRIGATORIO/);
 }

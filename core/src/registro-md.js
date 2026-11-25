@@ -1,4 +1,7 @@
+import { CAMPO_PROTEGIDO, VALOR_PROTEGIDO } from './dados-protegidos.js';
 import { layout } from './layout.js';
+import { gravarRespostaFicha, localizarFicha, usaFichas } from './fichas-vagas.js';
+import { comEscritaCentral } from './operacao.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -7,8 +10,6 @@ import { fileURLToPath } from 'node:url';
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const ESPERA = new Int32Array(new SharedArrayBuffer(4));
 const CHAVES_PERIGOSAS = new Set(['__proto__', 'prototype', 'constructor']);
-const PERGUNTA_SENSIVEL = /\b(?:cpf|rg|passaporte|passport|social security|national id|documento de identidade|identity document|data de nascimento|date of birth|birth date|raça|raca|race|etnia|ethnicity|gênero|genero|gender|orientação sexual|orientacao sexual|sexual orientation|lgbtqia|deficiência|deficiencia|disability|disabled person|groups below|grupos de diversidade|street address|residential address|endereço|endereco|bairro|cep|postal code|zip code|pcd|religião|religiao|religion|antecedentes criminais|criminal record|autodeclaração|autodeclaracao|self.identification)\b/i;
-const VALOR_SENSIVEL = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16})\b|\bBearer\s+[A-Za-z0-9._~+/-]{16,}/i;
 export const PONTEIRO_HISTORICO = '# Histórico migrado\n\nConsulte [Respostas preenchidas](../aplicacao/RESPOSTAS-PREENCHIDAS.md).\n';
 
 function objeto(valor, chaves, rotulo) {
@@ -53,7 +54,7 @@ function pacoteValidado(entrada) {
   if (!['rascunho', 'enviada'].includes(dados.estado)) throw new Error('PACOTE_INVALIDO: estado deve ser rascunho ou enviada');
   if (dados.estado === 'enviada') {
     dados.evidenciaEnvio = texto(contexto.evidenciaEnvio, 'evidenciaEnvio', { linha: true });
-    if (VALOR_SENSIVEL.test(dados.evidenciaEnvio)) throw new Error('DADO_SENSIVEL: evidência contém dado pessoal ou segredo');
+    if (VALOR_PROTEGIDO.test(dados.evidenciaEnvio)) throw new Error('DADO_SENSIVEL: evidência contém dado pessoal ou segredo');
   }
   else if (contexto.evidenciaEnvio !== undefined) throw new Error('PACOTE_INVALIDO: evidenciaEnvio exige estado enviada');
   if (!Array.isArray(entrada.campos) || entrada.campos.length === 0) throw new Error('PACOTE_INVALIDO: campos não pode ser vazio');
@@ -64,7 +65,7 @@ function pacoteValidado(entrada) {
     if (!campo.preenchida) continue;
     const pergunta = texto(campo.pergunta, 'pergunta', { linha: true });
     if (campo.evidencia !== undefined) texto(campo.evidencia, 'evidencia', { linha: true });
-    if (PERGUNTA_SENSIVEL.test(pergunta)) {
+    if (CAMPO_PROTEGIDO.test(pergunta)) {
       if (campo.texto !== undefined) throw new Error('DADO_SENSIVEL: use somente referenciaPrivada para esta pergunta');
       const referenciaPrivada = texto(campo.referenciaPrivada, 'referenciaPrivada', { linha: true });
       if (!/^ref:[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$/.test(referenciaPrivada)) throw new Error('DADO_SENSIVEL: referência deve ser identificador privado ref:...');
@@ -73,7 +74,7 @@ function pacoteValidado(entrada) {
     }
     if (campo.referenciaPrivada !== undefined) throw new Error('PACOTE_INVALIDO: referenciaPrivada só cabe em campo sensível');
     const resposta = texto(campo.texto, 'texto');
-    if (VALOR_SENSIVEL.test(resposta)) throw new Error('DADO_SENSIVEL: padrão de dado pessoal ou segredo detectado');
+    if (VALOR_PROTEGIDO.test(resposta)) throw new Error('DADO_SENSIVEL: padrão de dado pessoal ou segredo detectado');
     campos.push({ pergunta, resposta });
   }
   if (campos.length === 0) return null;
@@ -191,6 +192,17 @@ export function registrarRespostas(entrada, { raizProjeto = PROJETO } = {}) {
   const pacote = pacoteValidado(entrada);
   if (!pacote) return { registrado: false, motivo: 'nenhum campo preenchido' };
   const { arquivo, legado } = caminhosSeguros(raizProjeto);
+  const { dados } = layout(raizProjeto);
+  if (usaFichas(dados)) {
+    return comEscritaCentral(dados, () => {
+      const antes = localizarFicha(dados, pacote.contexto.id)?.ficha.respostas ?? [];
+      if (antes.some(r => JSON.stringify(r) === JSON.stringify(pacote))) {
+        return { registrado: false, motivo: 'pacote já registrado' };
+      }
+      gravarRespostaFicha(dados, pacote);
+      return { registrado: true, campos: pacote.campos.length, arquivo: localizarFicha(dados, pacote.contexto.id).arquivo };
+    }, [arquivo]);
+  }
   return comLock(arquivo, () => {
     const historicoLegado = lerSeguro(legado);
     if (historicoLegado.hash !== null && !historicoLegado.conteudo.equals(Buffer.from(PONTEIRO_HISTORICO))) {

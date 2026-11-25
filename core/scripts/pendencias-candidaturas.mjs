@@ -2,6 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { lerPendencias, registrarPendencias, atualizarPendencia, projetarPendencias } from '../src/pendencias-candidaturas.js';
+import { DIR_DADOS } from '../src/config.js';
+import { garantirFichas } from '../src/migracao-fichas.js';
 try {
   const [acao, ...argv] = process.argv.slice(2);
   const opcoes = {};
@@ -10,7 +12,8 @@ try {
     if (!valor || !['--dados', '--arquivo', '--id', '--prova'].includes(chave) || opcoes[chave]) throw new Error('ARGUMENTO_INVALIDO');
     opcoes[chave] = valor;
   }
-  const dados = path.resolve(opcoes['--dados'] || process.env.VAGAS_DIR_DADOS || new URL('../data', import.meta.url).pathname);
+  const dados = path.resolve(opcoes['--dados'] || process.env.VAGAS_DIR_DADOS || DIR_DADOS);
+  if (!opcoes['--dados'] && !process.env.VAGAS_DIR_DADOS) garantirFichas(dados);
   let resultado;
   if (acao === 'listar') resultado = lerPendencias(dados);
   else if (acao === 'registrar') {

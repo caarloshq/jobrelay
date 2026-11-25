@@ -15,6 +15,7 @@ import { ingerirDaSessao } from '../src/contatos-posts.js';
 import { prepararLote, validarDesfecho } from '../src/linkedin-feed.js';
 import { lerJsonSeguro } from '../src/persistencia.js';
 import { lerEstado, salvarEstado } from '../src/estado-central.js';
+import { garantirFichas } from '../src/migracao-fichas.js';
 import * as cache from '../src/cache.js';
 import * as arquivo from '../src/arquivo.js';
 import * as semantico from '../src/semantico.js';
@@ -259,5 +260,8 @@ export async function main(argv = process.argv.slice(2), { saida = valor => proc
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
-  main().catch(erro => { process.stderr.write(`${JSON.stringify({ ok: false, erro: erro.message })}\n`); process.exitCode = 1; });
+  Promise.resolve().then(() => {
+    if (!process.env.VAGAS_DIR_DADOS) garantirFichas(DIR_DADOS);
+    return main();
+  }).catch(erro => { process.stderr.write(`${JSON.stringify({ ok: false, erro: erro.message })}\n`); process.exitCode = 1; });
 }

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
+import { gravarTentativaFicha, usaFichas } from './fichas-vagas.js';
 import { validarRevisaoRespostas } from './revisao-respostas.js';
 import { lerJsonSeguro, gravarJsonAtomico, nlinkTolerado } from './persistencia.js';
 
@@ -480,6 +481,10 @@ function conferirHashesArtefatos(entrega, dados) {
   }
 }
 
+function projetarTentativaFicha(p, tentativa) {
+  if (usaFichas(p.dados)) gravarTentativaFicha(p.dados, tentativa);
+}
+
 function lerTentativas(p, bootstrap = false) {
   const inicial = { contrato: CONTRATO, tentativas: {} };
   if (!fs.existsSync(p.tentativas) && !bootstrap) falha('TENTATIVAS_AUSENTES', 'bootstrap novo explícito obrigatório');
@@ -853,6 +858,7 @@ export function operar(dirDados, acao, args = {}) {
         geracao: estado.geracao, dono: estado.dono, entregaId: estado.prontas[chave].entregaId, versoes: args.versoes,
         preflight, intencaoEm: agora(), desfecho: null };
       gravarJsonAtomico(p.tentativas, registro);
+      projetarTentativaFicha(p, registro.tentativas[tentativaId]);
       estado.tarefas[chave].estado = 'envio_incerto';
       delete estado.prontas[chave];
       gravarEstado(p, estado);
@@ -862,12 +868,21 @@ export function operar(dirDados, acao, args = {}) {
       const registro = lerTentativas(p);
       const tentativa = registro.tentativas[string(args.tentativaId, 'tentativaId')];
       if (!tentativa) falha('TENTATIVA_AUSENTE');
-      if (tentativa.desfecho === 'confirmado') return { tentativa, repetida: true };
+      if (tentativa.desfecho === 'confirmado') {
+        projetarTentativaFicha(p, tentativa);
+        if (estado.tarefas[tentativa.chave]?.estado !== 'enviada') {
+          estado.tarefas[tentativa.chave] = { ...estado.tarefas[tentativa.chave], estado: 'enviada' };
+          delete estado.prontas[tentativa.chave];
+          gravarEstado(p, estado);
+        }
+        return { tentativa, repetida: true };
+      }
       if (tentativa.desfecho) falha('DESFECHO_IMUTAVEL');
       tentativa.desfecho = 'confirmado';
       tentativa.provaRef = string(args.provaRef, 'provaRef');
       tentativa.confirmadaEm = agora();
       gravarJsonAtomico(p.tentativas, registro);
+      projetarTentativaFicha(p, tentativa);
       estado.tarefas[tentativa.chave] = { ...estado.tarefas[tentativa.chave], estado: 'enviada' };
       gravarEstado(p, estado);
       return { tentativa };
@@ -876,7 +891,15 @@ export function operar(dirDados, acao, args = {}) {
       const registro = lerTentativas(p);
       const tentativa = registro.tentativas[string(args.tentativaId, 'tentativaId')];
       if (!tentativa) falha('TENTATIVA_AUSENTE');
-      if (tentativa.desfecho) return { tentativa, repetida: true };
+      if (tentativa.desfecho) {
+        projetarTentativaFicha(p, tentativa);
+        if (estado.tarefas[tentativa.chave]?.estado !== 'enviada') {
+          estado.tarefas[tentativa.chave] = { ...estado.tarefas[tentativa.chave], estado: 'enviada' };
+          delete estado.prontas[tentativa.chave];
+          gravarEstado(p, estado);
+        }
+        return { tentativa, repetida: true };
+      }
       if (args.desfecho === 'confirmado') {
         tentativa.provaRef = string(args.provaRef, 'provaRef');
         tentativa.desfecho = 'confirmado';
@@ -884,6 +907,7 @@ export function operar(dirDados, acao, args = {}) {
       } else falha('RECONCILIACAO_INSUFICIENTE', 'ausência de recibo não prova ausência de envio');
       tentativa.reconciliadaEm = agora();
       gravarJsonAtomico(p.tentativas, registro);
+      projetarTentativaFicha(p, tentativa);
       gravarEstado(p, estado);
       return { tentativa };
     }

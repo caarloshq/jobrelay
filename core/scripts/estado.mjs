@@ -2,7 +2,9 @@
 // Notion consultado pelo agente via MCP. Não recebe token e não acessa a rede.
 import { readFileSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
-import { RAIZ } from '../src/config.js';
+import { localizarFicha, usaFichas } from '../src/fichas-vagas.js';
+import { migrarFichas } from '../src/migracao-fichas.js';
+import { RAIZ, DIR_DADOS } from '../src/config.js';
 import { configuracao, selecionar, importar } from '../src/fonte-estado.js';
 
 function argumento(nome) {
@@ -10,7 +12,32 @@ function argumento(nome) {
   return i < 0 ? null : process.argv[i + 1];
 }
 
+function comandoFichas([acao = 'prever', id, extra]) {
+  if (extra) throw new Error('ARGUMENTO_INVALIDO');
+  if (['prever', 'migrar', 'recuperar', 'restaurar'].includes(acao) && !id) {
+    return migrarFichas(DIR_DADOS, acao);
+  }
+  if (acao === 'mostrar' && id) {
+    if (!usaFichas(DIR_DADOS)) throw new Error('FICHAS_LOCAIS_INATIVAS');
+    const registro = localizarFicha(DIR_DADOS, id);
+    if (!registro) throw new Error('FICHA_NAO_ENCONTRADA');
+    return registro;
+  }
+  throw new Error('Uso: npm run fichas -- prever|migrar|recuperar|restaurar|mostrar ID');
+}
+
 try {
+  if (process.argv[2] === '--fichas') {
+    console.log(JSON.stringify(comandoFichas(process.argv.slice(3)), null, 2));
+  } else {
+    comandoFonte();
+  }
+} catch (erro) {
+  console.error(erro.message);
+  process.exitCode = 1;
+}
+
+function comandoFonte() {
   const fonte = argumento('--fonte');
   const arquivo = argumento('--importar');
   if (fonte && arquivo) throw new Error('Use --fonte ou --importar em comandos separados.');
@@ -28,7 +55,4 @@ try {
   } else {
     throw new Error('Uso: node scripts/estado.mjs [--fonte local | --fonte notion --database-id ID | --importar data/snapshot.json]');
   }
-} catch (erro) {
-  console.error(erro.message);
-  process.exitCode = 1;
 }

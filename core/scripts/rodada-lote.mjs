@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // JSON somente por arquivo/stdin. Não imprime conteúdo de pacotes nem respostas.
 import fs from 'node:fs';
+import { garantirFichas } from '../src/migracao-fichas.js';
 import { layout } from '../src/layout.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,9 +25,10 @@ try {
   if (Object.hasOwn(textos, acao)) {
     process.stdout.write(`${textos[acao](args)}\n`);
   } else {
-    if (!dados) throw new Error('DADOS_OBRIGATORIOS');
     const raizVagas = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
     const locais = layout(path.resolve(raizVagas, '..'));
+    dados ??= locais.dados;
+    if (path.resolve(dados) === locais.dados) garantirFichas(dados);
     const politicaAutonomia = lerJsonSeguro(path.join(locais.dados, 'politica-autonomia.json'), { modoCandidatura: 'mapear' });
     // A coleta 2 existe só onde o LinkedIn assistido está ligado (config/linkedin-feed.json).
     if (acao === 'iniciar' && args.coleta2Habilitada === undefined) {

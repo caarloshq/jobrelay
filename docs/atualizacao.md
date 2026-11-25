@@ -1,5 +1,18 @@
 # Receba avisos de versões e preserve seus dados ao atualizar
 
+## Fichas locais na v1.7.0
+
+Quando a instalação usa quadro local, a primeira entrada de operação da v1.7 cria as fichas depois de preparar e conferir uma cópia datada dos arquivos anteriores. O quadro web opcional usa as mesmas fichas. A instalação que escolheu Notion continua operando com o quadro do Notion.
+
+Execute os comandos em `core/`.
+
+- `npm run fichas -- prever` conta registros e detecta conflitos de identidade antes da migração.
+- `npm run fichas -- migrar` ativa as fichas e informa a pasta do backup quando a instalação está sem uma rodada ativa.
+- `npm run fichas -- recuperar` retoma uma gravação interrompida. Confira conflitos de arquivo ou de identidade antes de repetir.
+- `npm run fichas -- restaurar` restaura o quadro anterior se nenhuma ficha mudou depois da migração. O backup mantém as fichas migradas para conferência. Se houve trabalho novo, preserve o estado atual e reconcilie as alterações antes de restaurar.
+
+Conserve a cópia em `local/data/backups/`. A presença de um status de candidatura antiga preserva o histórico da vaga. Conte como envio comprovado somente a confirmação vinculada à requisição.
+
 ## Instalações 1.5.3 para 1.6.0
 
 Use a entrada de atualização existente e confirme a release específica. O pacote compatível entrega uma ponte; a conversão do layout acontece automaticamente na próxima entrada normal, antes de operar. Não há etapa manual de migrador no fluxo normal. Confira essa entrada, os arquivos pessoais e o registro atual antes de dizer que a transição terminou. O procedimento completo está em [ATUALIZAR.md](../ATUALIZAR.md#transição-automática-para-appcoreskillsdocslocal).

@@ -1,7 +1,7 @@
 {
   "name": "jobrelay-instalacao",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -34,6 +34,7 @@
     "sincronizar:fontes": "node migrar-layout.mjs . && npm --prefix core run sincronizar:fontes --",
     "registrar:respostas": "node migrar-layout.mjs . && npm --prefix core run registrar:respostas --",
     "atualizar": "node migrar-layout.mjs . && npm --prefix core run atualizar --",
+    "fichas": "node migrar-layout.mjs . && npm --prefix core run fichas --",
     "estado": "node migrar-layout.mjs . && npm --prefix core run estado --",
     "revisar:escrita": "node migrar-layout.mjs . && npm --prefix core run revisar:escrita --",
     "navegador": "node migrar-layout.mjs . && npm --prefix core run navegador --",
